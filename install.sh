@@ -83,10 +83,13 @@ if [ "$reponse_zsh" = "oui" ] || [ "$reponse_zsh" = "o" ] || [ "$reponse_zsh" = 
     execute_command "chmod +x zsh.sh" \
         "Permissions du script zsh.sh modifiées." \
         "Échec de la modification des permissions du script zsh.sh."
-    info_msg "Exécution de zsh.."
-    execute_command "$HOME/zsh.sh" \
-        "Installation de zsh terminée." \
-        "Échec de l'installation de zsh."
+    info_msg "Exécution de zsh..."
+    "$HOME/zsh.sh"  # Exécution directe du script
+    if [ $? -eq 0 ]; then
+        success_msg "Installation de zsh terminée."
+    else
+        error_msg "Échec de l'installation de zsh."
+    fi
 else
     info_msg "Installation de zsh refusée."
 fi
@@ -205,16 +208,17 @@ read reponse
 reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
 
 if [ "$reponse" = "oui" ] || [ "$reponse" = "o" ] || [ "$reponse" = "y" ] || [ "$reponse" = "yes" ]; then
-    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh" \
-        "Script de personnalisation XFCE téléchargé." \
-        "Erreur lors du téléchargement du script de personnalisation XFCE."
-    execute_command "chmod +x xfce.sh" \
-        "Permissions du script de personnalisation XFCE modifiées." \
-        "Erreur lors de la modification des permissions du script de personnalisation XFCE."
-    info_msg "Exécution de la personnalisation XFCE..."
-    execute_command " "$HOME/xfce.sh" \
-        "Personnalisation XFCE terminée." \
-        "Erreur lors de l'exécution de la personnalisation XFCE."
+    if [ -f "$HOME/xfce.sh" ]; then
+        echo "Exécution de la personnalisation XFCE..."
+        "$HOME/xfce.sh"  # Exécution directe du script
+        if [ $? -eq 0 ]; then
+            success_msg "Personnalisation XFCE terminée."
+        else
+            error_msg "Erreur lors de l'exécution de la personnalisation XFCE."
+        fi
+    else
+        error_msg "Erreur : Le fichier xfce.sh n'existe pas."
+    fi
 else
     info_msg "Installation de la personnalisation XFCE refusée."
 fi
