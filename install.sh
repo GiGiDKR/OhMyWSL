@@ -44,6 +44,7 @@ info_msg "Création du fichier .wslconfig..."
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" \
     "Le fichier .wslconfig a été créé avec succès." \
     "Erreur lors de la création du fichier .wslconfig."
+
 echo "-------------------------------------------------------------------------"
 
 ## Installation des paquets
