@@ -18,5 +18,5 @@ wsl
 
 Run the following command to install OhMyWSL :
 ```bash
-curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/main/install.sh -o install.sh && chmod +x install.sh && ./install.sh
+curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/install.sh -o install.sh && chmod +x install.sh && ./install.sh
 ```
