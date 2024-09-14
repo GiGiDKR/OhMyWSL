@@ -83,7 +83,7 @@ if [ "$reponse_zsh" = "oui" ] || [ "$reponse_zsh" = "o" ] || [ "$reponse_zsh" = 
     execute_command "chmod +x zsh.sh" \
         "Permissions du script zsh.sh modifiées." \
         "Échec de la modification des permissions du script zsh.sh."
-    info_msg "Exécution de zsh..."
+#    info_msg "Exécution de zsh..."
     "$HOME/zsh.sh"  # Exécution directe du script
     if [ $? -eq 0 ]; then
         success_msg "Installation de zsh terminée."
