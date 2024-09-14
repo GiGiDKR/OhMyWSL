@@ -30,7 +30,7 @@ packages_install() {
 }
 
 echo "Mise à jour des listes de paquets..."
-sudo apt update > /dev/null 2>&1
+sudo apt update -y && sudo apt upgrade -y > /dev/null 2>&1
 
 for package in $packages; do
     packages_install "$package"
