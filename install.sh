@@ -45,7 +45,7 @@ execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" \
     "Le fichier .wslconfig a été créé avec succès." \
     "Erreur lors de la création du fichier .wslconfig."
 
-info_msg "-------------------------------------------------------------------------"
+info_msg "--------------------------------------------------------"
 
 ## Installation des paquets
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark"
@@ -68,7 +68,7 @@ for package in $packages; do
         "Échec de l'installation de $package."
 done
 
-info_msg "-------------------------------------------------------------------------"
+info_msg "--------------------------------------------------------"
 # Installation de ZSH
 info_msg "Installer zsh ? (oui/non)"
 read reponse_zsh
@@ -90,7 +90,7 @@ else
     info_msg "Installation de zsh refusée."
 fi
 
-info_msg "-------------------------------------------------------------------------"
+info_msg "--------------------------------------------------------"
 ## Configuration réseau
 info_msg "Configuration du réseau..."
 ip_address=$(ip route | grep default | awk '{print $3; exit;}')
@@ -112,7 +112,7 @@ execute_command "sudo sed -i \"s/^nameserver.*/& ${ip_address}:0.0/\" \"$resolv_
     "Le fichier $resolv_conf a été mis à jour avec succès." \
     "Erreur lors de la mise à jour de $resolv_conf."
 
-info_msg "-------------------------------------------------------------------------"
+info_msg "--------------------------------------------------------"
 ## Configuration des fichiers de shell
 bashrc_path="$HOME/.bashrc"
 zshrc_path="$HOME/.zshrc"
@@ -137,7 +137,7 @@ add_lines_to_file "$bashrc_path"
 
 success_msg "Fichier(s) de configuration shell mis à jour avec succès."
 
-info_msg "-------------------------------------------------------------------------"
+info_msg "--------------------------------------------------------"
 ## Installation de GWSL
 info_msg "Installation de GWSL..."
 execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip" \
@@ -160,7 +160,7 @@ execute_command "mv GWSL /mnt/c/WSL2-Distros/" \
     "GWSL déplacé dans WSL2-Distros." \
     "Erreur lors du déplacement de GWSL."
 
-info_msg "-------------------------------------------------------------------------"
+info_msg "--------------------------------------------------------"
 ## Configuration de XFCE4
 info_msg "Démarrage de XFCE4..."
 execute_command "timeout 5s sudo startxfce4 &> /dev/null" \
@@ -196,7 +196,7 @@ execute_command "echo 'echo \$DISPLAY' >> $HOME/.bashrc" \
     "Commande d'affichage de DISPLAY ajoutée à .bashrc." \
     "Erreur lors de l'ajout de la commande d'affichage de DISPLAY à .bashrc."
 
-info_msg "-------------------------------------------------------------------------"
+info_msg "--------------------------------------------------------"
 # Personnalisation XFCE
 info_msg "Installer la personnalisation XFCE ? (oui/non)"
 read reponse
@@ -218,7 +218,7 @@ else
     info_msg "Installation de la personnalisation XFCE refusée."
 fi
 
-info_msg "-------------------------------------------------------------------------"
+info_msg "--------------------------------------------------------"
 ## Lancement de la session XFCE4
 info_msg "Lancement de la session XFCE4..."
 execute_command "dbus-launch xfce4-session" \
