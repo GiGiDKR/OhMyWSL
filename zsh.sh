@@ -169,5 +169,5 @@ update_zshrc() {
 }
 
 install_zsh_plugins
-
-chsh
+zsh
+chsh -s $(which zsh)
