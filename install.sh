@@ -33,22 +33,18 @@ packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark"
 
 packages_install() {
     info_msg "Installation de $1..."
-    if sudo apt install -y "$1"; then # > /dev/null 2>&1    
+    if sudo apt install -y "$1"; then   
         info_msg "✓ $1 installé avec succès."
     else
         error_msg "✗ Échec de l'installation de $1."
-        error_msg "Détails de l'erreur :"
-        #sudo apt install -y "$1"
     fi
 }
 
 clear
 info_msg "Mise à jour des listes de paquets..."
-sudo apt update -y # > /dev/null 2>&1
-echo ""
+sudo apt update -y
 info_msg "Mise à jour des paquets..."
-sudo apt upgrade -y # > /dev/null 2>&1
-echo ""
+sudo apt upgrade -y
 
 for package in $packages; do
     packages_install "$package"
