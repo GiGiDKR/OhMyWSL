@@ -39,7 +39,7 @@ execute_command "sudo apt install -y zsh" \
 
 info_msg "----------------------------------------"
 # Installation de Oh My Zsh
-read -p "Voulez-vous installer Oh My Zsh ? (o/n)" choice
+read -p "Voulez-vous installer Oh My Zsh ? (o/n) : " choice
 
 if [ "$choice" = "o" ]; then
     info_msg "Installation des pré-requis..."
@@ -64,7 +64,7 @@ execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/
 
 info_msg "----------------------------------------"
 # Installation de PowerLevel10k
-read -p "Voulez-vous installer PowerLevel10k ? (o/n)" choice
+read -p "Voulez-vous installer PowerLevel10k ? (o/n) : " choice
 
 if [ "$choice" = "o" ]; then
     info_msg "Installation de PowerLevel10k..."
@@ -76,7 +76,7 @@ if [ "$choice" = "o" ]; then
         "Échec de la configuration du thème PowerLevel10k."
 
     info_msg "----------------------------------------"
-    read -p "Installer le prompt OhMyTermux ? (o/n)" choice
+    read -p "Installer le prompt OhMyTermux ? (o/n) : " choice
 
     if [ "$choice" = "o" ]; then
         info_msg "Téléchargement du prompt PowerLevel10k..."
