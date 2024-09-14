@@ -71,8 +71,7 @@ done
 
 info_msg "----------------------------------------"
 # Installation de ZSH
-info_msg "Installer zsh ? (oui/non)"
-read reponse_zsh
+read -p "Installer zsh ?" reponse_zsh
 
 reponse_zsh=$(echo "$reponse_zsh" | tr '[:upper:]' '[:lower:]')
 
@@ -202,8 +201,7 @@ execute_command "echo 'echo \$DISPLAY' >> $HOME/.bashrc" \
 
 info_msg "----------------------------------------"
 # Personnalisation XFCE
-info_msg "Installer la personnalisation XFCE ? (oui/non)"
-read reponse
+read -p "Installer la personnalisation XFCE ? (oui/non)" reponse
 
 reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
 
