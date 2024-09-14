@@ -84,7 +84,7 @@ if [ "$reponse_zsh" = "oui" ] || [ "$reponse_zsh" = "o" ] || [ "$reponse_zsh" = 
         "Permissions du script zsh.sh modifiées." \
         "Échec de la modification des permissions du script zsh.sh."
     info_msg "Exécution de zsh.."
-    execute_command "./zsh.sh" \
+    execute_command "$HOME/zsh.sh" \
         "Installation de zsh terminée." \
         "Échec de l'installation de zsh."
 else
@@ -212,7 +212,7 @@ if [ "$reponse" = "oui" ] || [ "$reponse" = "o" ] || [ "$reponse" = "y" ] || [ "
         "Permissions du script de personnalisation XFCE modifiées." \
         "Erreur lors de la modification des permissions du script de personnalisation XFCE."
     info_msg "Exécution de la personnalisation XFCE..."
-    execute_command "./xfce.sh" \
+    execute_command " "$HOME/xfce.sh" \
         "Personnalisation XFCE terminée." \
         "Erreur lors de l'exécution de la personnalisation XFCE."
 else
