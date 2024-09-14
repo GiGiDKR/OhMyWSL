@@ -29,7 +29,7 @@ execute_command() {
     fi
 }
 
-info_msg "--------------------------------------------------------"
+info_msg "----------------------------------------"
 ## Téléchargement et installation du fond d'écran
 info_msg "Téléchargement du fond d'écran..."
 execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png > /dev/null 2>&1" \

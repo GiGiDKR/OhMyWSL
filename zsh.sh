@@ -31,7 +31,7 @@ execute_command() {
     fi
 }
 
-info_msg "----------------------------------------------"
+info_msg "----------------------------------------"
 # Installation de Oh My Zsh
 info_msg "Voulez-vous installer Oh My Zsh ? (o/n)"
 read choice
@@ -57,7 +57,7 @@ execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/
     "Configuration zshrc téléchargée." \
     "Échec du téléchargement de la configuration zshrc."
 
-info_msg "----------------------------------------------"
+info_msg "----------------------------------------"
 # Installation de PowerLevel10k
 info_msg "Voulez-vous installer PowerLevel10k ? (o/n)"
 read choice
@@ -71,7 +71,7 @@ if [ "$choice" = "o" ]; then
         "Thème PowerLevel10k configuré." \
         "Échec de la configuration du thème PowerLevel10k."
 
-    info_msg "----------------------------------------------"
+    info_msg "----------------------------------------"
     info_msg "Installer le prompt OhMyTermux ? (o/n)"
     read choice
 
@@ -87,14 +87,14 @@ if [ "$choice" = "o" ]; then
     fi
 fi
 
-info_msg "----------------------------------------------"
+info_msg "----------------------------------------"
 # Téléchargement de la configuration
 info_msg "Téléchargement de la configuration..."
 execute_command "curl -fLo \"$HOME/.oh-my-zsh/custom/aliases.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh" \
     "Configuration téléchargée." \
     "Échec du téléchargement de la configuration."
 
-info_msg "----------------------------------------------"
+info_msg "----------------------------------------"
 # Installation des plugins
 install_zsh_plugins() {
     info_msg "Sélectionner les plugins à installer (SÉPARÉS PAR DES ESPACES) :"
