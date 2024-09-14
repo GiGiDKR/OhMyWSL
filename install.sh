@@ -60,6 +60,7 @@ execute_command "sudo apt upgrade -y" \
     "Mise à jour des paquets réussie." \
     "Échec de la mise à jour des paquets."
 
+info_msg "--------------------------------------------------------"
 
 for package in $packages; do
     info_msg "Installation de $package..."
