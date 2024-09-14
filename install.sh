@@ -45,16 +45,19 @@ execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" \
 ## Installation des paquets
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark"
 
-clear
+info_msg "Mise à jour des listes de paquets..."
 execute_command "sudo apt update -y" \
     "Mise à jour des listes de paquets réussie." \
     "Échec de la mise à jour des listes de paquets."
 
+info_msg "Mise à jour des paquets..."
 execute_command "sudo apt upgrade -y" \
     "Mise à jour des paquets réussie." \
     "Échec de la mise à jour des paquets."
 
+
 for package in $packages; do
+    info_msg "Installation de $package..."
     execute_command "sudo apt install -y $package" \
         "$package installé." \
         "Échec de l'installation de $package."
@@ -84,6 +87,7 @@ fi
 
 echo ""
 ## Configuration réseau
+info_msg "Configuration du réseau..."
 ip_address=$(ip route | grep default | awk '{print $3; exit;}')
 
 if [ -z "$ip_address" ]; then
@@ -98,6 +102,7 @@ if [ ! -f "$resolv_conf" ]; then
     exit 1
 fi
 
+info_msg "Mise à jour du fichier $resolv_conf..."
 execute_command "sudo sed -i \"s/^nameserver.*/& ${ip_address}:0.0/\" \"$resolv_conf\"" \
     "Le fichier $resolv_conf a été mis à jour avec succès." \
     "Erreur lors de la mise à jour de $resolv_conf."
@@ -129,6 +134,7 @@ success_msg "Fichier(s) de configuration shell mis à jour avec succès."
 
 echo ""
 ## Installation de GWSL
+info_msg "Installation de GWSL..."
 execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip" \
     "GWSL téléchargé avec succès." \
     "Erreur lors du téléchargement de GWSL."
@@ -156,6 +162,7 @@ execute_command "timeout 5s sudo startxfce4 &> /dev/null" \
     "XFCE4 fermé après 5 secondes." \
     "Erreur lors du démarrage de XFCE4."
 
+info_msg "Configuration de XFCE4..."
 execute_command "mkdir -p $HOME/.config/xfce4" \
     "Dossier de configuration XFCE4 créé." \
     "Erreur lors de la création du dossier de configuration XFCE4."
