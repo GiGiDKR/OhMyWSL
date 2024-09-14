@@ -142,7 +142,7 @@ success_msg "Fichier(s) de configuration shell mis à jour."
 
 info_msg "----------------------------------------"
 ## Installation de GWSL
-info_msg "Installation de GWSL..."
+info_msg "Téléchargement de GWSL..."
 execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip" \
     "GWSL téléchargé." \
     "Erreur lors du téléchargement de GWSL."
@@ -165,10 +165,10 @@ execute_command "mv GWSL /mnt/c/WSL2-Distros/" \
 
 info_msg "----------------------------------------"
 ## Configuration de XFCE4
-info_msg "Démarrage de XFCE4..."
-execute_command "timeout 5s sudo startxfce4 &> /dev/null" \
-    "XFCE4 fermé après 5 secondes." \
-    "Erreur lors du démarrage de XFCE4."
+#info_msg "Démarrage de XFCE4..."
+#execute_command "timeout 5s sudo startxfce4 &> /dev/null" \
+#    "XFCE4 fermé après 5 secondes." \
+#    "Erreur lors du démarrage de XFCE4."
 
 info_msg "Configuration de XFCE4..."
 execute_command "mkdir -p $HOME/.config/xfce4" \
@@ -227,3 +227,4 @@ info_msg "Lancement de la session XFCE4..."
 execute_command "dbus-launch xfce4-session" \
     "Session XFCE4 lancée." \
     "Échec du lancement de la session XFCE4."
+
