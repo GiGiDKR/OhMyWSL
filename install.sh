@@ -42,7 +42,7 @@ generateResolvConf = false"
 clear
 info_msg "Création du fichier .wslconfig..."
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" \
-    "Le fichier .wslconfig a été créé avec succès." \
+    "Le fichier .wslconfig a été créé." \
     "Erreur lors de la création du fichier .wslconfig."
 
 info_msg "--------------------------------------------------------"
@@ -113,7 +113,7 @@ fi
 
 info_msg "Mise à jour du fichier $resolv_conf..."
 execute_command "sudo sed -i \"s/^nameserver.*/& ${ip_address}:0.0/\" \"$resolv_conf\"" \
-    "Le fichier $resolv_conf a été mis à jour avec succès." \
+    "Le fichier $resolv_conf a été mis à jour." \
     "Erreur lors de la mise à jour de $resolv_conf."
 
 info_msg "--------------------------------------------------------"
@@ -139,17 +139,17 @@ add_lines_to_file() {
 add_lines_to_file "$bashrc_path"
 [ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path"
 
-success_msg "Fichier(s) de configuration shell mis à jour avec succès."
+success_msg "Fichier(s) de configuration shell mis à jour."
 
 info_msg "--------------------------------------------------------"
 ## Installation de GWSL
 info_msg "Installation de GWSL..."
 execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip" \
-    "GWSL téléchargé avec succès." \
+    "GWSL téléchargé." \
     "Erreur lors du téléchargement de GWSL."
 
 execute_command "unzip GWSL-145-STORE.zip" \
-    "GWSL extrait avec succès." \
+    "GWSL extrait." \
     "Erreur lors de l'extraction de GWSL."
 
 execute_command "mv GWSL-145-STORE GWSL" \
@@ -227,5 +227,5 @@ info_msg "--------------------------------------------------------"
 ## Lancement de la session XFCE4
 info_msg "Lancement de la session XFCE4..."
 execute_command "dbus-launch xfce4-session" \
-    "Session XFCE4 lancée avec succès." \
+    "Session XFCE4 lancée." \
     "Échec du lancement de la session XFCE4."

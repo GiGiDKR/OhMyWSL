@@ -39,22 +39,22 @@ read choice
 if [ "$choice" = "o" ]; then
     info_msg "Installation des pré-requis..."
     execute_command "sudo apt install -y wget curl git unzip" \
-        "Pré-requis installés avec succès." \
+        "Pré-requis installés." \
         "Échec de l'installation des pré-requis."
 
     info_msg "Installation de Oh My Zsh..."
     execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git \"$HOME/.oh-my-zsh\" --quiet >/dev/null" \
-        "Oh My Zsh installé avec succès." \
+        "Oh My Zsh installé." \
         "Échec de l'installation de Oh My Zsh."
 
     execute_command "cp \"$HOME/.oh-my-zsh/templates/zshrc.zsh-template\" \"$ZSHRC\"" \
-        "Fichier zshrc copié avec succès." \
+        "Fichier zshrc copié." \
         "Échec de la copie du fichier zshrc."
 fi
 
 [ -f "$ZSHRC" ] && cp "$ZSHRC" "${ZSHRC}.bak"
 execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/zshrc >/dev/null 2>&1" \
-    "Configuration zshrc téléchargée avec succès." \
+    "Configuration zshrc téléchargée." \
     "Échec du téléchargement de la configuration zshrc."
 
 info_msg "--------------------------------------------------------"
@@ -65,10 +65,10 @@ read choice
 if [ "$choice" = "o" ]; then
     info_msg "Installation de PowerLevel10k..."
     execute_command "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \"$HOME/.oh-my-zsh/custom/themes/powerlevel10k\" --quiet >/dev/null || true" \
-        "PowerLevel10k installé avec succès." \
+        "PowerLevel10k installé." \
         "Échec de l'installation de PowerLevel10k."
     execute_command "sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/' \"$ZSHRC\"" \
-        "Thème PowerLevel10k configuré avec succès." \
+        "Thème PowerLevel10k configuré." \
         "Échec de la configuration du thème PowerLevel10k."
 
     info_msg "--------------------------------------------------------"
@@ -78,7 +78,7 @@ if [ "$choice" = "o" ]; then
     if [ "$choice" = "o" ]; then
         info_msg "Téléchargement du prompt PowerLevel10k..."
         execute_command "curl -fLo \"$HOME/.p10k.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/p10k.zsh" \
-            "Prompt PowerLevel10k téléchargé avec succès." \
+            "Prompt PowerLevel10k téléchargé." \
             "Échec du téléchargement du prompt PowerLevel10k."
         echo -e "\n# To customize prompt, run \`p10k configure\` or edit ~/.p10k.zsh." >> "$ZSHRC"
         echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
@@ -91,7 +91,7 @@ info_msg "--------------------------------------------------------"
 # Téléchargement de la configuration
 info_msg "Téléchargement de la configuration..."
 execute_command "curl -fLo \"$HOME/.oh-my-zsh/custom/aliases.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh" \
-    "Configuration téléchargée avec succès." \
+    "Configuration téléchargée." \
     "Échec du téléchargement de la configuration."
 
 info_msg "--------------------------------------------------------"
@@ -143,7 +143,7 @@ install_plugin() {
 
     info_msg "Installation $plugin_name..."
     execute_command "git clone \"$plugin_url\" \"$HOME/.oh-my-zsh/custom/plugins/$plugin_name\" --quiet >/dev/null || true" \
-        "$plugin_name installé avec succès." \
+        "$plugin_name installé." \
         "Échec de l'installation de $plugin_name."
 }
 

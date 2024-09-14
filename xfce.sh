@@ -33,7 +33,7 @@ info_msg "--------------------------------------------------------"
 ## Téléchargement et installation du fond d'écran
 info_msg "Téléchargement du fond d'écran..."
 execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png > /dev/null 2>&1" \
-    "Fond d'écran téléchargé avec succès." \
+    "Fond d'écran téléchargé." \
     "Échec du téléchargement du fond d'écran."
 
 execute_command "mkdir -p /usr/share/backgrounds/xfce/" \
@@ -41,7 +41,7 @@ execute_command "mkdir -p /usr/share/backgrounds/xfce/" \
     "Échec de la création du dossier de fond d'écran."
 
 execute_command "sudo mv waves.png /usr/share/backgrounds/xfce/ > /dev/null 2>&1" \
-    "Fond d'écran installé avec succès." \
+    "Fond d'écran installé." \
     "Échec de l'installation du fond d'écran."
 
 ## Installation de WhiteSur-Dark
@@ -51,7 +51,7 @@ execute_command "wget https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/
     "Échec du téléchargement de WhiteSur-Dark."
 
 execute_command "unzip 2024.09.02.zip && tar -xf WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz && sudo mv WhiteSur-Dark/ /usr/share/themes/ && sudo rm -rf WhiteSur* && sudo rm 2024.09.02.zip" \
-    "WhiteSur-Dark installé avec succès." \
+    "WhiteSur-Dark installé." \
     "Échec de l'installation de WhiteSur-Dark."
 
 ## Installation de Fluent Cursor
@@ -61,5 +61,5 @@ execute_command "wget https://github.com/vinceliuice/Fluent-icon-theme/archive/r
     "Échec du téléchargement de Fluent Cursor."
 
 execute_command "unzip 2024-02-25.zip && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/ && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/ && sudo rm -rf $HOME/Fluent* && sudo rm 2024-02-25.zip" \
-    "Fluent Cursor installé avec succès." \
+    "Fluent Cursor installé." \
     "Échec de l'installation de Fluent Cursor."
