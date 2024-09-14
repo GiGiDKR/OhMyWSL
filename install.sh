@@ -29,6 +29,8 @@ execute_command() {
     fi
 }
 
+clear
+
 sudo -v
 
 # Création du fichier .wslconfig
