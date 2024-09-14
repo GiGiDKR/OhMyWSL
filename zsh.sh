@@ -12,6 +12,7 @@ error_msg() {
     echo -e "\e[38;5;196m$1\e[0m"
 }
 
+echo ""
 # Installation de Oh My Zsh
 info_msg "Voulez-vous installer Oh My Zsh ? (o/n)"
 read choice
@@ -29,6 +30,7 @@ fi
 [ -f "$ZSHRC" ] && cp "$ZSHRC" "${ZSHRC}.bak"
 curl -fLo "$ZSHRC" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/zshrc >/dev/null 2>&1
 
+echo ""
 # Installation de PowerLevel10k
 info_msg "Voulez-vous installer PowerLevel10k ? (o/n)"
 read choice
@@ -38,6 +40,7 @@ if [ "$choice" = "o" ]; then
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" --quiet >/dev/null || true
     sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="powerlevel10k\/powerlevel10k"/' "$ZSHRC"
 
+    echo ""
     info_msg "Installer le prompt OhMyTermux ? (o/n)"
     read choice
 
@@ -51,13 +54,12 @@ if [ "$choice" = "o" ]; then
     fi
 fi
 
+echo ""
 # Téléchargement de la configuration
 info_msg "Téléchargement de la configuration..."
-(curl -fLo "$HOME/.oh-my-zsh/custom/aliases.zsh" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh &&
-mkdir -p $HOME/.config/OhMyTermux &&
-curl -fLo "$HOME/.config/OhMyTermux/help.md" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/help.md) ||
-error_msg "Erreur lors du téléchargement des fichiers"
+curl -fLo "$HOME/.oh-my-zsh/custom/aliases.zsh" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh
 
+echo ""
 # Installation des plugins
 install_zsh_plugins() {
     info_msg "Sélectionner les plugins à installer (SÉPARÉS PAR DES ESPACES) :"
@@ -90,6 +92,7 @@ install_zsh_plugins() {
     update_zshrc
 }
 
+echo ""
 install_plugin() {
     local plugin_name=$1
     local plugin_url=""
