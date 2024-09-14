@@ -74,7 +74,7 @@ read reponse_zsh
 reponse_zsh=$(echo "$reponse_zsh" | tr '[:upper:]' '[:lower:]')
 
 if [ "$reponse_zsh" = "oui" ] || [ "$reponse_zsh" = "o" ] || [ "$reponse_zsh" = "y" ] || [ "$reponse_zsh" = "yes" ]; then
-    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/main/zsh.sh" \
+    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" \
         "Script zsh.sh téléchargé." \
         "Échec du téléchargement du script zsh.sh."
     execute_command "chmod +x zsh.sh" \
@@ -202,7 +202,7 @@ read reponse
 reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
 
 if [ "$reponse" = "oui" ] || [ "$reponse" = "o" ] || [ "$reponse" = "y" ] || [ "$reponse" = "yes" ]; then
-    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/main/xfce.sh" \
+    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh" \
         "Script de personnalisation XFCE téléchargé." \
         "Erreur lors du téléchargement du script de personnalisation XFCE."
     execute_command "chmod +x xfce.sh" \
