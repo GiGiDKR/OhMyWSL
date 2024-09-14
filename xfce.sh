@@ -29,7 +29,7 @@ execute_command() {
     fi
 }
 
-echo ""
+echo "-------------------------------------------------------------------------"
 ## Téléchargement et installation du fond d'écran
 info_msg "Téléchargement du fond d'écran..."
 execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png > /dev/null 2>&1" \
@@ -44,7 +44,6 @@ execute_command "sudo mv waves.png /usr/share/backgrounds/xfce/ > /dev/null 2>&1
     "Fond d'écran installé avec succès." \
     "Échec de l'installation du fond d'écran."
 
-echo ""
 ## Installation de WhiteSur-Dark
 info_msg "Installation WhiteSur-Dark..."
 execute_command "wget https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip > /dev/null 2>&1" \
@@ -55,7 +54,6 @@ execute_command "unzip 2024.09.02.zip && tar -xf WhiteSur-gtk-theme-2024.09.02/r
     "WhiteSur-Dark installé avec succès." \
     "Échec de l'installation de WhiteSur-Dark."
 
-echo ""
 ## Installation de Fluent Cursor
 info_msg "Installation Fluent Cursor..."
 execute_command "wget https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip > /dev/null 2>&1" \
