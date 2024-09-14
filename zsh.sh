@@ -127,6 +127,7 @@ install_zsh_plugins() {
 install_plugin() {
     local plugin_name=$1
     local plugin_url=""
+    info_msg "----------------------------------------"
 
     case $plugin_name in
         "zsh-autosuggestions") plugin_url="https://github.com/zsh-users/zsh-autosuggestions.git" ;;
