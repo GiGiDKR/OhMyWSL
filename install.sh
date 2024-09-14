@@ -30,8 +30,8 @@ execute_command() {
 }
 
 clear
-
 sudo -v
+clear
 
 # Création du fichier .wslconfig
 wslconfig_file="/mnt/c/Users/$USER/.wslconfig"
