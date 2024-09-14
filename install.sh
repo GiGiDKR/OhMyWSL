@@ -1,13 +1,32 @@
 #!/bin/bash
 
-# Fonction pour afficher des messages d'information
+# Fonction pour afficher des messages d'information en bleu
 info_msg() {
     echo -e "\e[38;5;33m$1\e[0m"
 }
 
-# Fonction pour afficher des messages d'erreur
+# Fonction pour afficher des messages de succès en vert
+success_msg() {
+    echo -e "\e[38;5;82m$1\e[0m"
+}
+
+# Fonction pour afficher des messages d'erreur en rouge
 error_msg() {
     echo -e "\e[38;5;196m$1\e[0m"
+}
+
+# Fonction pour exécuter une commande et afficher le résultat
+execute_command() {
+    local command="$1"
+    local success_msg="$2"
+    local error_msg="$3"
+
+    if eval "$command"; then
+        success_msg "✓ $success_msg"
+    else
+        error_msg "✗ $error_msg"
+        return 1
+    fi
 }
 
 sudo -v
@@ -19,35 +38,26 @@ guiApplications=false
 [network]
 generateResolvConf = false"
 
-echo -e "$content" | tr -d '\r' > "$wslconfig_file"
-
-if [ -f "$wslconfig_file" ]; then
-    info_msg "Le fichier .wslconfig a été créé avec succès."
-else
-    error_msg "Erreur lors de la création du fichier .wslconfig."
-    exit 1
-fi
+execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" \
+    "Le fichier .wslconfig a été créé avec succès." \
+    "Erreur lors de la création du fichier .wslconfig."
 
 ## Installation des paquets
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark"
 
-packages_install() {
-    info_msg "Installation de $1..."
-    if sudo apt install -y "$1"; then   
-        info_msg "✓ $1 installé avec succès."
-    else
-        error_msg "✗ Échec de l'installation de $1."
-    fi
-}
-
 clear
-info_msg "Mise à jour des listes de paquets..."
-sudo apt update -y
-info_msg "Mise à jour des paquets..."
-sudo apt upgrade -y
+execute_command "sudo apt update -y" \
+    "Mise à jour des listes de paquets réussie." \
+    "Échec de la mise à jour des listes de paquets."
+
+execute_command "sudo apt upgrade -y" \
+    "Mise à jour des paquets réussie." \
+    "Échec de la mise à jour des paquets."
 
 for package in $packages; do
-    packages_install "$package"
+    execute_command "sudo apt install -y $package" \
+        "$package installé." \
+        "Échec de l'installation de $package."
 done
 
 echo ""
@@ -58,10 +68,16 @@ read reponse_zsh
 reponse_zsh=$(echo "$reponse_zsh" | tr '[:upper:]' '[:lower:]')
 
 if [ "$reponse_zsh" = "oui" ] || [ "$reponse_zsh" = "o" ] || [ "$reponse_zsh" = "y" ] || [ "$reponse_zsh" = "yes" ]; then
-    wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/main/zsh.sh
-    chmod +x zsh.sh
+    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/main/zsh.sh" \
+        "Script zsh.sh téléchargé." \
+        "Échec du téléchargement du script zsh.sh."
+    execute_command "chmod +x zsh.sh" \
+        "Permissions du script zsh.sh modifiées." \
+        "Échec de la modification des permissions du script zsh.sh."
     info_msg "Exécution de zsh.."
-    ./zsh.sh
+    execute_command "./zsh.sh" \
+        "Installation de zsh terminée." \
+        "Échec de l'installation de zsh."
 else
     info_msg "Installation de zsh refusée."
 fi
@@ -82,9 +98,9 @@ if [ ! -f "$resolv_conf" ]; then
     exit 1
 fi
 
-sudo sed -i "s/^nameserver.*/& ${ip_address}:0.0/" "$resolv_conf"
-
-info_msg "Le fichier $resolv_conf a été mis à jour avec succès."
+execute_command "sudo sed -i \"s/^nameserver.*/& ${ip_address}:0.0/\" \"$resolv_conf\"" \
+    "Le fichier $resolv_conf a été mis à jour avec succès." \
+    "Erreur lors de la mise à jour de $resolv_conf."
 
 echo ""
 ## Configuration des fichiers de shell
@@ -96,11 +112,11 @@ export DISPLAY=$(grep -m 1 nameserver /etc/resolv.conf | awk "{print \$2}"):0.0
 export PULSE_SERVER=tcp:$(grep -m 1 nameserver /etc/resolv.conf | awk "{print \$2}")
 echo $DISPLAY'
 
-
 add_lines_to_file() {
     if [ -f "$1" ]; then
-        echo "$lines_to_add" >> "$1"
-        info_msg "Les lignes ont été ajoutées à $1"
+        execute_command "echo \"$lines_to_add\" >> \"$1\"" \
+            "Les lignes ont été ajoutées à $1" \
+            "Erreur lors de l'ajout des lignes à $1"
     else
         error_msg "Le fichier $1 n'existe pas."
     fi
@@ -109,46 +125,64 @@ add_lines_to_file() {
 add_lines_to_file "$bashrc_path"
 [ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path"
 
-info_msg "Fichier(s) de configuration shell mis à jour avec succès."
+success_msg "Fichier(s) de configuration shell mis à jour avec succès."
 
 echo ""
 ## Installation de GWSL
-if wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip; then
-    if unzip GWSL-145-STORE.zip; then
-        mv GWSL-145-STORE GWSL
-        mkdir -p /mnt/c/WSL2-Distros
-        mv GWSL /mnt/c/WSL2-Distros/
-        info_msg "GWSL installé avec succès."
-    else
-        error_msg "Erreur lors de l'extraction de GWSL."
-        exit 1
-    fi
-else
-    error_msg "Erreur lors du téléchargement de GWSL."
-    exit 1
-fi
+execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip" \
+    "GWSL téléchargé avec succès." \
+    "Erreur lors du téléchargement de GWSL."
+
+execute_command "unzip GWSL-145-STORE.zip" \
+    "GWSL extrait avec succès." \
+    "Erreur lors de l'extraction de GWSL."
+
+execute_command "mv GWSL-145-STORE GWSL" \
+    "Dossier GWSL renommé." \
+    "Erreur lors du renommage du dossier GWSL."
+
+execute_command "mkdir -p /mnt/c/WSL2-Distros" \
+    "Dossier WSL2-Distros créé." \
+    "Erreur lors de la création du dossier WSL2-Distros."
+
+execute_command "mv GWSL /mnt/c/WSL2-Distros/" \
+    "GWSL déplacé dans WSL2-Distros." \
+    "Erreur lors du déplacement de GWSL."
 
 echo ""
 ## Configuration de XFCE4
-execute_command() {
-    info_msg "Exécution de : $1"
-    eval "$1"
-    echo ""
-}
-
-echo ""
 info_msg "Démarrage de XFCE4..."
-timeout 5s sudo startxfce4 &> /dev/null
-info_msg "XFCE4 fermé après 5 secondes."
-echo ""
+execute_command "timeout 5s sudo startxfce4 &> /dev/null" \
+    "XFCE4 fermé après 5 secondes." \
+    "Erreur lors du démarrage de XFCE4."
 
-execute_command "mkdir -p $HOME/.config/xfce4"
-execute_command "cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc"
-execute_command "touch $HOME/.ICEauthority"
-execute_command "chmod 600 $HOME/.ICEauthority"
-execute_command "sudo mkdir -p /run/user/$UID"
-execute_command "sudo chown -R $UID:$UID /run/user/$UID/"
-execute_command "echo 'echo \$DISPLAY' >> $HOME/.bashrc"
+execute_command "mkdir -p $HOME/.config/xfce4" \
+    "Dossier de configuration XFCE4 créé." \
+    "Erreur lors de la création du dossier de configuration XFCE4."
+
+execute_command "cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc" \
+    "Fichier xinitrc copié." \
+    "Erreur lors de la copie du fichier xinitrc."
+
+execute_command "touch $HOME/.ICEauthority" \
+    "Fichier .ICEauthority créé." \
+    "Erreur lors de la création du fichier .ICEauthority."
+
+execute_command "chmod 600 $HOME/.ICEauthority" \
+    "Permissions du fichier .ICEauthority modifiées." \
+    "Erreur lors de la modification des permissions du fichier .ICEauthority."
+
+execute_command "sudo mkdir -p /run/user/$UID" \
+    "Dossier /run/user/$UID créé." \
+    "Erreur lors de la création du dossier /run/user/$UID."
+
+execute_command "sudo chown -R $UID:$UID /run/user/$UID/" \
+    "Propriétaire du dossier /run/user/$UID modifié." \
+    "Erreur lors de la modification du propriétaire du dossier /run/user/$UID."
+
+execute_command "echo 'echo \$DISPLAY' >> $HOME/.bashrc" \
+    "Commande d'affichage de DISPLAY ajoutée à .bashrc." \
+    "Erreur lors de l'ajout de la commande d'affichage de DISPLAY à .bashrc."
 
 echo ""
 # Personnalisation XFCE
@@ -158,11 +192,16 @@ read reponse
 reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
 
 if [ "$reponse" = "oui" ] || [ "$reponse" = "o" ] || [ "$reponse" = "y" ] || [ "$reponse" = "yes" ]; then
-    # XFCE script
-    wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/main/xfce.sh
-    chmod +x xfce.sh
+    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/main/xfce.sh" \
+        "Script de personnalisation XFCE téléchargé." \
+        "Erreur lors du téléchargement du script de personnalisation XFCE."
+    execute_command "chmod +x xfce.sh" \
+        "Permissions du script de personnalisation XFCE modifiées." \
+        "Erreur lors de la modification des permissions du script de personnalisation XFCE."
     info_msg "Exécution de la personnalisation XFCE..."
-    ./xfce.sh
+    execute_command "./xfce.sh" \
+        "Personnalisation XFCE terminée." \
+        "Erreur lors de l'exécution de la personnalisation XFCE."
 else
     info_msg "Installation de la personnalisation XFCE refusée."
 fi
@@ -170,4 +209,6 @@ fi
 echo ""
 ## Lancement de la session XFCE4
 info_msg "Lancement de la session XFCE4..."
-dbus-launch xfce4-session
+execute_command "dbus-launch xfce4-session" \
+    "Session XFCE4 lancée avec succès." \
+    "Échec du lancement de la session XFCE4."

@@ -2,14 +2,33 @@
 
 ZSHRC="$HOME/.zshrc"
 
-# Fonction pour afficher des messages d'information
+# Fonction pour afficher des messages d'information en bleu
 info_msg() {
     echo -e "\e[38;5;33m$1\e[0m"
 }
 
-# Fonction pour afficher des messages d'erreur
+# Fonction pour afficher des messages de succès en vert
+success_msg() {
+    echo -e "\e[38;5;82m$1\e[0m"
+}
+
+# Fonction pour afficher des messages d'erreur en rouge
 error_msg() {
     echo -e "\e[38;5;196m$1\e[0m"
+}
+
+# Fonction pour exécuter une commande et afficher le résultat
+execute_command() {
+    local command="$1"
+    local success_msg="$2"
+    local error_msg="$3"
+
+    if eval "$command"; then
+        success_msg "✓ $success_msg"
+    else
+        error_msg "✗ $error_msg"
+        return 1
+    fi
 }
 
 echo ""
@@ -19,16 +38,24 @@ read choice
 
 if [ "$choice" = "o" ]; then
     info_msg "Installation des pré-requis..."
-    sudo apt install -y wget curl git unzip
+    execute_command "sudo apt install -y wget curl git unzip" \
+        "Pré-requis installés avec succès." \
+        "Échec de l'installation des pré-requis."
 
     info_msg "Installation de Oh My Zsh..."
-    git clone https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh" --quiet >/dev/null
+    execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git \"$HOME/.oh-my-zsh\" --quiet >/dev/null" \
+        "Oh My Zsh installé avec succès." \
+        "Échec de l'installation de Oh My Zsh."
 
-    cp "$HOME/.oh-my-zsh/templates/zshrc.zsh-template" "$ZSHRC"
+    execute_command "cp \"$HOME/.oh-my-zsh/templates/zshrc.zsh-template\" \"$ZSHRC\"" \
+        "Fichier zshrc copié avec succès." \
+        "Échec de la copie du fichier zshrc."
 fi
 
 [ -f "$ZSHRC" ] && cp "$ZSHRC" "${ZSHRC}.bak"
-curl -fLo "$ZSHRC" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/zshrc >/dev/null 2>&1
+execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/zshrc >/dev/null 2>&1" \
+    "Configuration zshrc téléchargée avec succès." \
+    "Échec du téléchargement de la configuration zshrc."
 
 echo ""
 # Installation de PowerLevel10k
@@ -37,8 +64,12 @@ read choice
 
 if [ "$choice" = "o" ]; then
     info_msg "Installation de PowerLevel10k..."
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" --quiet >/dev/null || true
-    sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="powerlevel10k\/powerlevel10k"/' "$ZSHRC"
+    execute_command "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \"$HOME/.oh-my-zsh/custom/themes/powerlevel10k\" --quiet >/dev/null || true" \
+        "PowerLevel10k installé avec succès." \
+        "Échec de l'installation de PowerLevel10k."
+    execute_command "sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/' \"$ZSHRC\"" \
+        "Thème PowerLevel10k configuré avec succès." \
+        "Échec de la configuration du thème PowerLevel10k."
 
     echo ""
     info_msg "Installer le prompt OhMyTermux ? (o/n)"
@@ -46,7 +77,9 @@ if [ "$choice" = "o" ]; then
 
     if [ "$choice" = "o" ]; then
         info_msg "Téléchargement du prompt PowerLevel10k..."
-        curl -fLo "$HOME/.p10k.zsh" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/p10k.zsh
+        execute_command "curl -fLo \"$HOME/.p10k.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/p10k.zsh" \
+            "Prompt PowerLevel10k téléchargé avec succès." \
+            "Échec du téléchargement du prompt PowerLevel10k."
         echo -e "\n# To customize prompt, run \`p10k configure\` or edit ~/.p10k.zsh." >> "$ZSHRC"
         echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
     else
@@ -57,7 +90,9 @@ fi
 echo ""
 # Téléchargement de la configuration
 info_msg "Téléchargement de la configuration..."
-curl -fLo "$HOME/.oh-my-zsh/custom/aliases.zsh" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh
+execute_command "curl -fLo \"$HOME/.oh-my-zsh/custom/aliases.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh" \
+    "Configuration téléchargée avec succès." \
+    "Échec du téléchargement de la configuration."
 
 echo ""
 # Installation des plugins
@@ -107,7 +142,9 @@ install_plugin() {
     esac
 
     info_msg "Installation $plugin_name..."
-    git clone "$plugin_url" "$HOME/.oh-my-zsh/custom/plugins/$plugin_name" --quiet >/dev/null || true
+    execute_command "git clone \"$plugin_url\" \"$HOME/.oh-my-zsh/custom/plugins/$plugin_name\" --quiet >/dev/null || true" \
+        "$plugin_name installé avec succès." \
+        "Échec de l'installation de $plugin_name."
 }
 
 update_zshrc() {
