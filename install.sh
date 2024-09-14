@@ -21,7 +21,7 @@ execute_command() {
     local success_msg="$2"
     local error_msg="$3"
 
-    if eval "$command" &>/dev/null; then
+    if eval "$command" > /dev/null 2>&1; then
         success_msg "✓ $success_msg"
     else
         error_msg "✗ $error_msg"
