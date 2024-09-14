@@ -31,7 +31,6 @@ execute_command() {
 
 clear
 sudo -v
-clear
 
 # Création du fichier .wslconfig
 wslconfig_file="/mnt/c/Users/$USER/.wslconfig"
@@ -40,6 +39,8 @@ guiApplications=false
 [network]
 generateResolvConf = false"
 
+clear
+info_msg "Création du fichier .wslconfig..."
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" \
     "Le fichier .wslconfig a été créé avec succès." \
     "Erreur lors de la création du fichier .wslconfig."
