@@ -32,12 +32,18 @@ execute_command() {
 }
 
 info_msg "----------------------------------------"
+info_msg "Installation de zsh..."
+execute_command "sudo apt install -y zsh" \
+    "zsh installé." \
+    "Échec de l'installation de zsh."
+
+info_msg "----------------------------------------"
 # Installation de Oh My Zsh
 read -p "Voulez-vous installer Oh My Zsh ? (o/n)" choice
 
 if [ "$choice" = "o" ]; then
     info_msg "Installation des pré-requis..."
-    execute_command "sudo apt install -y wget curl git unzip" \
+    execute_command "zsudo apt install -y wget curl git unzip" \
         "Pré-requis installés." \
         "Échec de l'installation des pré-requis."
 
