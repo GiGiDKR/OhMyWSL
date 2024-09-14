@@ -41,13 +41,19 @@ packages_install() {
     echo ""
 }
 
+clear
 info_msg "Mise à jour des listes de paquets..."
-sudo apt update -y && sudo apt upgrade -y > /dev/null 2>&1
+sudo apt update -y > /dev/null 2>&1
+echo ""
+info_msg "Mise à jour des paquets..."
+sudo apt upgrade -y > /dev/null 2>&1
+echo ""
 
 for package in $packages; do
     packages_install "$package"
 done
 
+echo ""
 # Installation de ZSH
 info_msg "Installer zsh ? (oui/non)"
 read reponse_zsh
@@ -63,6 +69,7 @@ else
     info_msg "Installation de zsh refusée."
 fi
 
+echo ""
 ## Configuration réseau
 ip_address=$(ip route | grep default | awk '{print $3; exit;}')
 
@@ -82,6 +89,7 @@ sudo sed -i "s/^nameserver.*/& ${ip_address}:0.0/" "$resolv_conf"
 
 info_msg "Le fichier $resolv_conf a été mis à jour avec succès."
 
+echo ""
 ## Configuration des fichiers de shell
 bashrc_path="$HOME/.bashrc"
 zshrc_path="$HOME/.zshrc"
@@ -106,6 +114,7 @@ add_lines_to_file "$bashrc_path"
 
 info_msg "Fichier(s) de configuration shell mis à jour avec succès."
 
+echo ""
 ## Installation de GWSL
 if wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip; then
     if unzip GWSL-145-STORE.zip; then
@@ -122,6 +131,7 @@ else
     exit 1
 fi
 
+echo ""
 ## Configuration de XFCE4
 execute_command() {
     info_msg "Exécution de : $1"
@@ -129,6 +139,7 @@ execute_command() {
     echo ""
 }
 
+echo ""
 info_msg "Démarrage de XFCE4..."
 timeout 5s sudo startxfce4 &> /dev/null
 info_msg "XFCE4 fermé après 5 secondes."
@@ -142,6 +153,7 @@ execute_command "sudo mkdir -p /run/user/$UID"
 execute_command "sudo chown -R $UID:$UID /run/user/$UID/"
 execute_command "echo 'echo \$DISPLAY' >> $HOME/.bashrc"
 
+echo ""
 # Personnalisation XFCE
 info_msg "Installer la personnalisation XFCE ? (oui/non)"
 read reponse
@@ -158,6 +170,7 @@ else
     info_msg "Installation de la personnalisation XFCE refusée."
 fi
 
+echo ""
 ## Lancement de la session XFCE4
 info_msg "Lancement de la session XFCE4..."
 dbus-launch xfce4-session
