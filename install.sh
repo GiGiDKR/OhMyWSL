@@ -30,7 +30,7 @@ fi
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
     if $USE_GUM; then
-        gum style --foreground 33 $1
+        gum style --foreground 33 "${1//$'\n'/ }"
     else
         echo -e "\e[38;5;33m$1\e[0m"
     fi
@@ -39,7 +39,7 @@ info_msg() {
 # Fonction pour afficher des messages de succès en vert
 success_msg() {
     if $USE_GUM; then
-        gum style --foreground 82 $1
+        gum style --foreground 82 "$1"
     else
         echo -e "\e[38;5;82m$1\e[0m"
     fi
@@ -48,7 +48,7 @@ success_msg() {
 # Fonction pour afficher des messages d'erreur en rouge
 error_msg() {
     if $USE_GUM; then
-        gum style --foreground 196 $1
+        gum style --foreground 196 "$1"
     else
         echo -e "\e[38;5;196m$1\e[0m"
     fi
@@ -61,19 +61,30 @@ execute_command() {
     local error_msg="$3"
 
     if $USE_GUM; then
-        if gum spin --spinner dot --title "$2" -- bash -c "$command"; then
+        info_msg "$2"
+        if gum spin --spinner dot --title "" -- bash -c "$command"; then
             gum style --foreground 82 "✓ $success_msg"
         else
             gum style --foreground 196 "✗ $error_msg"
             return 1
         fi
     else
+        info_msg "$2"
         if eval "$command"; then
             success_msg "✓ $success_msg"
         else
             error_msg "✗ $error_msg"
             return 1
         fi
+    fi
+}
+
+# Remplacer les lignes de séparation par une fonction
+separator() {
+    if $USE_GUM; then
+        gum style --foreground 33 "----------------------------------------"
+    else
+        echo -e "\e[38;5;33m----------------------------------------\e[0m"
     fi
 }
 
@@ -93,7 +104,7 @@ execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" \
     "Le fichier .wslconfig a été créé." \
     "Erreur lors de la création du fichier .wslconfig."
 
-info_msg "----------------------------------------"
+separator
 
 ## Installation des paquets
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark"
@@ -108,7 +119,7 @@ execute_command "sudo apt upgrade -y" \
     "Mise à jour des paquets réussie." \
     "Échec de la mise à jour des paquets."
 
-info_msg "----------------------------------------"
+separator
 
 for package in $packages; do
     info_msg "Installation de $package..."
@@ -117,7 +128,7 @@ for package in $packages; do
         "Échec de l'installation de $package."
 done
 
-info_msg "----------------------------------------"
+separator
 # Installation de ZSH
 if $USE_GUM; then
     if gum confirm "Installer zsh ?"; then
@@ -159,7 +170,7 @@ else
     fi
 fi
 
-info_msg "----------------------------------------"
+separator
 ## Configuration réseau
 info_msg "Configuration du réseau..."
 ip_address=$(ip route | grep default | awk '{print $3; exit;}')
@@ -181,7 +192,7 @@ execute_command "sudo sed -i \"s/^nameserver.*/& ${ip_address}:0.0/\" \"$resolv_
     "Le fichier $resolv_conf a été mis à jour." \
     "Erreur lors de la mise à jour de $resolv_conf."
 
-info_msg "----------------------------------------"
+separator
 ## Configuration des fichiers de shell
 bashrc_path="$HOME/.bashrc"
 zshrc_path="$HOME/.zshrc"
@@ -206,7 +217,7 @@ add_lines_to_file "$bashrc_path"
 
 success_msg "Fichier(s) de configuration shell mis à jour."
 
-info_msg "----------------------------------------"
+separator
 ## Installation de GWSL
 # Fonction pour installer GWSL
 install_gwsl() {
@@ -341,7 +352,7 @@ else
     fi
 fi
 
-info_msg "----------------------------------------"
+separator
 ## Configuration de XFCE4
 #info_msg "Démarrage de XFCE4..."
 #execute_command "timeout 5s sudo startxfce4 &> /dev/null" \
@@ -377,7 +388,7 @@ execute_command "echo 'echo \$DISPLAY' >> $HOME/.bashrc" \
     "Commande d'affichage de DISPLAY ajoutée à .bashrc." \
     "Erreur lors de l'ajout de la commande d'affichage de DISPLAY à .bashrc."
 
-info_msg "----------------------------------------"
+separator
 # Personnalisation XFCE
 if $USE_GUM; then
     if gum confirm "Installer la personnalisation XFCE ?"; then
@@ -417,7 +428,7 @@ else
     fi
 fi
 
-info_msg "----------------------------------------"
+separator
 ## Lancement de la session XFCE4
 info_msg "Lancement de la session XFCE4..."
 execute_command "dbus-launch xfce4-session" \

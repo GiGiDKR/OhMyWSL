@@ -7,7 +7,7 @@ ZSHRC="$HOME/.zshrc"
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
     if $USE_GUM; then
-        gum style --foreground 33 $1
+        gum style --foreground 33 "${1//$'\n'/ }"
     else
         echo -e "\e[38;5;33m$1\e[0m"
     fi
@@ -16,7 +16,7 @@ info_msg() {
 # Fonction pour afficher des messages de succès en vert
 success_msg() {
     if $USE_GUM; then
-        gum style --foreground 82 $1
+        gum style --foreground 82 "${1//$'\n'/ }"
     else
         echo -e "\e[38;5;82m$1\e[0m"
     fi
@@ -25,7 +25,7 @@ success_msg() {
 # Fonction pour afficher des messages d'erreur en rouge
 error_msg() {
     if $USE_GUM; then
-        gum style --foreground 196 $1
+        gum style --foreground 196 "${1//$'\n'/ }"
     else
         echo -e "\e[38;5;196m$1\e[0m"
     fi
@@ -38,19 +38,30 @@ execute_command() {
     local error_msg="$3"
 
     if $USE_GUM; then
-        if gum spin --spinner dot --title "$2" -- bash -c "$command"; then
+        info_msg "$2"
+        if gum spin --spinner dot --title "" -- bash -c "$command"; then
             gum style --foreground 82 "✓ $success_msg"
         else
             gum style --foreground 196 "✗ $error_msg"
             return 1
         fi
     else
+        info_msg "$2"
         if eval "$command"; then
             success_msg "✓ $success_msg"
         else
             error_msg "✗ $error_msg"
             return 1
         fi
+    fi
+}
+
+# Fonction pour afficher une ligne de séparation
+separator() {
+    if $USE_GUM; then
+        gum style --foreground 33 "----------------------------------------"
+    else
+        echo -e "\e[38;5;33m----------------------------------------\e[0m"
     fi
 }
 
@@ -63,13 +74,13 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-info_msg "----------------------------------------"
+separator
 info_msg "Installation de zsh..."
 execute_command "sudo apt install -y zsh" \
     "zsh installé." \
     "Échec de l'installation de zsh."
 
-info_msg "----------------------------------------"
+separator
 # Installation de Oh My Zsh
 if $USE_GUM; then
     if gum confirm "Voulez-vous installer Oh My Zsh ?"; then
@@ -101,7 +112,7 @@ execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/
     "Configuration zshrc téléchargée." \
     "Échec du téléchargement de la configuration zshrc."
 
-info_msg "----------------------------------------"
+separator
 # Installation de PowerLevel10k
 if $USE_GUM; then
     if gum confirm "Voulez-vous installer PowerLevel10k ?"; then
@@ -121,7 +132,7 @@ if [ "$install_powerlevel10k" = true ]; then
         "Thème PowerLevel10k configuré." \
         "Échec de la configuration du thème PowerLevel10k."
 
-    info_msg "----------------------------------------"
+    separator
     if $USE_GUM; then
         if gum confirm "Installer le prompt OhMyTermux ?"; then
             install_p10k=true
@@ -143,14 +154,14 @@ if [ "$install_powerlevel10k" = true ]; then
     fi
 fi
 
-info_msg "----------------------------------------"
+separator
 # Téléchargement de la configuration
 info_msg "Téléchargement de la configuration..."
 execute_command "curl -fLo \"$HOME/.oh-my-zsh/custom/aliases.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh" \
     "Configuration téléchargée." \
     "Échec du téléchargement de la configuration."
 
-info_msg "----------------------------------------"
+separator
 # Installation des plugins
 install_zsh_plugins() {
     if $USE_GUM; then
@@ -190,7 +201,7 @@ install_zsh_plugins() {
 install_plugin() {
     local plugin_name=$1
     local plugin_url=""
-    info_msg "----------------------------------------"
+    separator
 
     case $plugin_name in
         "zsh-autosuggestions") plugin_url="https://github.com/zsh-users/zsh-autosuggestions.git" ;;
