@@ -1,18 +1,32 @@
 #!/bin/bash
 
+USE_GUM=false
+
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
-    echo -e "\e[38;5;33m$1\e[0m"
+    if $USE_GUM; then
+        gum style --foreground 33 "$1"
+    else
+        echo -e "\e[38;5;33m$1\e[0m"
+    fi
 }
 
 # Fonction pour afficher des messages de succès en vert
 success_msg() {
-    echo -e "\e[38;5;82m$1\e[0m"
+    if $USE_GUM; then
+        gum style --foreground 82 "$1"
+    else
+        echo -e "\e[38;5;82m$1\e[0m"
+    fi
 }
 
 # Fonction pour afficher des messages d'erreur en rouge
 error_msg() {
-    echo -e "\e[38;5;196m$1\e[0m"
+    if $USE_GUM; then
+        gum style --foreground 196 "$1"
+    else
+        echo -e "\e[38;5;196m$1\e[0m"
+    fi
 }
 
 # Fonction pour exécuter une commande et afficher le résultat
@@ -21,13 +35,48 @@ execute_command() {
     local success_msg="$2"
     local error_msg="$3"
 
-    if eval "$command" > /dev/null 2>&1; then
-        success_msg "✓ $success_msg"
+    if $USE_GUM; then
+        if gum spin --spinner dot --title "$2" -- eval "$command" > /dev/null 2>&1; then
+            gum style --foreground 82 "✓ $success_msg"
+        else
+            gum style --foreground 196 "✗ $error_msg"
+            return 1
+        fi
     else
-        error_msg "✗ $error_msg"
-        return 1
+        if eval "$command" > /dev/null 2>&1; then
+            success_msg "✓ $success_msg"
+        else
+            error_msg "✗ $error_msg"
+            return 1
+        fi
     fi
 }
+
+# Traitement des arguments en ligne de commande
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --gum|-g) USE_GUM=true ;;
+        *) error_msg "Option non reconnue : $1" ;;
+    esac
+    shift
+done
+
+# Modification des interactions utilisateur pour utiliser gum si nécessaire
+if $USE_GUM; then
+    if gum confirm "Voulez-vous télécharger et installer le fond d'écran ?"; then
+        # ... (code pour télécharger et installer le fond d'écran)
+    fi
+    
+    if gum confirm "Voulez-vous installer WhiteSur-Dark ?"; then
+        # ... (code pour installer WhiteSur-Dark)
+    fi
+    
+    if gum confirm "Voulez-vous installer Fluent Cursor ?"; then
+        # ... (code pour installer Fluent Cursor)
+    fi
+else
+    # ... (code existant pour les interactions sans gum)
+fi
 
 info_msg "----------------------------------------"
 ## Téléchargement et installation du fond d'écran

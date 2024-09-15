@@ -1,18 +1,32 @@
 #!/bin/bash
 
+USE_GUM=false
+
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
-    echo -e "\e[38;5;33m$1\e[0m"
+    if $USE_GUM; then
+        gum style --foreground 33 "$1"
+    else
+        echo -e "\e[38;5;33m$1\e[0m"
+    fi
 }
 
 # Fonction pour afficher des messages de succès en vert
 success_msg() {
-    echo -e "\e[38;5;82m$1\e[0m"
+    if $USE_GUM; then
+        gum style --foreground 82 "$1"
+    else
+        echo -e "\e[38;5;82m$1\e[0m"
+    fi
 }
 
 # Fonction pour afficher des messages d'erreur en rouge
 error_msg() {
-    echo -e "\e[38;5;196m$1\e[0m"
+    if $USE_GUM; then
+        gum style --foreground 196 "$1"
+    else
+        echo -e "\e[38;5;196m$1\e[0m"
+    fi
 }
 
 # Fonction pour exécuter une commande et afficher le résultat
@@ -21,13 +35,37 @@ execute_command() {
     local success_msg="$2"
     local error_msg="$3"
 
-    if eval "$command" > /dev/null 2>&1; then
-        success_msg "✓ $success_msg"
+    if $USE_GUM; then
+        if gum spin --spinner dot --title "$2" -- eval "$command" > /dev/null 2>&1; then
+            gum style --foreground 82 "✓ $success_msg"
+        else
+            gum style --foreground 196 "✗ $error_msg"
+            return 1
+        fi
     else
-        error_msg "✗ $error_msg"
-        return 1
+        if eval "$command" > /dev/null 2>&1; then
+            success_msg "✓ $success_msg"
+        else
+            error_msg "✗ $error_msg"
+            return 1
+        fi
     fi
 }
+
+# Traitement des arguments en ligne de commande
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --gum|-g) USE_GUM=true ;;
+        *) error_msg "Option non reconnue : $1" ;;
+    esac
+    shift
+done
+
+# Installation de gum si nécessaire
+if $USE_GUM && ! command -v gum &> /dev/null; then
+    info_msg "Installation de gum..."
+    sudo apt update && sudo apt install -y gum
+fi
 
 clear
 sudo -v
@@ -71,26 +109,44 @@ done
 
 info_msg "----------------------------------------"
 # Installation de ZSH
-read -p "Installer zsh ? (o/n) : " reponse_zsh
-
-reponse_zsh=$(echo "$reponse_zsh" | tr '[:upper:]' '[:lower:]')
-
-if [ "$reponse_zsh" = "oui" ] || [ "$reponse_zsh" = "o" ] || [ "$reponse_zsh" = "y" ] || [ "$reponse_zsh" = "yes" ]; then
-    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" \
-        "Script zsh.sh téléchargé." \
-        "Échec du téléchargement du script zsh.sh."
-    execute_command "chmod +x zsh.sh" \
-        "Permissions du script zsh.sh modifiées." \
-        "Échec de la modification des permissions du script zsh.sh."
-#    info_msg "Exécution de zsh..."
-    "$HOME/zsh.sh"  # Exécution directe du script
-    if [ $? -eq 0 ]; then
-        success_msg "Installation de zsh terminée."
+if $USE_GUM; then
+    if gum confirm "Installer zsh ?"; then
+        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" \
+            "Script zsh.sh téléchargé." \
+            "Échec du téléchargement du script zsh.sh."
+        execute_command "chmod +x zsh.sh" \
+            "Permissions du script zsh.sh modifiées." \
+            "Échec de la modification des permissions du script zsh.sh."
+        "$HOME/zsh.sh" --gum  # Exécution directe du script avec gum
+        if [ $? -eq 0 ]; then
+            success_msg "Installation de zsh terminée."
+        else
+            error_msg "Échec de l'installation de zsh."
+        fi
     else
-        error_msg "Échec de l'installation de zsh."
+        info_msg "Installation de zsh refusée."
     fi
 else
-    info_msg "Installation de zsh refusée."
+    read -p "Installer zsh ? (o/n) : " reponse_zsh
+
+    reponse_zsh=$(echo "$reponse_zsh" | tr '[:upper:]' '[:lower:]')
+
+    if [ "$reponse_zsh" = "oui" ] || [ "$reponse_zsh" = "o" ] || [ "$reponse_zsh" = "y" ] || [ "$reponse_zsh" = "yes" ]; then
+        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" \
+            "Script zsh.sh téléchargé." \
+            "Échec du téléchargement du script zsh.sh."
+        execute_command "chmod +x zsh.sh" \
+            "Permissions du script zsh.sh modifiées." \
+            "Échec de la modification des permissions du script zsh.sh."
+        "$HOME/zsh.sh"  # Exécution directe du script
+        if [ $? -eq 0 ]; then
+            success_msg "Installation de zsh terminée."
+        else
+            error_msg "Échec de l'installation de zsh."
+        fi
+    else
+        info_msg "Installation de zsh refusée."
+    fi
 fi
 
 info_msg "----------------------------------------"
@@ -142,26 +198,138 @@ success_msg "Fichier(s) de configuration shell mis à jour."
 
 info_msg "----------------------------------------"
 ## Installation de GWSL
-info_msg "Téléchargement de GWSL..."
-execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip" \
-    "GWSL téléchargé." \
-    "Erreur lors du téléchargement de GWSL."
+# Fonction pour installer GWSL
+install_gwsl() {
+    info_msg "Installation de GWSL..."
+    if [ ! -f "GWSL-145-STORE.zip" ]; then
+        execute_command "wget https://github.com/Opticos/GWSL-Source/releases/download/v1.4.5/GWSL-145-STORE.zip" \
+            "GWSL téléchargé." \
+            "Échec du téléchargement de GWSL."
+    else
+        info_msg "Le fichier GWSL-145-STORE.zip existe déjà."
+    fi
 
-execute_command "unzip GWSL-145-STORE.zip" \
-    "GWSL extrait." \
-    "Erreur lors de l'extraction de GWSL."
+    execute_command "unzip GWSL-145-STORE.zip && mv GWSL-145-STORE/GWSL.exe /mnt/c/Users/Public/Desktop/ && rm -rf GWSL-145-STORE*" \
+        "GWSL installé." \
+        "Échec de l'installation de GWSL."
+}
 
-execute_command "mv GWSL-145-STORE GWSL" \
-    "Dossier GWSL renommé." \
-    "Erreur lors du renommage du dossier GWSL."
+# Fonction pour installer des packages optionnels
+optional_packages() {
+    if $USE_GUM; then
+        PACKAGES=$(gum choose --no-limit --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer")
+    else
+        info_msg "Sélectionnez les packages à installer (séparés par des espaces) :"
+        info_msg "1) nala"
+        info_msg "2) eza"
+        info_msg "3) lfm"
+        info_msg "4) bat"
+        info_msg "5) fzf"
+        read -p "Entrez les numéros des packages : " package_choices
+    fi
 
-execute_command "mkdir -p /mnt/c/WSL2-Distros" \
-    "Dossier WSL2-Distros créé." \
-    "Erreur lors de la création du dossier WSL2-Distros."
+    for choice in $PACKAGES; do
+        case $choice in
+            1) install_package "nala" ;;
+            2) install_eza ;;
+            3) install_package "lfm" ;;
+            4) install_package "bat" ;;
+            5) install_package "fzf" ;;
+            "Tout installer")
+                install_package "nala"
+                install_eza
+                install_package "lfm"
+                install_package "bat"
+                install_package "fzf"
+                ;;
+        esac
+    done
+}
 
-execute_command "mv GWSL /mnt/c/WSL2-Distros/" \
-    "GWSL déplacé dans WSL2-Distros." \
-    "Erreur lors du déplacement de GWSL."
+# Fonction pour installer un package standard
+install_package() {
+    local package=$1
+    info_msg "Installation de $package..."
+    execute_command "sudo apt install -y $package" \
+        "$package installé." \
+        "Échec de l'installation de $package."
+    add_aliases_to_rc "$package"
+}
+
+# Fonction pour installer eza
+install_eza() {
+    info_msg "Installation de eza..."
+    execute_command "sudo apt install -y gpg ca-certificates" \
+        "Prérequis pour eza installés." \
+        "Échec de l'installation des prérequis pour eza."
+
+    execute_command "sudo mkdir -p /etc/apt/keyrings && \
+                    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
+                    echo 'deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main' | sudo tee /etc/apt/sources.list.d/gierens.list && \
+                    sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list && \
+                    sudo apt update && \
+                    sudo apt install -y eza" \
+        "eza installé." \
+        "Échec de l'installation de eza."
+
+    add_aliases_to_rc "eza"
+}
+
+# Fonction pour ajouter des alias selon les packages installés
+add_aliases_to_rc() {
+    local package=$1
+    local rc_file="$HOME/.bashrc"
+    [ -f "$HOME/.zshrc" ] && rc_file="$HOME/.zshrc"
+
+    case $package in
+        eza)
+            echo -e '\nalias l="eza --icons"
+alias ls="eza -1 --icons"
+alias ll="eza -lF -a --icons --total-size --no-permissions --no-time --no-user"
+alias la="eza --icons -lgha --group-directories-first"
+alias lt="eza --icons --tree"
+alias lta="eza --icons --tree -lgha"
+alias dir="eza -lF --icons"' >> "$rc_file"
+            ;;
+        bat)
+            echo -e '\nalias cat="bat"' >> "$rc_file"
+            ;;
+        nala)
+            echo -e '\nalias install="nala install -y"
+alias uninstall="nala remove -y"
+alias update="nala update"
+alias upgrade="nala upgrade -y"
+alias search="nala search"
+alias list="nala list --upgradeable"
+alias show="nala show"' >> "$rc_file"
+            ;;
+        # Ajoutez d'autres cas pour les packages supplémentaires si nécessaire
+    esac
+}
+
+# Demander à l'utilisateur s'il souhaite installer des packages supplémentaires
+if $USE_GUM; then
+    if gum confirm "Installer des packages supplémentaires ?"; then
+        optional_packages
+    fi
+else
+    read -p "Installer des packages supplémentaires ? (o/n) : " install_optional_packages
+    if [ "$install_optional_packages" = "o" ]; then
+        optional_packages
+    fi
+fi
+
+# Demander à l'utilisateur s'il souhaite installer GWSL
+if $USE_GUM; then
+    if gum confirm "Voulez-vous installer GWSL ?"; then
+        install_gwsl
+    fi
+else
+    read -p "Voulez-vous installer GWSL ? (o/n) : " install_gwsl_choice
+    if [ "$install_gwsl_choice" = "o" ]; then
+        install_gwsl
+    fi
+fi
 
 info_msg "----------------------------------------"
 ## Configuration de XFCE4
@@ -201,24 +369,42 @@ execute_command "echo 'echo \$DISPLAY' >> $HOME/.bashrc" \
 
 info_msg "----------------------------------------"
 # Personnalisation XFCE
-read -p "Installer la personnalisation XFCE ? (o/n) : " reponse
-
-reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
-
-if [ "$reponse" = "oui" ] || [ "$reponse" = "o" ] || [ "$reponse" = "y" ] || [ "$reponse" = "yes" ]; then
-    if [ -f "$HOME/xfce.sh" ]; then
-        echo "Exécution de la personnalisation XFCE..."
-        "$HOME/xfce.sh"  # Exécution directe du script
-        if [ $? -eq 0 ]; then
-            success_msg "Personnalisation XFCE terminée."
+if $USE_GUM; then
+    if gum confirm "Installer la personnalisation XFCE ?"; then
+        if [ -f "$HOME/xfce.sh" ]; then
+            echo "Exécution de la personnalisation XFCE..."
+            "$HOME/xfce.sh" --gum  # Exécution directe du script avec gum
+            if [ $? -eq 0 ]; then
+                success_msg "Personnalisation XFCE terminée."
+            else
+                error_msg "Erreur lors de l'exécution de la personnalisation XFCE."
+            fi
         else
-            error_msg "Erreur lors de l'exécution de la personnalisation XFCE."
+            error_msg "Erreur : Le fichier xfce.sh n'existe pas."
         fi
     else
-        error_msg "Erreur : Le fichier xfce.sh n'existe pas."
+        info_msg "Installation de la personnalisation XFCE refusée."
     fi
 else
-    info_msg "Installation de la personnalisation XFCE refusée."
+    read -p "Installer la personnalisation XFCE ? (o/n) : " reponse
+
+    reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
+
+    if [ "$reponse" = "oui" ] || [ "$reponse" = "o" ] || [ "$reponse" = "y" ] || [ "$reponse" = "yes" ]; then
+        if [ -f "$HOME/xfce.sh" ]; then
+            echo "Exécution de la personnalisation XFCE..."
+            "$HOME/xfce.sh"  # Exécution directe du script
+            if [ $? -eq 0 ]; then
+                success_msg "Personnalisation XFCE terminée."
+            else
+                error_msg "Erreur lors de l'exécution de la personnalisation XFCE."
+            fi
+        else
+            error_msg "Erreur : Le fichier xfce.sh n'existe pas."
+        fi
+    else
+        info_msg "Installation de la personnalisation XFCE refusée."
+    fi
 fi
 
 info_msg "----------------------------------------"
@@ -227,4 +413,3 @@ info_msg "Lancement de la session XFCE4..."
 execute_command "dbus-launch xfce4-session" \
     "Session XFCE4 lancée." \
     "Échec du lancement de la session XFCE4."
-
