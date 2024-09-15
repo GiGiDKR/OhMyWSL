@@ -2,6 +2,31 @@
 
 USE_GUM=false
 
+# Traitement des arguments en ligne de commande
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --gum|-g) USE_GUM=true ;;
+        *) echo "Option non reconnue : $1" ;;
+    esac
+    shift
+done
+
+# Fonction pour installer gum
+install_gum() {
+    echo "Installation de gum..."
+    sudo mkdir -p /etc/apt/keyrings
+    curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
+    sudo apt update && sudo apt install -y gum
+}
+
+# Installation de gum si nécessaire
+if $USE_GUM; then
+    if ! command -v gum &> /dev/null; then
+        install_gum
+    fi
+fi
+
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
     if $USE_GUM; then
@@ -51,21 +76,6 @@ execute_command() {
         fi
     fi
 }
-
-# Traitement des arguments en ligne de commande
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --gum|-g) USE_GUM=true ;;
-        *) error_msg "Option non reconnue : $1" ;;
-    esac
-    shift
-done
-
-# Installation de gum si nécessaire
-if $USE_GUM && ! command -v gum &> /dev/null; then
-    info_msg "Installation de gum..."
-    sudo apt update && sudo apt install -y gum
-fi
 
 clear
 sudo -v
