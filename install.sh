@@ -23,7 +23,6 @@ install_gum() {
 # Installation de gum si nécessaire
 if $USE_GUM; then
     if ! command -v gum &> /dev/null; then
-        clear
         install_gum
     fi
 fi
@@ -31,7 +30,7 @@ fi
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
     if $USE_GUM; then
-        gum style --foreground 33 "$1"
+        gum style --foreground 33 $1
     else
         echo -e "\e[38;5;33m$1\e[0m"
     fi
@@ -40,7 +39,7 @@ info_msg() {
 # Fonction pour afficher des messages de succès en vert
 success_msg() {
     if $USE_GUM; then
-        gum style --foreground 82 "$1"
+        gum style --foreground 82 $1
     else
         echo -e "\e[38;5;82m$1\e[0m"
     fi
@@ -49,7 +48,7 @@ success_msg() {
 # Fonction pour afficher des messages d'erreur en rouge
 error_msg() {
     if $USE_GUM; then
-        gum style --foreground 196 "$1"
+        gum style --foreground 196 $1
     else
         echo -e "\e[38;5;196m$1\e[0m"
     fi
@@ -62,14 +61,14 @@ execute_command() {
     local error_msg="$3"
 
     if $USE_GUM; then
-        if gum spin --spinner dot --title "$2" -- eval "$command" > /dev/null 2>&1; then
+        if gum spin --spinner dot --title "$2" -- bash -c "$command"; then
             gum style --foreground 82 "✓ $success_msg"
         else
             gum style --foreground 196 "✗ $error_msg"
             return 1
         fi
     else
-        if eval "$command" > /dev/null 2>&1; then
+        if eval "$command"; then
             success_msg "✓ $success_msg"
         else
             error_msg "✗ $error_msg"
