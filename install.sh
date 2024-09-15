@@ -23,6 +23,7 @@ install_gum() {
 # Installation de gum si nécessaire
 if $USE_GUM; then
     if ! command -v gum &> /dev/null; then
+        clear
         install_gum
     fi
 fi
