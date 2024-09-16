@@ -28,10 +28,10 @@ done
 install_gum() {
     bash_banner
     echo "Installation de gum"
-    sudo mkdir -p /etc/apt/keyrings
-    curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
-    echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
-    sudo apt update && sudo apt install -y gum
+    sudo mkdir -p /etc/apt/keyrings > /dev/null 2>&1
+    curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg > /dev/null 2>&1
+    echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list > /dev/null 2>&1
+    sudo apt update -y > /dev/null 2>&1 && sudo apt install -y gum > /dev/null 2>&1
 }
 
 # Installation de gum si nécessaire
