@@ -216,15 +216,23 @@ export PULSE_SERVER=tcp:$(cat /etc/resolv.conf | grep nameserver | awk '{print $
 echo 'echo $DISPLAY'"
 
 add_lines_to_file() {
-    if [ -f "$1" ]; then
-        execute_command "echo \"$lines_to_add\" >> \"$1\"" "Ajout de la configuration à $1"
+    local file="$1"
+    local create_if_missing="$2"
+
+    if [ -f "$file" ]; then
+        execute_command "echo \"$lines_to_add\" >> \"$file\"" "Ajout de la configuration à $file"
     else
-        error_msg "Le fichier $1 n'existe pas"
+        if [ "$create_if_missing" = "true" ]; then
+            execute_command "touch \"$file\"" "Création du fichier $file"
+            execute_command "echo \"$lines_to_add\" >> \"$file\"" "Ajout de la configuration à $file"
+        else
+            error_msg "Le fichier $file n'existe pas"
+        fi
     fi
 }
 
-add_lines_to_file "$bashrc_path"
-[ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path"
+add_lines_to_file "$bashrc_path" "true"
+[ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path" "false"
 
 # separator
 ## Installation de GWSL
