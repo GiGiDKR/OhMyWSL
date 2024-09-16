@@ -39,7 +39,7 @@ execute_command() {
     local error_msg="✗ $info_msg"
 
     if $USE_GUM; then
-        if gum spin --spinner dot --title "$info_msg" -- bash -c "$command"; then
+        if gum spin  --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
             gum style "$success_msg" --foreground 82
         else
             gum style "$error_msg" --foreground 196
@@ -59,9 +59,9 @@ execute_command() {
 # Remplacer les lignes de séparation par une fonction
 separator() {
     if $USE_GUM; then
-        gum style "" "_________________________________________" "" --foreground 33
+        gum style "" --foreground 33
     else
-        echo -e "\e[38;5;33m\n_________________________________________\n\e[0m"
+        echo -e "\e[38;5;33m\e[0m"
     fi
 }
 
