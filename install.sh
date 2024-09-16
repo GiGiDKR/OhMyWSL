@@ -30,7 +30,7 @@ fi
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
     if $USE_GUM; then
-        gum style --foreground 33 "${1//$'\n'/ }"
+        gum style "${1//$'\n'/ }" --foreground 33
     else
         echo -e "\e[38;5;33m$1\e[0m"
     fi
@@ -39,7 +39,7 @@ info_msg() {
 # Fonction pour afficher des messages de succès en vert
 success_msg() {
     if $USE_GUM; then
-        gum style --foreground 82 "$1"
+        gum style "${1//$'\n'/ }" --foreground 82
     else
         echo -e "\e[38;5;82m$1\e[0m"
     fi
@@ -48,7 +48,7 @@ success_msg() {
 # Fonction pour afficher des messages d'erreur en rouge
 error_msg() {
     if $USE_GUM; then
-        gum style --foreground 196 "$1"
+        gum style "${1//$'\n'/ }" --foreground 196
     else
         echo -e "\e[38;5;196m$1\e[0m"
     fi
@@ -61,11 +61,11 @@ execute_command() {
     local error_msg="$3"
 
     if $USE_GUM; then
-        info_msg "$2"
-        if gum spin --spinner dot --title "" -- bash -c "$command"; then
-            gum style --foreground 82 "✓ $success_msg"
+        local info_msg_content=$(info_msg "$2")
+        if gum spin --spinner dot --title "$info_msg_content" -- bash -c "$command"; then
+            gum style "✓ $success_msg" --foreground 82
         else
-            gum style --foreground 196 "✗ $error_msg"
+            gum style "✗ $error_msg" --foreground 196
             return 1
         fi
     else
@@ -82,9 +82,9 @@ execute_command() {
 # Remplacer les lignes de séparation par une fonction
 separator() {
     if $USE_GUM; then
-        gum style --foreground 33 "----------------------------------------"
+        gum style "" "_________________________________________" "" --foreground 33
     else
-        echo -e "\e[38;5;33m----------------------------------------\e[0m"
+        echo -e "\e[38;5;33m\n_________________________________________\n\e[0m"
     fi
 }
 
