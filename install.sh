@@ -232,12 +232,15 @@ install_gwsl() {
         info_msg "Le fichier GWSL-145-STORE.zip existe déjà"
     fi
 
-    execute_command "unzip GWSL-145-STORE.zip && mv GWSL-145-STORE /mnt/c/Users/Public/Desktop/ && rm -rf GWSL-145-STORE*" "Installation de GWSL"
+    execute_command "unzip GWSL-145-STORE.zip" "Extraction de GWSL"
+    execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire WSL2-Distros"
+    execute_command "mv GWSL-145-STORE /mnt/c/WSL2-Distros/GWSL" "Déplacement et renommage de GWSL"
+    execute_command "rm -rf GWSL-145-STORE*" "Nettoyage des fichiers temporaires"
 }
 
 execute_gwsl() {
     info_msg "Lancement de GWSL"
-    execute_command "/mnt/c/Users/Public/Desktop/GWSL-145-STORE/GWSL.exe" "Exécution de GWSL"
+    execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL"
 }
 
 # Fonction pour installer des packages optionnels
