@@ -57,19 +57,19 @@ error_msg() {
 # Fonction pour exécuter une commande et afficher le résultat
 execute_command() {
     local command="$1"
-    local success_msg="$2"
-    local error_msg="$3"
+    local info_msg="$2"
+    local success_msg="$3"
+    local error_msg="$4"
 
     if $USE_GUM; then
-        local info_msg_content=$(info_msg "$2")
-        if gum spin --spinner dot --title "$info_msg_content" -- bash -c "$command"; then
+        if gum spin --spinner dot --title "$info_msg" -- bash -c "$command"; then
             gum style "✓ $success_msg" --foreground 82
         else
             gum style "✗ $error_msg" --foreground 196
             return 1
         fi
     else
-        info_msg "$2"
+        info_msg "$info_msg"
         if eval "$command"; then
             success_msg "✓ $success_msg"
         else
@@ -99,8 +99,8 @@ guiApplications=false
 generateResolvConf = false"
 
 clear
-info_msg "Création du fichier .wslconfig..."
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" \
+    "Création du fichier .wslconfig..." \
     "Le fichier .wslconfig a été créé." \
     "Erreur lors de la création du fichier .wslconfig."
 
@@ -109,21 +109,23 @@ separator
 ## Installation des paquets
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark"
 
-info_msg "Mise à jour des listes de paquets..."
+
 execute_command "sudo apt update -y" \
+    "Mise à jour des listes de paquets..." \
     "Mise à jour des listes de paquets réussie." \
     "Échec de la mise à jour des listes de paquets."
 
-info_msg "Mise à jour des paquets..."
+
 execute_command "sudo apt upgrade -y" \
+    "Mise à jour des paquets..." \
     "Mise à jour des paquets réussie." \
     "Échec de la mise à jour des paquets."
 
 separator
 
 for package in $packages; do
-    info_msg "Installation de $package..."
     execute_command "sudo apt install -y $package" \
+        "Installation de $package..." \
         "$package installé." \
         "Échec de l'installation de $package."
 done
