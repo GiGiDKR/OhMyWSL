@@ -438,4 +438,5 @@ execute_command "dbus-launch xfce4-session" "Démarrage de la session XFCE4"
 
 if [ -f "$zshrc_path" ]; then
     exec zsh
+    dbus-launch xfce4-session
 fi
