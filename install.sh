@@ -110,7 +110,6 @@ execute_command() {
     fi
 }
 
-
 ## separator() {
 #    if $USE_GUM; then
 #        gum style "" --foreground 33
@@ -137,18 +136,15 @@ generateResolvConf = false"
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier .wslconfig"
 
 # separator
-
 ## Installation des paquets
+info_msg "Configuration de système"
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark"
 
-
 execute_command "sudo apt update -y" "Recherche de mises à jour"
-
 
 execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
 
 # separator
-
 configure_noninteractive
 
 for package in $packages; do
@@ -157,6 +153,7 @@ done
 
 # separator
 # Installation de ZSH
+info_msg "Configuration du shell"
 if $USE_GUM; then
     if gum confirm "Installer zsh ?"; then
         execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" "Téléchargement du script"
@@ -391,10 +388,10 @@ fi
 
 # separator
 ## Configuration de XFCE4
-#info_msg "Démarrage de XFCE4..."
+#info_msg "Démarrage de XFCE4
 #execute_command "timeout 5s sudo startxfce4 &> /dev/null" "XFCE4 fermé après 5 secondes"
 
-info_msg "Configuration de XFCE4..."
+info_msg "Configuration de XFCE4"
 execute_command "mkdir -p $HOME/.config/xfce4" "Création du dossier de configuration XFCE4"
 
 execute_command "cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc" "Copie du fichier xinitrc"
