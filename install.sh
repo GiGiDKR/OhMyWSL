@@ -8,11 +8,11 @@ bash_banner() {
     local BANNER="
 ╔═════════════════════════════════════╗
 ║                                     ║
-║              OHMYWSL                ║
+║               OHMYWSL               ║
 ║                                     ║
 ╚═════════════════════════════════════╝"
 
-    echo -e "${COLOR_BLUE}${BANNER}${COLOR_RESET}\n"
+    echo -e "\e[38;5;33m${BANNER}$1\n\e[0m"
 }
 
 # Traitement des arguments en ligne de commande
@@ -52,7 +52,7 @@ show_banner() {
             --align center \
             --width 35 \
             --margin "1 1 1 0" \
-            "" "OHMYTERMUX" ""
+            "" "OHMYWSL ""
     else
         bash_banner
     fi
