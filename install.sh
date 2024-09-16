@@ -52,7 +52,7 @@ show_banner() {
             --align center \
             --width 35 \
             --margin "1 1 1 0" \
-            "" "OHMYWSL ""
+            "" "OHMYWSL" ""
     else
         bash_banner
     fi
@@ -257,12 +257,12 @@ optional_packages() {
 
     for choice in $packages; do
         case $choice in
-            1) install_package "nala" ;;
-            2) install_eza ;;
-            3) install_package "lfm" ;;
-            4) install_package "bat" ;;
-            5) install_package "fzf" ;;
-            6)
+            nala|1) install_package "nala" ;;
+            eza|2) install_eza ;;
+            lfm|3) install_package "lfm" ;;
+            bat|4) install_package "bat" ;;
+            fzf|5) install_package "fzf" ;;
+            "Tout installer"|6)
                 install_package "nala"
                 install_eza
                 install_package "lfm"
