@@ -93,7 +93,7 @@ execute_command() {
     local error_msg="✗ $info_msg"
 
     if $USE_GUM; then
-        if gum spin  --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
+        if gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "DEBIAN_FRONTEND=noninteractive $command"; then
             gum style "$success_msg" --foreground 82
         else
             gum style "$error_msg" --foreground 196
@@ -101,7 +101,7 @@ execute_command() {
         fi
     else
         info_msg "$info_msg"
-        if eval "$command"; then
+        if DEBIAN_FRONTEND=noninteractive eval "$command"; then
             success_msg "$success_msg"
         else
             error_msg "$error_msg"
@@ -118,6 +118,11 @@ execute_command() {
 #        echo -e "\e[38;5;33m\e[0m"
 #    fi
 #}
+
+configure_noninteractive() {
+    sudo debconf-set-selections <<< "gdm3 shared/default-x-display-manager select gdm3"
+    export DEBIAN_FRONTEND=noninteractive
+}
 
 sudo -v
 show_banner
@@ -144,8 +149,10 @@ execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
 
 # separator
 
+configure_noninteractive
+
 for package in $packages; do
-    execute_command "sudo apt install -y $package" "Installation de $package"
+    execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
 done
 
 # separator
