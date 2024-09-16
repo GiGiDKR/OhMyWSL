@@ -119,10 +119,7 @@ execute_command() {
 #    fi
 #}
 
-clear
-
 sudo -v
-
 show_banner
 
 # Création du fichier .wslconfig
