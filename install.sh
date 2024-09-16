@@ -232,7 +232,12 @@ install_gwsl() {
         info_msg "Le fichier GWSL-145-STORE.zip existe déjà"
     fi
 
-    execute_command "unzip GWSL-145-STORE.zip && mv GWSL-145-STORE/GWSL.exe /mnt/c/Users/Public/Desktop/ && rm -rf GWSL-145-STORE*" "Installation de GWSL"
+    execute_command "unzip GWSL-145-STORE.zip && mv GWSL-145-STORE /mnt/c/Users/Public/Desktop/ && rm -rf GWSL-145-STORE*" "Installation de GWSL"
+}
+
+execute_gwsl() {
+    info_msg "Lancement de GWSL"
+    execute_command "/mnt/c/Users/Public/Desktop/GWSL-145-STORE/GWSL.exe" "Exécution de GWSL"
 }
 
 # Fonction pour installer des packages optionnels
@@ -432,11 +437,9 @@ else
     fi
 fi
 
+
+execute_gwsl
+
 # separator
 ## Lancement de la session XFCE4
 execute_command "dbus-launch xfce4-session" "Démarrage de la session XFCE4"
-
-if [ -f "$zshrc_path" ]; then
-    exec zsh
-    dbus-launch xfce4-session
-fi
