@@ -199,7 +199,7 @@ if [ ! -f "$resolv_conf" ]; then
     exit 1
 fi
 
-execute_command "sudo sed -i \"s/^nameserver.*/& ${ip_address}:0.0/\" \"$resolv_conf\"" "Mise à jour du fichier $resolv_conf"
+execute_command "sudo sed -i \"s/^nameserver.*/nameserver ${ip_address}/\" \"$resolv_conf\"" "Mise à jour du fichier $resolv_conf"
 
 # separator
 ## Configuration des fichiers de shell
@@ -208,8 +208,9 @@ zshrc_path="$HOME/.zshrc"
 
 lines_to_add='
 export DISPLAY=$(grep -m 1 nameserver /etc/resolv.conf | awk "{print \$2}"):0.0
-export PULSE_SERVER=tcp:$(grep -m 1 nameserver /etc/resolv.conf | awk "{print \$2}")
-echo $DISPLAY'
+export PULSE_SERVER=tcp:$(grep -m 1 nameserver /etc/resolv.conf | awk "{print \$2}")'
+#echo $DISPLAY'
+
 
 add_lines_to_file() {
     if [ -f "$1" ]; then
@@ -341,10 +342,10 @@ alias g="git"
 alias gc="git clone"
 alias push="git pull && git add . && git commit -m '\''mobile push'\'' && git push"'
 
-echo -e "$aliases" >> "$bashrc_path"
+echo "$aliases" >> "$bashrc_path"
 
 if [ -f "$zshrc_path" ]; then
-    echo -e "$aliases" >> "$zshrc_path"
+    echo "$aliases" >> "$zshrc_path"
 fi
 }
 
@@ -392,7 +393,7 @@ execute_command "sudo mkdir -p /run/user/$UID" "Création du dossier /run/user/$
 
 execute_command "sudo chown -R $UID:$UID /run/user/$UID/" "Modification du propriétaire du dossier /run/user/$UID"
 
-execute_command "echo 'echo \$DISPLAY' >> $HOME/.bashrc" "Ajout de l'affichage de DISPLAY à .bashrc"
+execute_command "echo \$DISPLAY >> $HOME/.bashrc" "Ajout de l'affichage de DISPLAY à .bashrc"
 
 # separator
 # Personnalisation XFCE
@@ -435,3 +436,7 @@ fi
 # separator
 ## Lancement de la session XFCE4
 execute_command "dbus-launch xfce4-session" "Démarrage de la session XFCE4"
+
+if [ -f "$zshrc_path" ]; then
+    exec zsh
+fi

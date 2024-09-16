@@ -74,7 +74,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # separator
-execute_command "sudo apt install -y zsh" "Installation de zsh"
+execute_command "sudo apt install -y zsh wget curl git unzip" "Installation des pré-requis et de zsh"
 
 # separator
 # Installation de Oh My Zsh
@@ -88,9 +88,8 @@ else
 fi
 
 if [ "$install_oh_my_zsh" = true ]; then
-    execute_command "sudo apt install -y wget curl git unzip" "Installation des pré-requis"
     execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git \"$HOME/.oh-my-zsh\" --quiet" "Installation de Oh My Zsh"
-    execute_command "cp \"$HOME/.oh-my-zsh/templates/zshrc.zsh-template\" \"$ZSHRC\"" "Copie du fichier zshrc"
+    execute_command "cp \"$HOME/.oh-my-zsh/templates/zshrc.zsh-template\" \"$ZSHRC\"" "Copie du fichier .zshrc"
 fi
 
 [ -f "$ZSHRC" ] && cp "$ZSHRC" "${ZSHRC}.bak"
