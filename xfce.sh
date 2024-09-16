@@ -32,23 +32,23 @@ error_msg() {
 # Fonction pour exécuter une commande et afficher le résultat
 execute_command() {
     local command="$1"
-    local success_msg="$2"
-    local error_msg="$3"
+    local info_msg="$2"
+    local success_msg="✓ $info_msg"
+    local error_msg="✗ $info_msg"
 
     if $USE_GUM; then
-        local info_msg_content=$(info_msg "$2")
-        if gum spin --spinner dot --title "$info_msg_content" -- bash -c "$command"; then
-            gum style "✓ $success_msg" --foreground 82
+        if gum spin --spinner dot --title "$info_msg" -- bash -c "$command"; then
+            gum style "$success_msg" --foreground 82
         else
-            gum style "✗ $error_msg" --foreground 196
+            gum style "$error_msg" --foreground 196
             return 1
         fi
     else
-        info_msg "$2"
+        info_msg "$info_msg"
         if eval "$command"; then
-            success_msg "✓ $success_msg"
+            success_msg "$success_msg"
         else
-            error_msg "✗ $error_msg"
+            error_msg "$error_msg"
             return 1
         fi
     fi
@@ -100,40 +100,19 @@ separator
 
 if [ "$download_wallpaper" = true ]; then
     ## Téléchargement et installation du fond d'écran
-    info_msg "Téléchargement du fond d'écran..."
-    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png" \
-        "Fond d'écran téléchargé." \
-        "Échec du téléchargement du fond d'écran."
-
-    execute_command "sudo mkdir -p /usr/share/backgrounds/xfce/" \
-        "Dossier de fond d'écran créé." \
-        "Échec de la création du dossier de fond d'écran."
-
-    execute_command "sudo mv waves.png /usr/share/backgrounds/xfce/" \
-        "Fond d'écran installé." \
-        "Échec de l'installation du fond d'écran."
+    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png" "Téléchargement du fond d'écran"
+#    execute_command "sudo mkdir -p /usr/share/backgrounds/xfce/" "Création du dossier de fond d'écran"
+    execute_command "sudo mv waves.png /usr/share/backgrounds/xfce/" "Installation du fond d'écran"
 fi
 
 if [ "$install_whitesur" = true ]; then
     ## Installation de WhiteSur-Dark
-    info_msg "Installation WhiteSur-Dark..."
-    execute_command "wget https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" \
-        "Archive WhiteSur-Dark téléchargée." \
-        "Échec du téléchargement de WhiteSur-Dark."
-
-    execute_command "unzip 2024.09.02.zip && tar -xf WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz && sudo mv WhiteSur-Dark/ /usr/share/themes/ && sudo rm -rf WhiteSur* && sudo rm 2024.09.02.zip" \
-        "WhiteSur-Dark installé." \
-        "Échec de l'installation de WhiteSur-Dark."
+    execute_command "wget https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" "Téléchargement de WhiteSur-Dark"
+    execute_command "unzip 2024.09.02.zip && tar -xf WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz && sudo mv WhiteSur-Dark/ /usr/share/themes/ && sudo rm -rf WhiteSur* && sudo rm 2024.09.02.zip" "Installation de WhiteSur-Dark"
 fi
 
 if [ "$install_fluent" = true ]; then
     ## Installation de Fluent Cursor
-    info_msg "Installation Fluent Cursor..."
-    execute_command "wget https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" \
-        "Archive Fluent Cursor téléchargée." \
-        "Échec du téléchargement de Fluent Cursor."
-
-    execute_command "unzip 2024-02-25.zip && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/ && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/ && sudo rm -rf $HOME/Fluent* && sudo rm 2024-02-25.zip" \
-        "Fluent Cursor installé." \
-        "Échec de l'installation de Fluent Cursor."
+    execute_command "wget https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" "Téléchargement de Fluent Cursor"
+    execute_command "unzip 2024-02-25.zip && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/ && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/ && sudo rm -rf $HOME/Fluent* && sudo rm 2024-02-25.zip" "Installation de Fluent Cursor"
 fi
