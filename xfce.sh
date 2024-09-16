@@ -54,14 +54,13 @@ execute_command() {
     fi
 }
 
-# Remplacer les lignes de séparation par une fonction
-separator() {
-    if $USE_GUM; then
-        gum style "" --foreground 33
-    else
-        echo -e "\e[38;5;33m\e[0m"
-    fi
-}
+# separator() {
+#    if $USE_GUM; then
+#        gum style "" --foreground 33
+#    else
+#        echo -e "\e[38;5;33m\e[0m"
+#    fi
+#}
 
 # Traitement des arguments en ligne de commande
 while [[ $# -gt 0 ]]; do
@@ -96,7 +95,7 @@ else
     [[ $response =~ ^[Oo]$ ]] && install_fluent=true
 fi
 
-separator
+# separator
 
 if [ "$download_wallpaper" = true ]; then
     ## Téléchargement et installation du fond d'écran

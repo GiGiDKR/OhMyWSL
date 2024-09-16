@@ -2,6 +2,19 @@
 
 USE_GUM=false
 
+# Fonction pour afficher le banner en mode basique
+bash_banner() {
+    clear
+    local BANNER="
+╔═════════════════════════════════════╗
+║                                     ║
+║              OHMYWSL                ║
+║                                     ║
+╚═════════════════════════════════════╝"
+
+    echo -e "${COLOR_BLUE}${BANNER}${COLOR_RESET}\n"
+}
+
 # Traitement des arguments en ligne de commande
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -26,6 +39,23 @@ if $USE_GUM; then
         install_gum
     fi
 fi
+
+# Fonction pour afficher le banner
+show_banner() {
+    clear
+    if $USE_GUM; then
+        gum style \
+            --foreground 33 \
+            --border-foreground 33 \
+            --border double \
+            --align center \
+            --width 35 \
+            --margin "1 1 1 0" \
+            "" "OHMYTERMUX" ""
+    else
+        bash_banner
+    fi
+}
 
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
@@ -79,17 +109,20 @@ execute_command() {
     fi
 }
 
-# Remplacer les lignes de séparation par une fonction
-separator() {
-    if $USE_GUM; then
-        gum style "" --foreground 33
-    else
-        echo -e "\e[38;5;33m\e[0m"
-    fi
-}
+
+## separator() {
+#    if $USE_GUM; then
+#        gum style "" --foreground 33
+#    else
+#        echo -e "\e[38;5;33m\e[0m"
+#    fi
+#}
 
 clear
+
 sudo -v
+
+show_banner
 
 # Création du fichier .wslconfig
 wslconfig_file="/mnt/c/Users/$USER/.wslconfig"
@@ -101,7 +134,7 @@ generateResolvConf = false"
 clear
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier .wslconfig"
 
-separator
+# separator
 
 ## Installation des paquets
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark"
@@ -112,13 +145,13 @@ execute_command "sudo apt update -y" "Recherche de mises à jour"
 
 execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
 
-separator
+# separator
 
 for package in $packages; do
     execute_command "sudo apt install -y $package" "Installation de $package"
 done
 
-separator
+# separator
 # Installation de ZSH
 if $USE_GUM; then
     if gum confirm "Installer zsh ?"; then
@@ -152,7 +185,7 @@ else
     fi
 fi
 
-separator
+# separator
 ## Configuration réseau
 info_msg "Configuration du réseau"
 ip_address=$(ip route | grep default | awk '{print $3; exit;}')
@@ -171,7 +204,7 @@ fi
 
 execute_command "sudo sed -i \"s/^nameserver.*/& ${ip_address}:0.0/\" \"$resolv_conf\"" "Mise à jour du fichier $resolv_conf"
 
-separator
+# separator
 ## Configuration des fichiers de shell
 bashrc_path="$HOME/.bashrc"
 zshrc_path="$HOME/.zshrc"
@@ -192,7 +225,7 @@ add_lines_to_file() {
 add_lines_to_file "$bashrc_path"
 [ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path"
 
-separator
+# separator
 ## Installation de GWSL
 # Fonction pour installer GWSL
 install_gwsl() {
@@ -344,7 +377,7 @@ else
     fi
 fi
 
-separator
+# separator
 ## Configuration de XFCE4
 #info_msg "Démarrage de XFCE4..."
 #execute_command "timeout 5s sudo startxfce4 &> /dev/null" "XFCE4 fermé après 5 secondes"
@@ -364,7 +397,7 @@ execute_command "sudo chown -R $UID:$UID /run/user/$UID/" "Modification du propr
 
 execute_command "echo 'echo \$DISPLAY' >> $HOME/.bashrc" "Ajout de l'affichage de DISPLAY à .bashrc"
 
-separator
+# separator
 # Personnalisation XFCE
 if $USE_GUM; then
     if gum confirm "Installer la personnalisation XFCE ?"; then
@@ -402,6 +435,6 @@ else
     fi
 fi
 
-separator
+# separator
 ## Lancement de la session XFCE4
 execute_command "dbus-launch xfce4-session" "Démarrage de la session XFCE4"
