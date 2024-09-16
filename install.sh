@@ -206,11 +206,10 @@ execute_command "sudo sed -i \"s/^nameserver.*/nameserver ${ip_address}/\" \"$re
 bashrc_path="$HOME/.bashrc"
 zshrc_path="$HOME/.zshrc"
 
-lines_to_add='
-export DISPLAY=$(grep -m 1 nameserver /etc/resolv.conf | awk "{print \$2}"):0.0
-export PULSE_SERVER=tcp:$(grep -m 1 nameserver /etc/resolv.conf | awk "{print \$2}")'
-#echo $DISPLAY'
-
+lines_to_add="
+export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}'):0.0'
+export PULSE_SERVER=tcp:$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}')
+echo 'echo $DISPLAY'"
 
 add_lines_to_file() {
     if [ -f "$1" ]; then
