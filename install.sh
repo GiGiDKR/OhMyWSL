@@ -241,28 +241,28 @@ install_gwsl() {
 # Fonction pour installer des packages optionnels
 optional_packages() {
     if $USE_GUM; then
-        PACKAGES=$(gum choose --no-limit --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer")
+        packages=$(gum choose --no-limit --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer")
     else
-        info_msg "Sélectionnez les packages à installer (séparés par des espaces) :"
-        info_msg ""    
+        info_msg "Sélectionnez les packages à installer :"
+        echo  
         info_msg "1) nala"
         info_msg "2) eza"
         info_msg "3) lfm"
         info_msg "4) bat"
         info_msg "5) fzf"
         info_msg "6) Tout installer"
-        info_msg ""
-        read -p "Entrez les numéros des packages : " package_choices
+        echo
+        read -p "Entrez les numéros des packages (SÉPARÉS PAR DES ESPACES) : " package_choices
     fi
 
-    for choice in $PACKAGES; do
+    for choice in $packages; do
         case $choice in
             1) install_package "nala" ;;
             2) install_eza ;;
             3) install_package "lfm" ;;
             4) install_package "bat" ;;
             5) install_package "fzf" ;;
-            "Tout installer")
+            6)
                 install_package "nala"
                 install_eza
                 install_package "lfm"
