@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 USE_GUM=false
 
@@ -37,7 +38,7 @@ execute_command() {
     local error_msg="✗ $info_msg"
 
     if $USE_GUM; then
-        if gum spin  --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
+        if gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
             gum style "$success_msg" --foreground 82
         else
             gum style "$error_msg" --foreground 196
@@ -54,55 +55,62 @@ execute_command() {
     fi
 }
 
-# Traitement des arguments en ligne de commande
+# Traitement des arguments de ligne de commande
 while [[ $# -gt 0 ]]; do
     case $1 in
         --gum|-g) USE_GUM=true ;;
-        *) error_msg "Option non reconnue : $1" ;;
+        *) error_msg "Option non reconnue : $1" >&2; exit 1 ;;
     esac
     shift
 done
 
-# Modification des interactions utilisateur pour utiliser gum si nécessaire
+# Fonction pour télécharger et installer un composant
+download_and_install() {
+    local url="$1"
+    local filename="$2"
+    local install_command="$3"
+    local component_name="$4"
+
+    execute_command "wget -q $url -O $filename" "Téléchargement de $component_name"
+    execute_command "$install_command" "Installation de $component_name"
+}
+
+# Demander à l'utilisateur les options de personnalisation
 if $USE_GUM; then
-    if gum confirm "Voulez-vous installer le fond d'écran ?"; then
-        download_wallpaper=true
-    fi
-    
-    if gum confirm "Voulez-vous installer WhiteSur-Dark ?"; then
-        install_whitesur=true
-    fi
-    
-    if gum confirm "Voulez-vous installer Fluent Cursor ?"; then
-        install_fluent=true
-    fi
+    download_wallpaper=$(gum confirm "Voulez-vous installer le fond d'écran ?" && echo true || echo false)
+    install_whitesur=$(gum confirm "Voulez-vous installer WhiteSur-Dark ?" && echo true || echo false)
+    install_fluent=$(gum confirm "Voulez-vous installer Fluent Cursor ?" && echo true || echo false)
 else
     read -p "Voulez-vous installer le fond d'écran ? (o/n) : " response
-    [[ $response =~ ^[Oo]$ ]] && download_wallpaper=true
+    [[ $response =~ ^[Oo]$ ]] && download_wallpaper=true || download_wallpaper=false
 
     read -p "Voulez-vous installer WhiteSur-Dark ? (o/n) : " response
-    [[ $response =~ ^[Oo]$ ]] && install_whitesur=true
+    [[ $response =~ ^[Oo]$ ]] && install_whitesur=true || install_whitesur=false
 
     read -p "Voulez-vous installer Fluent Cursor ? (o/n) : " response
-    [[ $response =~ ^[Oo]$ ]] && install_fluent=true
+    [[ $response =~ ^[Oo]$ ]] && install_fluent=true || install_fluent=false
 fi
 
+# Télécharger et installer le fond d'écran
 if [ "$download_wallpaper" = true ]; then
-    ## Téléchargement et installation du fond d'écran
-    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png" "Téléchargement du fond d'écran"
-    # TODO : Supprimer le code ci-dessous
-#    execute_command "sudo mkdir -p /usr/share/backgrounds/xfce/" "Création du dossier de fond d'écran"
-    execute_command "sudo mv waves.png /usr/share/backgrounds/xfce/" "Installation du fond d'écran"
+    download_and_install "https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png" \
+                        "waves.png" \
+                        "sudo mv waves.png /usr/share/backgrounds/xfce/" \
+                        "fond d'écran"
 fi
 
+# Télécharger et installer WhiteSur-Dark
 if [ "$install_whitesur" = true ]; then
-    ## Installation de WhiteSur-Dark
-    execute_command "wget https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" "Téléchargement de WhiteSur-Dark"
-    execute_command "unzip 2024.09.02.zip && tar -xf WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz && sudo mv WhiteSur-Dark/ /usr/share/themes/ && sudo rm -rf WhiteSur* && sudo rm 2024.09.02.zip" "Installation de WhiteSur-Dark"
+    download_and_install "https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" \
+                        "whitesur.zip" \
+                        "unzip -q whitesur.zip && tar -xf WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz && sudo mv WhiteSur-Dark/ /usr/share/themes/ && rm -rf WhiteSur* whitesur.zip" \
+                        "WhiteSur-Dark"
 fi
 
+# Télécharger et installer Fluent Cursor
 if [ "$install_fluent" = true ]; then
-    ## Installation de Fluent Cursor
-    execute_command "wget https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" "Téléchargement de Fluent Cursor"
-    execute_command "unzip 2024-02-25.zip && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/ && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/ && sudo rm -rf $HOME/Fluent* && sudo rm 2024-02-25.zip" "Installation de Fluent Cursor"
+    download_and_install "https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" \
+                        "fluent.zip" \
+                        "unzip -q fluent.zip && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/ && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/ && rm -rf Fluent* fluent.zip" \
+                        "Fluent Cursor"
 fi
