@@ -65,7 +65,7 @@ done
 
 # Modification des interactions utilisateur pour utiliser gum si nécessaire
 if $USE_GUM; then
-    if gum confirm "Voulez-vous télécharger et installer le fond d'écran ?"; then
+    if gum confirm "Voulez-vous installer le fond d'écran ?"; then
         download_wallpaper=true
     fi
     
@@ -77,7 +77,7 @@ if $USE_GUM; then
         install_fluent=true
     fi
 else
-    read -p "Voulez-vous télécharger et installer le fond d'écran ? (o/n) : " response
+    read -p "Voulez-vous installer le fond d'écran ? (o/n) : " response
     [[ $response =~ ^[Oo]$ ]] && download_wallpaper=true
 
     read -p "Voulez-vous installer WhiteSur-Dark ? (o/n) : " response
@@ -90,6 +90,7 @@ fi
 if [ "$download_wallpaper" = true ]; then
     ## Téléchargement et installation du fond d'écran
     execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png" "Téléchargement du fond d'écran"
+    # TODO : Supprimer le code ci-dessous
 #    execute_command "sudo mkdir -p /usr/share/backgrounds/xfce/" "Création du dossier de fond d'écran"
     execute_command "sudo mv waves.png /usr/share/backgrounds/xfce/" "Installation du fond d'écran"
 fi

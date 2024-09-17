@@ -126,7 +126,7 @@ guiApplications=false
 [network]
 generateResolvConf = false"
 
-execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier .wslconfig"
+execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier Wslconfig"
 
 ## Installation des paquets
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark"
@@ -145,8 +145,8 @@ done
 info_msg "Configuration du shell"
 if $USE_GUM; then
     if gum confirm "Installer zsh ?"; then
-        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" "Téléchargement du script"
-        execute_command "chmod +x zsh.sh" "Modification des permissions du script"
+        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" "Téléchargement du script zsh"
+        execute_command "chmod +x zsh.sh" "Modification des permissions"
         "$HOME/zsh.sh" --gum  # Exécution directe du script avec gum
         if [ $? -eq 0 ]; then
             success_msg "✓ Installation de zsh"
@@ -154,7 +154,7 @@ if $USE_GUM; then
             error_msg "✗ Installation de zsh"
         fi
     else
-        info_msg "Installation de zsh refusée"
+        info_msg "𐄂 Installation de zsh refusée"
     fi
 else
     read -p "Installer zsh ? (o/n) : " reponse_zsh
@@ -162,8 +162,8 @@ else
     reponse_zsh=$(echo "$reponse_zsh" | tr '[:upper:]' '[:lower:]')
 
     if [ "$reponse_zsh" = "oui" ] || [ "$reponse_zsh" = "o" ] || [ "$reponse_zsh" = "y" ] || [ "$reponse_zsh" = "yes" ]; then
-        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" "Téléchargement du script"
-        execute_command "chmod +x zsh.sh" "Modification des permissions du script"
+        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" "Téléchargement du script zsh"
+        execute_command "chmod +x zsh.sh" "Modification des permissions"
         "$HOME/zsh.sh"  # Exécution directe du script
         if [ $? -eq 0 ]; then
             success_msg " ✓ Installation de zsh"
@@ -171,7 +171,7 @@ else
             error_msg "✗ Installation de zsh"
         fi
     else
-        info_msg "Installation de zsh refusée"
+        info_msg "𐄂 Installation de zsh refusée"
     fi
 fi
 
@@ -180,38 +180,40 @@ info_msg "Configuration du réseau"
 ip_address=$(ip route | grep default | awk '{print $3; exit;}')
 
 if [ -z "$ip_address" ]; then
-    error_msg "Erreur : Impossible de récupérer l'adresse IP"
+    error_msg "Impossible de récupérer l'adresse IP"
     exit 1
 fi
 
 resolv_conf="/etc/resolv.conf"
 
 if [ ! -f "$resolv_conf" ]; then
-    error_msg "Erreur : Le fichier $resolv_conf n'existe pas"
+    error_msg "Le fichier $resolv_conf n'existe pas"
     exit 1
 fi
 
-execute_command "sudo sed -i \"s/^nameserver.*/nameserver ${ip_address}/\" \"$resolv_conf\"" "Mise à jour du fichier $resolv_conf"
+execute_command "sudo sed -i \"s/^nameserver.*/nameserver ${ip_address}/\" \"$resolv_conf\"" "Mise à jour du fichier Resolv_conf"
 
 ## Configuration des fichiers de shell
 bashrc_path="$HOME/.bashrc"
 zshrc_path="$HOME/.zshrc"
 
 lines_to_add="
-export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}'):0.0'
+export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}'):0.0
 export PULSE_SERVER=tcp:$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}')
-echo 'echo $DISPLAY'"
+echo $DISPLAY
+
+"
 
 add_lines_to_file() {
     local file="$1"
     local create_if_missing="$2"
 
     if [ -f "$file" ]; then
-        execute_command "echo \"$lines_to_add\" >> \"$file\"" "Ajout de la configuration à $file"
+        execute_command "echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $file"
     else
         if [ "$create_if_missing" = "true" ]; then
             execute_command "touch \"$file\"" "Création du fichier $file"
-            execute_command "echo \"$lines_to_add\" >> \"$file\"" "Ajout de la configuration à $file"
+            execute_command "echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $file"
         else
             error_msg "Le fichier $file n'existe pas"
         fi
@@ -222,7 +224,6 @@ add_lines_to_file "$bashrc_path" "true"
 [ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path" "false"
 
 ## Installation de GWSL
-# Fonction pour installer GWSL
 install_gwsl() {
     if [ ! -f "GWSL-145-STORE.zip" ]; then
         execute_command "wget https://github.com/Opticos/GWSL-Source/releases/download/v1.4.5/GWSL-145-STORE.zip" "Téléchargement de GWSL"
@@ -231,13 +232,13 @@ install_gwsl() {
     fi
 
     execute_command "unzip GWSL-145-STORE.zip" "Extraction de GWSL"
-    execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire WSL2-Distros"
-    execute_command "mv GWSL-145-STORE /mnt/c/WSL2-Distros/GWSL" "Déplacement et renommage de GWSL"
+    execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire C:\WSL2-Distros"
+    execute_command "mv GWSL-145-STORE /mnt/c/WSL2-Distros/GWSL" "Déplacement de GWSL dans le répertoire"
     execute_command "rm -rf GWSL-145-STORE*" "Nettoyage des fichiers temporaires"
 }
 
 execute_gwsl() {
-    info_msg "Lancement de GWSL"
+    info_msg "❯ Lancement de GWSL"
     execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL"
 }
 
@@ -380,31 +381,27 @@ else
     fi
 fi
 
-
+# TODO : Décommenter le code ci-dessous pour démarrer XFCE4
 #info_msg "Démarrage de XFCE4
 #execute_command "timeout 5s sudo startxfce4 &> /dev/null" "XFCE4 fermé après 5 secondes"
 
 ## Configuration de XFCE4
 info_msg "Configuration de XFCE4"
+
 execute_command "mkdir -p $HOME/.config/xfce4" "Création du dossier de configuration XFCE4"
-
-execute_command "cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc" "Copie du fichier xinitrc"
-
-execute_command "touch $HOME/.ICEauthority" "Création du fichier .ICEauthority"
-
-execute_command "chmod 600 $HOME/.ICEauthority" "Modification des permissions du fichier .ICEauthority"
-
-execute_command "sudo mkdir -p /run/user/$UID" "Création du dossier /run/user/$UID"
-
-execute_command "sudo chown -R $UID:$UID /run/user/$UID/" "Modification du propriétaire du dossier /run/user/$UID"
-
-execute_command "echo \$DISPLAY >> $HOME/.bashrc" "Ajout de l'affichage de DISPLAY à .bashrc"
+execute_command "cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc" "Copie de fichiers"
+execute_command "touch $HOME/.ICEauthority" "Création de fichiers"
+execute_command "chmod 600 $HOME/.ICEauthority" "Modification des permissions des fichiers"
+execute_command "sudo mkdir -p /run/user/$UID" "Création d'un dossier temporaire"
+execute_command "sudo chown -R $UID:$UID /run/user/$UID/" "Modification des permissions du dossier"
+# TODO Supprimer le code ci-dessous 
+#execute_command "echo \$DISPLAY >> $HOME/.bashrc" "Ajout de l'affichage de $DISPLAY au prompt"
 
 # Personnalisation XFCE
 if $USE_GUM; then
     if gum confirm "Installer la personnalisation XFCE ?"; then
         if [ -f "$HOME/xfce.sh" ]; then
-            "$HOME/xfce.sh" --gum  # Exécution directe du script avec gum
+            "$HOME/xfce.sh" --gum
             if [ $? -eq 0 ]; then
                 success_msg "✓ Personnalisation XFCE"
             else
@@ -414,7 +411,7 @@ if $USE_GUM; then
             error_msg "Le fichier xfce.sh n'existe pas"
         fi
     else
-        info_msg "Personnalisation XFCE refusée"
+        info_msg "𐄂 Personnalisation XFCE refusée"
     fi
 else
     read -p "Installer la personnalisation XFCE ? (o/n) : " reponse
@@ -433,9 +430,13 @@ else
             error_msg "Le fichier xfce.sh n'existe pas"
         fi
     else
-        info_msg "Personnalisation XFCE refusée"
+        info_msg "𐄂 Personnalisation XFCE refusée"
     fi
 fi
 
 execute_gwsl
-execute_command "dbus-launch xfce4-session" "Démarrage de la session XFCE4"
+execute_command "dbus-launch xfce4-session" "❯ Lancement de la session XFCE4"
+
+rm -f zsh.sh xfce.sh
+rm -- "$0"
+exit 0

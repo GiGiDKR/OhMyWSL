@@ -65,25 +65,26 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-execute_command "sudo apt install -y zsh wget curl git unzip" "Installation des pré-requis et de zsh"
+execute_command "sudo apt install -y zsh wget curl git unzip" "Installation de zsh"
 
 # Installation de Oh My Zsh
 if $USE_GUM; then
-    if gum confirm "Voulez-vous installer Oh My Zsh ?"; then
+    if gum confirm "Voulez-vous installer Oh-My-Zsh ?"; then
         install_oh_my_zsh=true
     fi
 else
-    read -p "Voulez-vous installer Oh My Zsh ? (o/n) : " choice
+    read -p "Voulez-vous installer Oh-My-Zsh ? (o/n) : " choice
     [[ $choice =~ ^[Oo]$ ]] && install_oh_my_zsh=true
 fi
 
 if [ "$install_oh_my_zsh" = true ]; then
-    execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git \"$HOME/.oh-my-zsh\" --quiet" "Installation de Oh My Zsh"
-    execute_command "cp \"$HOME/.oh-my-zsh/templates/zshrc.zsh-template\" \"$ZSHRC\"" "Copie du fichier .zshrc"
+    execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git \"$HOME/.oh-my-zsh\" --quiet" "Installation de Oh-My-Zsh"
+    # TODO : Supprimer le code ci-dessous
+    #execute_command "cp \"$HOME/.oh-my-zsh/templates/zshrc.zsh-template\" \"$ZSHRC\"" "Copie du fichier .zshrc"
 fi
 
 [ -f "$ZSHRC" ] && cp "$ZSHRC" "${ZSHRC}.bak"
-execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/zshrc >/dev/null 2>&1" "Téléchargement de la configuration zshrc"
+execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/zshrc >/dev/null 2>&1" "Configuraion de zshrc"
 
 # Installation de PowerLevel10k
 if $USE_GUM; then
@@ -97,7 +98,7 @@ fi
 
 if [ "$install_powerlevel10k" = true ]; then
     execute_command "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \"$HOME/.oh-my-zsh/custom/themes/powerlevel10k\" --quiet" "Installation de PowerLevel10k"
-    execute_command "sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/' \"$ZSHRC\"" "Configuration du thème PowerLevel10k"
+    execute_command "sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/' \"$ZSHRC\"" "Configuration de PowerLevel10k"
 
     if $USE_GUM; then
         if gum confirm "Installer le prompt OhMyTermux ?"; then
@@ -109,11 +110,11 @@ if [ "$install_powerlevel10k" = true ]; then
     fi
 
     if [ "$install_p10k" = true ]; then
-        execute_command "curl -fLo \"$HOME/.p10k.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/p10k.zsh" "Téléchargement du prompt PowerLevel10k"
+        execute_command "curl -fLo \"$HOME/.p10k.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/p10k.zsh" "Téléchargement du prompt OhMyTermux"
         echo -e "\n# To customize prompt, run \`p10k configure\` or edit ~/.p10k.zsh." >> "$ZSHRC"
         echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
     else
-        info_msg "Vous pouvez configurer le prompt PowerLevel10k manuellement en exécutant 'p10k configure' après l'installation."
+        info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
     fi
 fi
 
