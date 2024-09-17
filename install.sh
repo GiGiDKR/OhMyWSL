@@ -191,7 +191,7 @@ if [ ! -f "$resolv_conf" ]; then
     exit 1
 fi
 
-execute_command "sudo sed -i \"s/^nameserver.*/nameserver ${ip_address}/\" \"$resolv_conf\"" "Mise à jour du fichier Resolv_conf"
+execute_command "sudo sed -i \"s/^nameserver.*/nameserver ${ip_address}/\" /etc/resolv.conf" "Mise à jour du fichier resolv.conf"
 
 ## Configuration des fichiers de shell
 bashrc_path="$HOME/.bashrc"
@@ -200,7 +200,6 @@ zshrc_path="$HOME/.zshrc"
 lines_to_add="
 export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}'):0.0
 export PULSE_SERVER=tcp:$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}')
-echo $DISPLAY
 
 "
 
@@ -225,16 +224,20 @@ add_lines_to_file "$bashrc_path" "true"
 
 ## Installation de GWSL
 install_gwsl() {
-    if [ ! -f "GWSL-145-STORE.zip" ]; then
-        execute_command "wget https://github.com/Opticos/GWSL-Source/releases/download/v1.4.5/GWSL-145-STORE.zip" "Téléchargement de GWSL"
+    execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire C:\WSL2-Distros"
+
+    if [ ! -f "/mnt/c/WSL2-Distros/GWSL-145-STORE.zip" ]; then
+        execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip -P /mnt/c/WSL2-Distros" "Téléchargement de GWSL"
     else
-        info_msg "Le fichier GWSL-145-STORE.zip existe déjà"
+        info_msg "Le fichier GWSL-145-STORE.zip existe déjà dans C:\WSL2-Distros"
     fi
 
+    cd /mnt/c/WSL2-Distros > /dev/null 2>&1
     execute_command "unzip GWSL-145-STORE.zip" "Extraction de GWSL"
-    execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire C:\WSL2-Distros"
-    execute_command "mv GWSL-145-STORE /mnt/c/WSL2-Distros/GWSL" "Déplacement de GWSL dans le répertoire"
-    execute_command "rm -rf GWSL-145-STORE*" "Nettoyage des fichiers temporaires"
+    execute_command "mv GWSL-145-STORE GWSL" "Renommage du dossier GWSL"
+    execute_command "rm -f GWSL-145-STORE.zip" "Nettoyage des fichiers temporaires"
+
+    cd - > /dev/null 2>&1
 }
 
 configure_gwsl() {
