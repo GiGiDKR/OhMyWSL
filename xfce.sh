@@ -54,14 +54,6 @@ execute_command() {
     fi
 }
 
-# separator() {
-#    if $USE_GUM; then
-#        gum style "" --foreground 33
-#    else
-#        echo -e "\e[38;5;33m\e[0m"
-#    fi
-#}
-
 # Traitement des arguments en ligne de commande
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -94,8 +86,6 @@ else
     read -p "Voulez-vous installer Fluent Cursor ? (o/n) : " response
     [[ $response =~ ^[Oo]$ ]] && install_fluent=true
 fi
-
-# separator
 
 if [ "$download_wallpaper" = true ]; then
     ## Téléchargement et installation du fond d'écran

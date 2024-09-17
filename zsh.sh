@@ -56,14 +56,6 @@ execute_command() {
     fi
 }
 
-# separator() {
-#    if $USE_GUM; then
-#        gum style "" --foreground 33
-#    else
-#        echo -e "\e[38;5;33m\e[0m"
-#    fi
-#}
-
 # Traitement des arguments en ligne de commande
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -73,10 +65,8 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-# separator
 execute_command "sudo apt install -y zsh wget curl git unzip" "Installation des pré-requis et de zsh"
 
-# separator
 # Installation de Oh My Zsh
 if $USE_GUM; then
     if gum confirm "Voulez-vous installer Oh My Zsh ?"; then
@@ -95,7 +85,6 @@ fi
 [ -f "$ZSHRC" ] && cp "$ZSHRC" "${ZSHRC}.bak"
 execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/zshrc >/dev/null 2>&1" "Téléchargement de la configuration zshrc"
 
-# separator
 # Installation de PowerLevel10k
 if $USE_GUM; then
     if gum confirm "Voulez-vous installer PowerLevel10k ?"; then
@@ -110,7 +99,6 @@ if [ "$install_powerlevel10k" = true ]; then
     execute_command "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \"$HOME/.oh-my-zsh/custom/themes/powerlevel10k\" --quiet" "Installation de PowerLevel10k"
     execute_command "sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/' \"$ZSHRC\"" "Configuration du thème PowerLevel10k"
 
-    # separator
     if $USE_GUM; then
         if gum confirm "Installer le prompt OhMyTermux ?"; then
             install_p10k=true
@@ -129,10 +117,8 @@ if [ "$install_powerlevel10k" = true ]; then
     fi
 fi
 
-# # separator
 execute_command "curl -fLo \"$HOME/.oh-my-zsh/custom/aliases.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh" "Téléchargement de la configuration des alias"
 
-# separator
 # Installation des plugins
 install_zsh_plugins() {
     if $USE_GUM; then

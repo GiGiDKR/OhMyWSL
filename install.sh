@@ -110,14 +110,6 @@ execute_command() {
     fi
 }
 
-## separator() {
-#    if $USE_GUM; then
-#        gum style "" --foreground 33
-#    else
-#        echo -e "\e[38;5;33m\e[0m"
-#    fi
-#}
-
 configure_noninteractive() {
     sudo debconf-set-selections <<< "gdm3 shared/default-x-display-manager select gdm3"
     export DEBIAN_FRONTEND=noninteractive
@@ -126,6 +118,7 @@ configure_noninteractive() {
 sudo -v
 show_banner
 
+info_msg "Configuration du système"
 # Création du fichier .wslconfig
 wslconfig_file="/mnt/c/Users/$USER/.wslconfig"
 content="[wsl2]
@@ -135,23 +128,19 @@ generateResolvConf = false"
 
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier .wslconfig"
 
-# separator
 ## Installation des paquets
-info_msg "Configuration de système"
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark"
 
 execute_command "sudo apt update -y" "Recherche de mises à jour"
 
 execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
 
-# separator
 configure_noninteractive
 
 for package in $packages; do
     execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
 done
 
-# separator
 # Installation de ZSH
 info_msg "Configuration du shell"
 if $USE_GUM; then
@@ -186,7 +175,6 @@ else
     fi
 fi
 
-# separator
 ## Configuration réseau
 info_msg "Configuration du réseau"
 ip_address=$(ip route | grep default | awk '{print $3; exit;}')
@@ -205,7 +193,6 @@ fi
 
 execute_command "sudo sed -i \"s/^nameserver.*/nameserver ${ip_address}/\" \"$resolv_conf\"" "Mise à jour du fichier $resolv_conf"
 
-# separator
 ## Configuration des fichiers de shell
 bashrc_path="$HOME/.bashrc"
 zshrc_path="$HOME/.zshrc"
@@ -234,7 +221,6 @@ add_lines_to_file() {
 add_lines_to_file "$bashrc_path" "true"
 [ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path" "false"
 
-# separator
 ## Installation de GWSL
 # Fonction pour installer GWSL
 install_gwsl() {
@@ -394,11 +380,11 @@ else
     fi
 fi
 
-# separator
-## Configuration de XFCE4
+
 #info_msg "Démarrage de XFCE4
 #execute_command "timeout 5s sudo startxfce4 &> /dev/null" "XFCE4 fermé après 5 secondes"
 
+## Configuration de XFCE4
 info_msg "Configuration de XFCE4"
 execute_command "mkdir -p $HOME/.config/xfce4" "Création du dossier de configuration XFCE4"
 
@@ -414,7 +400,6 @@ execute_command "sudo chown -R $UID:$UID /run/user/$UID/" "Modification du propr
 
 execute_command "echo \$DISPLAY >> $HOME/.bashrc" "Ajout de l'affichage de DISPLAY à .bashrc"
 
-# separator
 # Personnalisation XFCE
 if $USE_GUM; then
     if gum confirm "Installer la personnalisation XFCE ?"; then
@@ -452,9 +437,5 @@ else
     fi
 fi
 
-
 execute_gwsl
-
-# separator
-## Lancement de la session XFCE4
 execute_command "dbus-launch xfce4-session" "Démarrage de la session XFCE4"
