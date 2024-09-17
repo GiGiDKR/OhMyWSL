@@ -136,20 +136,21 @@ install_zsh_plugins() {
         info_msg "7) Tout installer"
         echo
         read -p "Entrez les numéros des plugins : " plugin_choices
+        
+        # Convertir les choix numériques en noms de plugins
+        PLUGINS=""
+        for choice in $plugin_choices; do
+            case $choice in
+                1) PLUGINS+="zsh-autosuggestions " ;;
+                2) PLUGINS+="zsh-syntax-highlighting " ;;
+                3) PLUGINS+="zsh-completions " ;;
+                4) PLUGINS+="you-should-use " ;;
+                5) PLUGINS+="zsh-abbr " ;;
+                6) PLUGINS+="zsh-alias-finder " ;;
+                7) PLUGINS="zsh-autosuggestions zsh-syntax-highlighting zsh-completions you-should-use zsh-abbr zsh-alias-finder" ;;
+            esac
+        done
     fi
-
-    PLUGINS=""
-    for choice in $PLUGINS; do
-        case $choice in
-            "zsh-autosuggestions"|1) PLUGINS+="zsh-autosuggestions " ;;
-            "zsh-syntax-highlighting"|2) PLUGINS+="zsh-syntax-highlighting " ;;
-            "zsh-completions"|3) PLUGINS+="zsh-completions " ;;
-            "you-should-use"|4) PLUGINS+="you-should-use " ;;
-            "zsh-abbr"|5) PLUGINS+="zsh-abbr " ;;
-            "zsh-alias-finder"|6) PLUGINS+="zsh-alias-finder " ;;
-            "Tout installer") PLUGINS="zsh-autosuggestions zsh-syntax-highlighting zsh-completions you-should-use zsh-abbr zsh-alias-finder" ;;
-        esac
-    done
 
     for PLUGIN in $PLUGINS; do
         install_plugin "$PLUGIN"
@@ -178,14 +179,21 @@ install_plugin() {
 update_zshrc() {
     local zshrc="$HOME/.zshrc"
     cp "$zshrc" "${zshrc}.bak"
-    existing_plugins=$(sed -n '/^plugins=(/,/)/p' "$zshrc" | grep -v '^plugins=(' | grep -v ')' | sed 's/^[[:space:]]*//' | tr '\n' ' ')
-    local plugin_list="$existing_plugins"
+    
+    # Récupérer les plugins existants
+    existing_plugins=$(sed -n '/^plugins=(/,/)/p' "$zshrc" | grep -v '^plugins=(' | grep -v ')' | tr -d ' ')
+    
+    # Ajouter les nouveaux plugins
     for plugin in $PLUGINS; do
-        if [[ ! "$plugin_list" =~ "$plugin" ]]; then
-            plugin_list+="$plugin "
+        if [[ ! "$existing_plugins" =~ "$plugin" ]]; then
+            existing_plugins+=" $plugin"
         fi
     done
-    sed -i "/^plugins=(/,/)/c\plugins=(\n\t${plugin_list}\n)" "$zshrc"
+    
+    # Mettre à jour la ligne des plugins dans .zshrc
+    sed -i "/^plugins=(/,/)/c\plugins=($existing_plugins)" "$zshrc"
+    
+    # Ajouter la configuration pour zsh-completions si nécessaire
     if [[ "$PLUGINS" == *"zsh-completions"* ]]; then
         if ! grep -q "fpath+=" "$zshrc"; then
             sed -i '/^source $ZSH\/oh-my-zsh.sh$/i\fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src' "$zshrc"

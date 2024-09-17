@@ -129,7 +129,7 @@ generateResolvConf = false"
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier Wslconfig"
 
 ## Installation des paquets
-packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark"
+packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark jq"
 
 execute_command "sudo apt update -y" "Recherche de mises à jour"
 
@@ -235,6 +235,22 @@ install_gwsl() {
     execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire C:\WSL2-Distros"
     execute_command "mv GWSL-145-STORE /mnt/c/WSL2-Distros/GWSL" "Déplacement de GWSL dans le répertoire"
     execute_command "rm -rf GWSL-145-STORE*" "Nettoyage des fichiers temporaires"
+}
+
+configure_gwsl() {
+    local gwsl_config_file="/mnt/c/Users/$USER/AppData/Roaming/GWSL/settings.json"
+    local temp_file="/tmp/gwsl_settings.json"
+
+    info_msg "Configuration de GWSL"
+
+    if [ -f "$gwsl_config_file" ]; then
+        cat "$gwsl_config_file" > "$temp_file"
+        jq '.graphics = {"window_mode": "single", "hidpi": true}' "$temp_file" > "${temp_file}.tmp" && mv "${temp_file}.tmp" "$temp_file"
+        execute_command "cp \"$temp_file\" \"$gwsl_config_file\"" "Mise à jour du fichier de configuration GWSL"
+        rm -f "$temp_file"
+    else
+        error_msg "Le fichier $gwsl_config_file n'existe pas"
+    fi
 }
 
 execute_gwsl() {
@@ -373,17 +389,18 @@ fi
 if $USE_GUM; then
     if gum confirm "Voulez-vous installer GWSL ?"; then
         install_gwsl
+        configure_gwsl
     fi
 else
     read -p "Voulez-vous installer GWSL ? (o/n) : " install_gwsl_choice
     if [ "$install_gwsl_choice" = "o" ]; then
         install_gwsl
+        configure_gwsl
     fi
 fi
 
 # TODO : Décommenter le code ci-dessous pour démarrer XFCE4
-#info_msg "Démarrage de XFCE4
-#execute_command "timeout 5s sudo startxfce4 &> /dev/null" "XFCE4 fermé après 5 secondes"
+execute_command "timeout 5s sudo startxfce4 &> /dev/null" "Session XFCE4 fermée après 5 secondes"
 
 ## Configuration de XFCE4
 info_msg "Configuration de XFCE4"
@@ -435,8 +452,9 @@ else
 fi
 
 execute_gwsl
+sleep 5
 execute_command "dbus-launch xfce4-session" "❯ Lancement de la session XFCE4"
-
-rm -f zsh.sh xfce.sh
-rm -- "$0"
+sleep 5
+execute_command "rm -f zsh.sh xfce.sh" "Nettoyage des fichiers temporaires"
+execute_command "rm -- "$0"" "Suppression du script d'installation"
 exit 0
