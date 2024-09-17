@@ -120,10 +120,11 @@ generateResolvConf = false"
 
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier Wslconfig"
 
-# Installation des paquets
+## Installation des paquets
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark jq"
 
-execute_command "sudo apt update && sudo apt upgrade -y" "Mise à jour du système"
+execute_command "sudo apt update -y > /dev/null 2>&1" "Recherche de mises à jour"
+execute_command "sudo apt upgrade -y > /dev/null 2>&1" "Mise à jour des paquets"
 
 configure_noninteractive
 
@@ -134,7 +135,7 @@ done
 # Installation de ZSH
 info_msg "Configuration du shell"
 install_zsh() {
-    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement et préparation du script zsh"
+    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh > /dev/null 2>&1" "Téléchargement et préparation du script zsh"
     if $USE_GUM; then
         "$HOME_DIR/zsh.sh" --gum
     else
@@ -152,13 +153,13 @@ fi
 
 # Configuration réseau
 info_msg "Configuration du réseau"
-ip_address=$(ip route | grep default | awk '{print $3; exit;}')
+ip_address=$(ip route | grep default | awk '{print $3; exit;}') > /dev/null 2>&1
 resolv_conf="/etc/resolv.conf"
 
 [ -z "$ip_address" ] && { error_msg "Impossible de récupérer l'adresse IP"; exit 1; }
 [ ! -f "$resolv_conf" ] && { error_msg "Le fichier $resolv_conf n'existe pas"; exit 1; }
 
-execute_command "sudo sed -i \"s/^nameserver.*/nameserver ${ip_address}/\" \"$resolv_conf\"" "Mise à jour du fichier Resolv_conf"
+execute_command "sudo sed -i \"s/^nameserver.*/nameserver ${ip_address}/\" \"$resolv_conf\"" "Mise à jour du fichier Resolv_conf" > /dev/null 2>&1
 
 # Configuration des fichiers de shell
 bashrc_path="$HOME_DIR/.bashrc"
@@ -175,7 +176,7 @@ add_lines_to_file() {
     local create_if_missing="$2"
 
     if [ -f "$file" ] || [ "$create_if_missing" = "true" ]; then
-        execute_command "touch \"$file\" && echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $(basename "$file")"
+        execute_command "touch \"$file\" && echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $(basename "$file")" > /dev/null 2>&1
     else
         error_msg "Le fichier $(basename "$file") n'existe pas"
     fi
@@ -189,9 +190,9 @@ install_gwsl() {
     local gwsl_zip="GWSL-145-STORE.zip"
     local gwsl_dir="/mnt/c/WSL2-Distros/GWSL"
 
-    [ ! -f "$gwsl_zip" ] && execute_command "wget https://github.com/Opticos/GWSL-Source/releases/download/v1.4.5/$gwsl_zip" "Téléchargement de GWSL"
+    [ ! -f "$gwsl_zip" ] && execute_command "wget https://github.com/Opticos/GWSL-Source/releases/download/v1.4.5/$gwsl_zip > /dev/null 2>&1" "Téléchargement de GWSL"
     
-    execute_command "unzip $gwsl_zip && mkdir -p /mnt/c/WSL2-Distros && mv GWSL-145-STORE $gwsl_dir && rm -rf $gwsl_zip" "Installation de GWSL"
+    execute_command "unzip $gwsl_zip && mkdir -p /mnt/c/WSL2-Distros && mv GWSL-145-STORE $gwsl_dir && rm -rf $gwsl_zip > /dev/null 2>&1" "Installation de GWSL"
 }
 
 configure_gwsl() {
@@ -257,10 +258,10 @@ install_package() {
                         wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
                         echo 'deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main' | sudo tee /etc/apt/sources.list.d/gierens.list && \
                         sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list && \
-                        sudo apt update && \
-                        sudo apt install -y eza" "Installation de eza"
+                        sudo apt update -y > /dev/null 2>&1 && \
+                        sudo apt install -y eza > /dev/null 2>&1" "Installation de eza"
     else
-        execute_command "sudo apt install -y $package" "Installation de $package"
+        execute_command "sudo apt install -y $package > /dev/null 2>&1" "Installation de $package"
     fi
     add_aliases_to_rc "$package"
 }
@@ -330,7 +331,7 @@ common_alias
 if $USE_GUM; then
     gum confirm "Installer des packages supplémentaires ?" && optional_packages
 else
-    read -p "Installer des packages supplémentaires ? (o/n) : " install_optional_packages
+    read -p "Installer des packages supplémentaires ? (o/n) : " install_optional_packages > /dev/null 2>&1
     [[ "$install_optional_packages" =~ ^[oOyY] ]] && optional_packages
 fi
 
@@ -338,7 +339,7 @@ fi
 if $USE_GUM; then
     gum confirm "Voulez-vous installer GWSL ?" && { install_gwsl; configure_gwsl; }
 else
-    read -p "Voulez-vous installer GWSL ? (o/n) : " install_gwsl_choice
+    read -p "Voulez-vous installer GWSL ? (o/n) : " install_gwsl_choice > /dev/null 2>&1
     [[ "$install_gwsl_choice" =~ ^[oOyY] ]] && { install_gwsl; configure_gwsl; }
 fi
 
@@ -350,12 +351,12 @@ execute_command "mkdir -p $XFCE4_CONFIG_DIR && \
                 touch $HOME_DIR/.ICEauthority && \
                 chmod 600 $HOME_DIR/.ICEauthority && \
                 sudo mkdir -p /run/user/$UID && \
-                sudo chown -R $UID:$UID /run/user/$UID/" "Configuration de XFCE4"
+                sudo chown -R $UID:$UID /run/user/$UID/ > /dev/null 2>&1" "Configuration de XFCE4"
 
 # Personnalisation XFCE
 install_xfce_customization() {
     if [ -f "$HOME_DIR/xfce.sh" ]; then
-        $USE_GUM && "$HOME_DIR/xfce.sh" --gum || "$HOME_DIR/xfce.sh"
+        $USE_GUM && "$HOME_DIR/xfce.sh" --gum || "$HOME_DIR/xfce.sh" > /dev/null 2>&1
         [ $? -eq 0 ] && success_msg "✓ Personnalisation XFCE" || error_msg "✗ Personnalisation XFCE"
     else
         error_msg "Le fichier xfce.sh n'existe pas"
@@ -365,12 +366,12 @@ install_xfce_customization() {
 if $USE_GUM; then
     gum confirm "Installer la personnalisation XFCE ?" && install_xfce_customization || info_msg "𐄂 Personnalisation XFCE refusée"
 else
-    read -p "Installer la personnalisation XFCE ? (o/n) : " reponse
+    read -p "Installer la personnalisation XFCE ? (o/n) : " reponse > /dev/null 2>&1
     [[ "$reponse" =~ ^[oOyY] ]] && install_xfce_customization || info_msg "𐄂 Personnalisation XFCE refusée"
 fi
 
 execute_gwsl
-execute_command "sleep 5 && dbus-launch xfce4-session" "❯ Lancement de la session XFCE4"
+execute_command "sleep 5 && dbus-launch xfce4-session > /dev/null 2>&1" "❯ Lancement de la session XFCE4"
 execute_command "rm -f zsh.sh xfce.sh && rm -- \"$0\"" "Nettoyage des fichiers temporaires"
 # TODO Tester la commande suivante
 zsh

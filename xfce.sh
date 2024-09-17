@@ -82,13 +82,13 @@ if $USE_GUM; then
     install_fluent=$(gum confirm "Voulez-vous installer Fluent Cursor ?" && echo true || echo false)
 else
     read -p "Voulez-vous installer le fond d'écran ? (o/n) : " response
-    [[ $response =~ ^[Oo]$ ]] && download_wallpaper=true || download_wallpaper=false
+    [[ $response =~ ^[Oo]$ ]] && download_wallpaper=true || download_wallpaper=false > /dev/null 2>&1
 
     read -p "Voulez-vous installer WhiteSur-Dark ? (o/n) : " response
-    [[ $response =~ ^[Oo]$ ]] && install_whitesur=true || install_whitesur=false
+    [[ $response =~ ^[Oo]$ ]] && install_whitesur=true || install_whitesur=false > /dev/null 2>&1
 
     read -p "Voulez-vous installer Fluent Cursor ? (o/n) : " response
-    [[ $response =~ ^[Oo]$ ]] && install_fluent=true || install_fluent=false
+    [[ $response =~ ^[Oo]$ ]] && install_fluent=true || install_fluent=false > /dev/null 2>&1
 fi
 
 # Télécharger et installer le fond d'écran
@@ -96,7 +96,7 @@ if [ "$download_wallpaper" = true ]; then
     download_and_install "https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png" \
                         "waves.png" \
                         "sudo mv waves.png /usr/share/backgrounds/xfce/" \
-                        "fond d'écran"
+                        "fond d'écran" > /dev/null 2>&1
 fi
 
 # Télécharger et installer WhiteSur-Dark
@@ -104,7 +104,7 @@ if [ "$install_whitesur" = true ]; then
     download_and_install "https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" \
                         "whitesur.zip" \
                         "unzip -q whitesur.zip && tar -xf WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz && sudo mv WhiteSur-Dark/ /usr/share/themes/ && rm -rf WhiteSur* whitesur.zip" \
-                        "WhiteSur-Dark"
+                        "WhiteSur-Dark" > /dev/null 2>&1
 fi
 
 # Télécharger et installer Fluent Cursor
@@ -112,5 +112,5 @@ if [ "$install_fluent" = true ]; then
     download_and_install "https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" \
                         "fluent.zip" \
                         "unzip -q fluent.zip && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/ && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/ && rm -rf Fluent* fluent.zip" \
-                        "Fluent Cursor"
+                        "Fluent Cursor" > /dev/null 2>&1
 fi
