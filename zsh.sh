@@ -171,24 +171,31 @@ update_zshrc() {
     local zshrc="$HOME/.zshrc"
     cp "$zshrc" "${zshrc}.bak"
     
+    # Extraire les plugins existants
     existing_plugins=$(sed -n '/^plugins=(/,/)/p' "$zshrc" | grep -v '^plugins=(' | grep -v ')' | tr -d ' ')
     
+    # Ajouter les nouveaux plugins
     for plugin in $PLUGINS; do
         if [[ ! "$existing_plugins" =~ "$plugin" ]]; then
             existing_plugins+=" $plugin"
         fi
     done
     
-    sed -i '/^plugins=(/ {
+    # Mettre à jour la ligne des plugins
+    sed -i '
+    /^plugins=(/ {
         :a
         N
         /)/!ba
-        s/^plugins=(.*)/plugins=('"$existing_plugins"')/
-    }' "$zshrc"
+        s/^plugins=(.*)/plugins=('"${existing_plugins// /,}"')/
+    }
+    ' "$zshrc"
     
+    # Ajouter la ligne pour zsh-completions si nécessaire
     if [[ "$PLUGINS" == *"zsh-completions"* ]]; then
         if ! grep -q "fpath+=" "$zshrc"; then
-            sed -i '/^source $ZSH\/oh-my-zsh.sh$/i fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src' "$zshrc"
+            sed -i '/^source $ZSH\/oh-my-zsh.sh$/i\
+fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src' "$zshrc"
         fi
     fi
 }
