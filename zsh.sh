@@ -81,7 +81,7 @@ if [ "$install_oh_my_zsh" = true ]; then
 fi
 
 [ -f "$ZSHRC" ] && cp "$ZSHRC" "${ZSHRC}.bak"
-execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/zshrc >/dev/null 2>&1" "Configuraion de zshrc"
+execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/zshrc" "Configuraion de zshrc"
 
 # Installation de PowerLevel10k
 if $USE_GUM; then

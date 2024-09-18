@@ -402,7 +402,7 @@ else
     fi
 fi
 
-execute_command "timeout 5s sudo startxfce4 &> /dev/null" "Session XFCE4 fermée après 5 secondes"
+execute_command "timeout 5s sudo startxfce4" "Session XFCE4 fermée après 5 secondes"
 
 ## Configuration de XFCE4
 info_msg "Configuration de XFCE4"
