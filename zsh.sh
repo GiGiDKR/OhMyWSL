@@ -171,15 +171,8 @@ update_zshrc() {
     local zshrc="$HOME/.zshrc"
     cp "$zshrc" "${zshrc}.bak"
 
-    # Extraire les plugins existants
-    existing_plugins=$(sed -n '/^plugins=(/,/)/p' "$zshrc" | grep -v '^plugins=(' | grep -v ')' | sed 's/^[[:space:]]*//' | tr '\n' ' ' | sed 's/ $//')
-
-    # Créer une liste unique de tous les plugins
-    local all_plugins="$existing_plugins $PLUGINS"
-    all_plugins=$(echo "$all_plugins" | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/ $//')
-
-    # Remplacer la ligne des plugins dans .zshrc
-    sed -i "/^plugins=(/,/)/c\plugins=(\n\t${all_plugins}\n)" "$zshrc"
+    # Remplacer la ligne des plugins dans .zshrc avec les nouveaux plugins
+    sed -i "/^plugins=(/,/)/c\plugins=(\n\t${PLUGINS}\n)" "$zshrc"
 
     # Ajouter la ligne fpath+= pour zsh-completions si nécessaire
     if [[ "$PLUGINS" == *"zsh-completions"* ]] && ! grep -q "fpath+=" "$zshrc"; then
