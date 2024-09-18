@@ -63,7 +63,6 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-# Modification des interactions utilisateur pour utiliser gum si nécessaire
 if $USE_GUM; then
     if gum confirm "Voulez-vous installer le fond d'écran ?"; then
         download_wallpaper=true
@@ -88,19 +87,16 @@ else
 fi
 
 if [ "$download_wallpaper" = true ]; then
-    ## Téléchargement et installation du fond d'écran
     execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png" "Téléchargement du fond d'écran"
     execute_command "sudo mv waves.png /usr/share/backgrounds/xfce/" "Installation du fond d'écran"
 fi
 
 if [ "$install_whitesur" = true ]; then
-    ## Installation de WhiteSur-Dark
     execute_command "wget https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" "Téléchargement de WhiteSur-Dark"
     execute_command "unzip 2024.09.02.zip && tar -xf WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz && sudo mv WhiteSur-Dark/ /usr/share/themes/ && sudo rm -rf WhiteSur* && sudo rm 2024.09.02.zip" "Installation de WhiteSur-Dark"
 fi
 
 if [ "$install_fluent" = true ]; then
-    ## Installation de Fluent Cursor
     execute_command "wget https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" "Téléchargement de Fluent Cursor"
     execute_command "unzip 2024-02-25.zip && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/ && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/ && sudo rm -rf $HOME/Fluent* && sudo rm 2024-02-25.zip" "Installation de Fluent Cursor"
 fi

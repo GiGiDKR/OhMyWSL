@@ -120,7 +120,6 @@ sudo -v
 show_banner
 
 info_msg "Configuration du système"
-# Création du fichier .wslconfig
 wslconfig_file="/mnt/c/Users/$USERNAME/.wslconfig"
 content="[wsl2]
 guiApplications=false
@@ -133,11 +132,8 @@ execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Créa
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark jq"
 
 execute_command "sudo apt update -y" "Recherche de mises à jour"
-
 execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
-
 configure_noninteractive
-
 for package in $packages; do
     execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
 done
@@ -192,7 +188,7 @@ if [ ! -f "$resolv_conf" ]; then
     exit 1
 fi
 
-execute_command "sudo sed -i \"s/^nameserver.*/nameserver ${ip_address}/\" /etc/resolv.conf" "Mise à jour du fichier resolv.conf"
+execute_command "sudo sed -i 's/^nameserver.*/nameserver '"${ip_address}"'/' /etc/resolv.conf" "Mise à jour du fichier resolv.conf"
 
 ## Configuration des fichiers de shell
 bashrc_path="$HOME/.bashrc"
@@ -201,7 +197,6 @@ zshrc_path="$HOME/.zshrc"
 lines_to_add="
 export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}'):0.0
 export PULSE_SERVER=tcp:$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}')
-
 "
 
 add_lines_to_file() {
@@ -230,17 +225,18 @@ install_gwsl() {
     if [ ! -f "/mnt/c/WSL2-Distros/GWSL-145-STORE.zip" ]; then
         execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip -P /mnt/c/WSL2-Distros" "Téléchargement de GWSL"
     else
-        info_msg "Le fichier GWSL-145-STORE.zip existe déjà dans C:\WSL2-Distros"
+        info_msg "Sources déjà téléchargées"
     fi
 
     cd /mnt/c/WSL2-Distros
     execute_command "unzip GWSL-145-STORE.zip" "Extraction de GWSL"
-    execute_command "mv GWSL-145-STORE GWSL" "Renommage du dossier GWSL"
+    execute_command "mv GWSL-145-STORE GWSL" "Configuration de GWSL"
     execute_command "rm -f GWSL-145-STORE.zip" "Nettoyage des fichiers temporaires"
 
     cd
 }
 
+# TODO Vérifier si la fonction peut être supprimée
 configure_gwsl() {
     local gwsl_config_file="/mnt/c/Users/$USERNAME/AppData/Roaming/GWSL/settings.json"
     local temp_file="/tmp/gwsl_settings.json"
@@ -250,7 +246,7 @@ configure_gwsl() {
     if [ -f "$gwsl_config_file" ]; then
         cat "$gwsl_config_file" > "$temp_file"
         jq '.graphics = {"window_mode": "single", "hidpi": true}' "$temp_file" > "${temp_file}.tmp" && mv "${temp_file}.tmp" "$temp_file"
-        execute_command "cp \"$temp_file\" \"$gwsl_config_file\"" "Mise à jour du fichier de configuration GWSL"
+        execute_command "cp \"$temp_file\" \"$gwsl_config_file\"" "Mise à jour des paramètres de GWSL"
         rm -f "$temp_file"
     else
         error_msg "Le fichier $gwsl_config_file n'existe pas"
@@ -347,7 +343,7 @@ alias search="nala search"
 alias list="nala list --upgradeable"
 alias show="nala show"' >> "$rc_file"
             ;;
-        # Ajoutez d'autres cas pour les packages supplémentaires si nécessaire
+        # TODO Ajoutez d'autres cas pour les packages supplémentaires si nécessaire
     esac
 }
 
@@ -394,13 +390,15 @@ fi
 if $USE_GUM; then
     if gum confirm "Voulez-vous installer GWSL ?"; then
         install_gwsl
-        configure_gwsl || error_msg "Échec de la configuration de GWSL"
+# TODO Vérifier si la fonction peut être supprimée
+#        configure_gwsl || error_msg "Échec de la configuration de GWSL"
     fi
 else
     read -p "Voulez-vous installer GWSL ? (o/n) : " install_gwsl_choice
     if [ "$install_gwsl_choice" = "o" ]; then
         install_gwsl
-        configure_gwsl || error_msg "Échec de la configuration de GWSL"
+        # TODO Vérifier si la fonction peut être supprimée
+#        configure_gwsl || error_msg "Échec de la configuration de GWSL"
     fi
 fi
 

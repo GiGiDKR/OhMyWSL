@@ -76,7 +76,6 @@ else
     read -p "Voulez-vous installer Oh-My-Zsh ? (o/n) : " choice
     [[ $choice =~ ^[Oo]$ ]] && install_oh_my_zsh=true
 fi
-
 if [ "$install_oh_my_zsh" = true ]; then
     execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git \"$HOME/.oh-my-zsh\" --quiet" "Installation de Oh-My-Zsh"
 fi
@@ -97,7 +96,6 @@ fi
 if [ "$install_powerlevel10k" = true ]; then
     execute_command "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \"$HOME/.oh-my-zsh/custom/themes/powerlevel10k\" --quiet" "Installation de PowerLevel10k"
     execute_command "sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/' \"$ZSHRC\"" "Configuration de PowerLevel10k"
-
     if $USE_GUM; then
         if gum confirm "Installer le prompt OhMyTermux ?"; then
             install_p10k=true
@@ -106,7 +104,6 @@ if [ "$install_powerlevel10k" = true ]; then
         read -p "Installer le prompt OhMyTermux ? (o/n) : " choice
         [[ $choice =~ ^[Oo]$ ]] && install_p10k=true
     fi
-
     if [ "$install_p10k" = true ]; then
         execute_command "curl -fLo \"$HOME/.p10k.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/p10k.zsh" "Téléchargement du prompt OhMyTermux"
         echo -e "\n# To customize prompt, run \`p10k configure\` or edit ~/.p10k.zsh." >> "$ZSHRC"
@@ -135,7 +132,6 @@ install_zsh_plugins() {
         echo
         read -p "Entrez les numéros des plugins : " plugin_choices
         
-        # Convertir les choix numériques en noms de plugins
         PLUGINS=""
         for choice in $plugin_choices; do
             case $choice in
@@ -149,18 +145,15 @@ install_zsh_plugins() {
             esac
         done
     fi
-
     for PLUGIN in $PLUGINS; do
         install_plugin "$PLUGIN"
     done
-
     update_zshrc
 }
 
 install_plugin() {
     local plugin_name=$1
     local plugin_url=""
-    # separator
 
     case $plugin_name in
         "zsh-autosuggestions") plugin_url="https://github.com/zsh-users/zsh-autosuggestions.git" ;;
@@ -178,23 +171,24 @@ update_zshrc() {
     local zshrc="$HOME/.zshrc"
     cp "$zshrc" "${zshrc}.bak"
     
-    # Récupérer les plugins existants
     existing_plugins=$(sed -n '/^plugins=(/,/)/p' "$zshrc" | grep -v '^plugins=(' | grep -v ')' | tr -d ' ')
     
-    # Ajouter les nouveaux plugins
     for plugin in $PLUGINS; do
         if [[ ! "$existing_plugins" =~ "$plugin" ]]; then
             existing_plugins+=" $plugin"
         fi
     done
     
-    # Mettre à jour la ligne des plugins dans .zshrc
-    sed -i "/^plugins=(/,/)/c\plugins=($existing_plugins)" "$zshrc"
+    sed -i '/^plugins=(/ {
+        :a
+        N
+        /)/!ba
+        s/^plugins=(.*)/plugins=('"$existing_plugins"')/
+    }' "$zshrc"
     
-    # Ajouter la configuration pour zsh-completions si nécessaire
     if [[ "$PLUGINS" == *"zsh-completions"* ]]; then
         if ! grep -q "fpath+=" "$zshrc"; then
-            sed -i '/^source $ZSH\/oh-my-zsh.sh$/i\fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src' "$zshrc"
+            sed -i '/^source $ZSH\/oh-my-zsh.sh$/i fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src' "$zshrc"
         fi
     fi
 }
