@@ -171,21 +171,19 @@ update_zshrc() {
     local zshrc="$HOME/.zshrc"
     cp "$zshrc" "${zshrc}.bak"
 
-    existing_plugins=$(sed -n '/^plugins=(/,/)/p' "$zshrc" | grep -v '^plugins=(' | grep -v ')' | sed 's/^[[:space:]]*//' | tr '\n' ' ')
+    # Extraire les plugins existants
+    existing_plugins=$(sed -n '/^plugins=(/,/)/p' "$zshrc" | grep -v '^plugins=(' | grep -v ')' | sed 's/^[[:space:]]*//' | tr '\n' ' ' | sed 's/ $//')
 
-    local plugin_list="$existing_plugins"
-    for plugin in $PLUGINS; do
-        if [[ ! "$plugin_list" =~ "$plugin" ]]; then
-            plugin_list+="$plugin "
-        fi
-    done
+    # Créer une liste unique de tous les plugins
+    local all_plugins="$existing_plugins $PLUGINS"
+    all_plugins=$(echo "$all_plugins" | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/ $//')
 
-    sed -i "/^plugins=(/,/)/c\plugins=(\n\t${plugin_list}\n)" "$zshrc"
+    # Remplacer la ligne des plugins dans .zshrc
+    sed -i "/^plugins=(/,/)/c\plugins=(\n\t${all_plugins}\n)" "$zshrc"
 
-    if [[ "$PLUGINS" == *"zsh-completions"* ]]; then
-        if ! grep -q "fpath+=" "$zshrc"; then
-            sed -i '/^source $ZSH\/oh-my-zsh.sh$/i\fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src' "$zshrc"
-        fi
+    # Ajouter la ligne fpath+= pour zsh-completions si nécessaire
+    if [[ "$PLUGINS" == *"zsh-completions"* ]] && ! grep -q "fpath+=" "$zshrc"; then
+        sed -i '/^source $ZSH\/oh-my-zsh.sh$/i\fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src' "$zshrc"
     fi
 }
 
