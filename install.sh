@@ -464,4 +464,5 @@ execute_command "dbus-launch xfce4-session" "Lancement de la session XFCE4"
 sleep 5
 execute_command "rm -f zsh.sh xfce.sh" "Nettoyage des fichiers temporaires"
 execute_command "rm -- "$0"" "Suppression du script d'installation"
+exec zsh
 exit 0
