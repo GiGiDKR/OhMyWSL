@@ -1,7 +1,6 @@
 #!/bin/bash
 
 USE_GUM=false
-
 ZSHRC="$HOME/.zshrc"
 
 # Fonction pour afficher des messages d'information en bleu
@@ -87,15 +86,15 @@ done
 
 sudo -v
 
-execute_command "sudo apt install -y zsh wget curl git unzip" "Installation de zsh"
+execute_command "sudo apt install -y zsh wget curl git unzip" "Installation de zsh et des dépendances"
 
 # Installation de Oh My Zsh
 if $USE_GUM; then
-    if gum confirm "Voulez-vous installer Oh-My-Zsh ?"; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer Oh-My-Zsh ?"; then
         install_oh_my_zsh=true
     fi
 else
-    read -p "Voulez-vous installer Oh-My-Zsh ? (o/n) : " choice
+    read -p $"\e[33mVoulez-vous installer Oh-My-Zsh ? (o/n) :\e[0m" choice
     [[ $choice =~ ^[Oo]$ ]] && install_oh_my_zsh=true
 fi
 if [ "$install_oh_my_zsh" = true ]; then
@@ -107,11 +106,11 @@ execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/
 
 # Installation de PowerLevel10k
 if $USE_GUM; then
-    if gum confirm "Voulez-vous installer PowerLevel10k ?"; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer PowerLevel10k ?"; then
         install_powerlevel10k=true
     fi
 else
-    read -p "Voulez-vous installer PowerLevel10k ? (o/n) : " choice
+    read -p $"\e[33mVoulez-vous installer PowerLevel10k ? (o/n) : \e[0m" choice
     [[ $choice =~ ^[Oo]$ ]] && install_powerlevel10k=true
 fi
 
@@ -119,11 +118,11 @@ if [ "$install_powerlevel10k" = true ]; then
     execute_command "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \"$HOME/.oh-my-zsh/custom/themes/powerlevel10k\" --quiet" "Installation de PowerLevel10k"
     execute_command "sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/' \"$ZSHRC\"" "Configuration de PowerLevel10k"
     if $USE_GUM; then
-        if gum confirm "Installer le prompt OhMyTermux ?"; then
+        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer le prompt OhMyTermux ?"; then
             install_p10k=true
         fi
     else
-        read -p "Installer le prompt OhMyTermux ? (o/n) : " choice
+        read -p $"\e[33mInstaller le prompt OhMyTermux ? (o/n) : \e[0m" choice
         [[ $choice =~ ^[Oo]$ ]] && install_p10k=true
     fi
     if [ "$install_p10k" = true ]; then
@@ -155,7 +154,7 @@ install_zsh_plugins() {
         info_msg "6) zsh-alias-finder"
         info_msg "7) Tout installer"
         echo
-        read -p "Entrez les numéros des plugins : " plugin_choices
+        read -p $"\e[33mEntrez les numéros des plugins : \e[0m" plugin_choices
         
         PLUGINS=""
         for choice in $plugin_choices; do
@@ -196,7 +195,6 @@ update_zshrc() {
     local zshrc="$HOME/.zshrc"
     cp "$zshrc" "${zshrc}.bak"
 
-    # Liste des plugins à ajouter
     local plugins_to_add=(
         git
         command-not-found
@@ -208,17 +206,14 @@ update_zshrc() {
         timer
     )
 
-    # Ajout des nouveaux plugins à la liste existante
     PLUGINS=$(echo "$PLUGINS ${plugins_to_add[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
-    # Création de la nouvelle section plugins
     local new_plugins_section="plugins=(\n"
     for plugin in $PLUGINS; do
         new_plugins_section+="\t$plugin\n"
     done
     new_plugins_section+=")"
 
-    # Remplacement de la section plugins existante
     sed -i "/^plugins=(/,/)/c\\${new_plugins_section}" "$zshrc"
 
     if [[ "$PLUGINS" == *"zsh-completions"* ]] && ! grep -q "fpath+=" "$zshrc"; then

@@ -119,7 +119,7 @@ configure_noninteractive() {
 sudo -v
 show_banner
 
-info_msg "Configuration du système"
+info_msg "❯ Configuration du système"
 wslconfig_file="/mnt/c/Users/$USERNAME/.wslconfig"
 content="[wsl2]
 guiApplications=false
@@ -139,9 +139,10 @@ for package in $packages; do
 done
 
 # Installation de ZSH
-info_msg "Configuration du shell"
+info_msg "❯ Configuration du shell"
 if $USE_GUM; then
-    if gum confirm "Installer zsh ?"; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.fo
+reground="0""Installer zsh ?"; then
         execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" "Téléchargement du script zsh"
         execute_command "chmod +x zsh.sh" "Modification des permissions"
         "$HOME/zsh.sh" --gum  # Exécution directe du script avec gum
@@ -154,7 +155,7 @@ if $USE_GUM; then
         info_msg "𐄂 Installation de zsh refusée"
     fi
 else
-    read -p "Installer zsh ? (o/n) : " reponse_zsh
+    read -p $"\e[33mInstaller zsh ? (o/n) : \e[0m" choice
 
     reponse_zsh=$(echo "$reponse_zsh" | tr '[:upper:]' '[:lower:]')
 
@@ -163,7 +164,7 @@ else
         execute_command "chmod +x zsh.sh" "Modification des permissions"
         "$HOME/zsh.sh"  # Exécution directe du script
         if [ $? -eq 0 ]; then
-            success_msg " ✓ Installation de zsh"
+            success_msg "✓ Installation de zsh"
         else
             error_msg "✗ Installation de zsh"
         fi
@@ -173,7 +174,7 @@ else
 fi
 
 ## Configuration réseau
-info_msg "Configuration du réseau"
+info_msg "❯ Configuration du réseau"
 ip_address=$(ip route | grep default | awk '{print $3; exit;}')
 
 if [ -z "$ip_address" ]; then
@@ -241,7 +242,7 @@ configure_gwsl() {
     local gwsl_config_file="/mnt/c/Users/$USERNAME/AppData/Roaming/GWSL/settings.json"
     local temp_file="/tmp/gwsl_settings.json"
 
-    info_msg "Configuration de GWSL"
+    info_msg "❯ Configuration de GWSL"
 
     if [ -f "$gwsl_config_file" ]; then
         cat "$gwsl_config_file" > "$temp_file"
@@ -255,7 +256,6 @@ configure_gwsl() {
 }
 
 execute_gwsl() {
-    info_msg "❯ Lancement de GWSL"
     execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL"
 }
 
@@ -265,7 +265,7 @@ optional_packages() {
         packages=$(gum choose --no-limit --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer")
     else
         info_msg "Sélectionnez les packages à installer :"
-        echo  
+        echo
         info_msg "1) nala"
         info_msg "2) eza"
         info_msg "3) lfm"
@@ -273,7 +273,7 @@ optional_packages() {
         info_msg "5) fzf"
         info_msg "6) Tout installer"
         echo
-        read -p "Entrez les numéros des packages (SÉPARÉS PAR DES ESPACES) : " package_choices
+        read -p $"\e[33mEntrez les numéros des packages (SÉPARÉS PAR DES ESPACES) : \e[0m" package_choices
     fi
 
     for choice in $packages; do
@@ -375,27 +375,34 @@ fi
 common_alias
 
 # Demander à l'utilisateur s'il souhaite installer des packages supplémentaires
+info_msg "❯ Installation de packages supplémentaires"
 if $USE_GUM; then
-    if gum confirm "Installer des packages supplémentaires ?"; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer des packages supplémentaires ?"; then
         optional_packages
     fi
 else
-    read -p "Installer des packages supplémentaires ? (o/n) : " install_optional_packages
-    if [ "$install_optional_packages" = "o" ]; then
+    read -p $"\e[33mInstaller des packages supplémentaires ? (o/n) : \e[0m" choice
+
+    choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
+
+    if [ "$choice" = "oui" ] || [ "$choice" = "o" ] || [ "$choice" = "y" ] || [ "$choice" = "yes" ]; then
         optional_packages
     fi
 fi
 
 # Demander à l'utilisateur s'il souhaite installer GWSL
+info_msg "❯ Installation de GWSL"
 if $USE_GUM; then
-    if gum confirm "Voulez-vous installer GWSL ?"; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer GWSL ?"; then
         install_gwsl
 # TODO Vérifier si la fonction peut être supprimée
 #        configure_gwsl || error_msg "Échec de la configuration de GWSL"
     fi
 else
-    read -p "Voulez-vous installer GWSL ? (o/n) : " install_gwsl_choice
-    if [ "$install_gwsl_choice" = "o" ]; then
+    read -p $"\e[33mVoulez-vous installer GWSL ? (o/n) : \e[0m" choice
+    choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
+    
+    if [ "$choice" = "oui" ] || [ "$choice" = "o" ] || [ "$choice" = "y" ] || [ "$choice" = "yes" ]; then
         install_gwsl
         # TODO Vérifier si la fonction peut être supprimée
 #        configure_gwsl || error_msg "Échec de la configuration de GWSL"
@@ -405,7 +412,7 @@ fi
 execute_command "timeout 5s sudo startxfce4" "Session XFCE4 fermée après 5 secondes"
 
 ## Configuration de XFCE4
-info_msg "Configuration de XFCE4"
+info_msg "❯ Configuration de XFCE4"
 
 execute_command "mkdir -p $HOME/.config/xfce4" "Création du dossier de configuration XFCE4"
 execute_command "cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc" "Copie de fichiers"
@@ -416,7 +423,7 @@ execute_command "sudo chown -R $UID:$UID /run/user/$UID/" "Modification des perm
 
 # Personnalisation XFCE
 if $USE_GUM; then
-    if gum confirm "Installer la personnalisation XFCE ?"; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer la personnalisation XFCE ?"; then
         if [ -f "$HOME/xfce.sh" ]; then
             "$HOME/xfce.sh" --gum
             if [ $? -eq 0 ]; then
@@ -431,11 +438,11 @@ if $USE_GUM; then
         info_msg "𐄂 Personnalisation XFCE refusée"
     fi
 else
-    read -p "Installer la personnalisation XFCE ? (o/n) : " reponse
+    read -p $"\e[33mInstaller la personnalisation XFCE ? (o/n) : \e[0m" choice
 
-    reponse=$(echo "$reponse" | tr '[:upper:]' '[:lower:]')
+    choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
 
-    if [ "$reponse" = "oui" ] || [ "$reponse" = "o" ] || [ "$reponse" = "y" ] || [ "$reponse" = "yes" ]; then
+    if [ "$choice" = "oui" ] || [ "$choice" = "o" ] || [ "$choice" = "y" ] || [ "$choice" = "yes" ]; then
         if [ -f "$HOME/xfce.sh" ]; then
             "$HOME/xfce.sh"  # Exécution directe du script
             if [ $? -eq 0 ]; then
@@ -453,7 +460,7 @@ fi
 
 execute_gwsl
 sleep 5
-execute_command "dbus-launch xfce4-session" "❯ Lancement de la session XFCE4"
+execute_command "dbus-launch xfce4-session" "Lancement de la session XFCE4"
 sleep 5
 execute_command "rm -f zsh.sh xfce.sh" "Nettoyage des fichiers temporaires"
 execute_command "rm -- "$0"" "Suppression du script d'installation"

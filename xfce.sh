@@ -64,26 +64,26 @@ while [[ $# -gt 0 ]]; do
 done
 
 if $USE_GUM; then
-    if gum confirm "Voulez-vous installer le fond d'écran ?"; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer le fond d'écran ?"; then
         download_wallpaper=true
     fi
     
-    if gum confirm "Voulez-vous installer WhiteSur-Dark ?"; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer WhiteSur-Dark ?"; then
         install_whitesur=true
     fi
     
-    if gum confirm "Voulez-vous installer Fluent Cursor ?"; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer Fluent Cursor ?"; then
         install_fluent=true
     fi
 else
-    read -p "Voulez-vous installer le fond d'écran ? (o/n) : " response
-    [[ $response =~ ^[Oo]$ ]] && download_wallpaper=true
+    read -p $"\e[33mVoulez-vous installer le fond d'écran ? (o/n) : \e[0m" choice
+    [[ $choice =~ ^[Oo]$ ]] && download_wallpaper=true
 
-    read -p "Voulez-vous installer WhiteSur-Dark ? (o/n) : " response
-    [[ $response =~ ^[Oo]$ ]] && install_whitesur=true
+    read -p $"\e[33mVoulez-vous installer WhiteSur-Dark ? (o/n) : \e[0m" choice
+    [[ $choice =~ ^[Oo]$ ]] && install_whitesur=true
 
-    read -p "Voulez-vous installer Fluent Cursor ? (o/n) : " response
-    [[ $response =~ ^[Oo]$ ]] && install_fluent=true
+    read -p $"\e[33mVoulez-vous installer Fluent Cursor ? (o/n) : \e[0m" choice
+    [[ $choice =~ ^[Oo]$ ]] && install_fluent=true
 fi
 
 if [ "$download_wallpaper" = true ]; then
