@@ -262,7 +262,7 @@ execute_gwsl() {
 # Fonction pour installer des packages optionnels
 optional_packages() {
     if $USE_GUM; then
-        packages=$(gum choose --no-limit --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer")
+        packages=$(gum choose --selected="Tout installer" --no-limit --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf")
     else
         info_msg "Sélectionnez les packages à installer :"
         echo
