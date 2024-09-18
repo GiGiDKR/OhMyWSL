@@ -126,7 +126,7 @@ guiApplications=false
 [network]
 generateResolvConf = false"
 
-execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier Wslconfig"
+execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier wslconfig"
 
 ## Installation des paquets
 packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark jq"

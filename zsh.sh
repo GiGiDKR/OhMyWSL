@@ -65,6 +65,8 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
+sudo -v
+
 execute_command "sudo apt install -y zsh wget curl git unzip" "Installation de zsh"
 
 # Installation de Oh My Zsh
@@ -202,5 +204,5 @@ update_zshrc() {
 }
 
 install_zsh_plugins
-execute_command "sudo chsh -s $(which zsh)" "Changement du shell par défaut à zsh"
+execute_command "chsh -s $(which zsh)" "Changement du shell par défaut à zsh"
 execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh"
