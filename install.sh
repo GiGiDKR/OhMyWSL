@@ -31,6 +31,7 @@ install_gum() {
     sudo mkdir -p /etc/apt/keyrings > /dev/null 2>&1
     curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg > /dev/null 2>&1
     echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list > /dev/null 2>&1
+    sudo chmod 644 /etc/apt/keyrings/charm.gpg /etc/apt/sources.list.d/charm.list > /dev/null 2>&1
     sudo apt update -y > /dev/null 2>&1 && sudo apt install -y gum > /dev/null 2>&1
 }
 
@@ -101,7 +102,7 @@ execute_command() {
         fi
     else
         info_msg "$info_msg"
-        if DEBIAN_FRONTEND=noninteractive eval "$command"; then
+        if DEBIAN_FRONTEND=noninteractive eval "$command" > /dev/null 2>&1; then
             success_msg "$success_msg"
         else
             error_msg "$error_msg"
@@ -120,7 +121,7 @@ show_banner
 
 info_msg "Configuration du système"
 # Création du fichier .wslconfig
-wslconfig_file="/mnt/c/Users/$USER/.wslconfig"
+wslconfig_file="/mnt/c/Users/$USERNAME/.wslconfig"
 content="[wsl2]
 guiApplications=false
 [network]
@@ -232,16 +233,16 @@ install_gwsl() {
         info_msg "Le fichier GWSL-145-STORE.zip existe déjà dans C:\WSL2-Distros"
     fi
 
-    cd /mnt/c/WSL2-Distros > /dev/null 2>&1
+    cd /mnt/c/WSL2-Distros
     execute_command "unzip GWSL-145-STORE.zip" "Extraction de GWSL"
     execute_command "mv GWSL-145-STORE GWSL" "Renommage du dossier GWSL"
     execute_command "rm -f GWSL-145-STORE.zip" "Nettoyage des fichiers temporaires"
 
-    cd - > /dev/null 2>&1
+    cd
 }
 
 configure_gwsl() {
-    local gwsl_config_file="/mnt/c/Users/$USER/AppData/Roaming/GWSL/settings.json"
+    local gwsl_config_file="/mnt/c/Users/$USERNAME/AppData/Roaming/GWSL/settings.json"
     local temp_file="/tmp/gwsl_settings.json"
 
     info_msg "Configuration de GWSL"
@@ -253,6 +254,7 @@ configure_gwsl() {
         rm -f "$temp_file"
     else
         error_msg "Le fichier $gwsl_config_file n'existe pas"
+        return 1
     fi
 }
 
@@ -392,17 +394,16 @@ fi
 if $USE_GUM; then
     if gum confirm "Voulez-vous installer GWSL ?"; then
         install_gwsl
-        configure_gwsl
+        configure_gwsl || error_msg "Échec de la configuration de GWSL"
     fi
 else
     read -p "Voulez-vous installer GWSL ? (o/n) : " install_gwsl_choice
     if [ "$install_gwsl_choice" = "o" ]; then
         install_gwsl
-        configure_gwsl
+        configure_gwsl || error_msg "Échec de la configuration de GWSL"
     fi
 fi
 
-# TODO : Décommenter le code ci-dessous pour démarrer XFCE4
 execute_command "timeout 5s sudo startxfce4 &> /dev/null" "Session XFCE4 fermée après 5 secondes"
 
 ## Configuration de XFCE4
@@ -414,8 +415,6 @@ execute_command "touch $HOME/.ICEauthority" "Création de fichiers"
 execute_command "chmod 600 $HOME/.ICEauthority" "Modification des permissions des fichiers"
 execute_command "sudo mkdir -p /run/user/$UID" "Création d'un dossier temporaire"
 execute_command "sudo chown -R $UID:$UID /run/user/$UID/" "Modification des permissions du dossier"
-# TODO Supprimer le code ci-dessous 
-#execute_command "echo \$DISPLAY >> $HOME/.bashrc" "Ajout de l'affichage de $DISPLAY au prompt"
 
 # Personnalisation XFCE
 if $USE_GUM; then

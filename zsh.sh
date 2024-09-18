@@ -47,7 +47,7 @@ execute_command() {
         fi
     else
         info_msg "$info_msg"
-        if eval "$command"; then
+        if eval "$command" > /dev/null 2>&1; then
             success_msg "$success_msg"
         else
             error_msg "$error_msg"
@@ -79,8 +79,6 @@ fi
 
 if [ "$install_oh_my_zsh" = true ]; then
     execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git \"$HOME/.oh-my-zsh\" --quiet" "Installation de Oh-My-Zsh"
-    # TODO : Supprimer le code ci-dessous
-    #execute_command "cp \"$HOME/.oh-my-zsh/templates/zshrc.zsh-template\" \"$ZSHRC\"" "Copie du fichier .zshrc"
 fi
 
 [ -f "$ZSHRC" ] && cp "$ZSHRC" "${ZSHRC}.bak"

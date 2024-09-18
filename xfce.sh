@@ -45,7 +45,7 @@ execute_command() {
         fi
     else
         info_msg "$info_msg"
-        if eval "$command"; then
+        if eval "$command" > /dev/null 2>&1; then
             success_msg "$success_msg"
         else
             error_msg "$error_msg"
@@ -90,8 +90,6 @@ fi
 if [ "$download_wallpaper" = true ]; then
     ## Téléchargement et installation du fond d'écran
     execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png" "Téléchargement du fond d'écran"
-    # TODO : Supprimer le code ci-dessous
-#    execute_command "sudo mkdir -p /usr/share/backgrounds/xfce/" "Création du dossier de fond d'écran"
     execute_command "sudo mv waves.png /usr/share/backgrounds/xfce/" "Installation du fond d'écran"
 fi
 
