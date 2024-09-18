@@ -8,11 +8,7 @@ Open a Windows Terminal and run the following command :
 ```bash
 wsl --install
 ```
-
-After the installation, run the following command to connect to the Ubuntu distribution :
-```bash
-wsl
-```
+After installing you will be logged into the created user session, ready to run the OhMyWSL installation.
 
 ## Install OhMyWSL
 curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/install.sh -o install.sh && chmod +x install.sh && ./install.sh
