@@ -35,21 +35,41 @@ execute_command() {
     local info_msg="$2"
     local success_msg="✓ $info_msg"
     local error_msg="✗ $info_msg"
+    local needs_input="${3:-false}"
 
     if $USE_GUM; then
-        if gum spin  --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
-            gum style "$success_msg" --foreground 82
+        if $needs_input; then
+            info_msg "$info_msg"
+            if bash -c "$command"; then
+                gum style "$success_msg" --foreground 82
+            else
+                gum style "$error_msg" --foreground 196
+                return 1
+            fi
         else
-            gum style "$error_msg" --foreground 196
-            return 1
+            if gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
+                gum style "$success_msg" --foreground 82
+            else
+                gum style "$error_msg" --foreground 196
+                return 1
+            fi
         fi
     else
         info_msg "$info_msg"
-        if eval "$command" > /dev/null 2>&1; then
-            success_msg "$success_msg"
+        if $needs_input; then
+            if eval "$command"; then
+                success_msg "$success_msg"
+            else
+                error_msg "$error_msg"
+                return 1
+            fi
         else
-            error_msg "$error_msg"
-            return 1
+            if eval "$command" > /dev/null 2>&1; then
+                success_msg "$success_msg"
+            else
+                error_msg "$error_msg"
+                return 1
+            fi
         fi
     fi
 }
@@ -63,40 +83,90 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
+# Vérification des dépendances
+check_dependencies() {
+    local dependencies=("wget" "unzip" "tar")
+    local missing_deps=()
+
+    for dep in "${dependencies[@]}"; do
+        if ! command -v "$dep" &> /dev/null; then
+            missing_deps+=("$dep")
+        fi
+    done
+
+    if [ ${#missing_deps[@]} -ne 0 ]; then
+        error_msg "Dépendances manquantes : ${missing_deps[*]}"
+        info_msg "Installation des dépendances manquantes..."
+        execute_command "sudo apt update && sudo apt install -y ${missing_deps[*]}" "Installation des dépendances"
+    fi
+}
+
+# Fonction pour télécharger et installer un thème
+install_theme() {
+    local name="$1"
+    local url="$2"
+    local install_dir="$3"
+    local zip_file="${name}.zip"
+
+    execute_command "wget '$url' -O '$zip_file'" "Téléchargement de $name"
+    execute_command "unzip -o '$zip_file' -d '$install_dir'" "Installation de $name"
+    execute_command "rm '$zip_file'" "Nettoyage des fichiers temporaires"
+}
+
+# Fonction pour appliquer le thème XFCE
+apply_xfce_theme() {
+    local gtk_theme="$1"
+    local icon_theme="$2"
+    local cursor_theme="$3"
+
+    execute_command "xfconf-query -c xsettings -p /Net/ThemeName -s '$gtk_theme'" "Application du thème GTK"
+    execute_command "xfconf-query -c xsettings -p /Net/IconThemeName -s '$icon_theme'" "Application du thème d'icônes"
+    execute_command "xfconf-query -c xsettings -p /Gtk/CursorThemeName -s '$cursor_theme'" "Application du thème de curseur"
+    execute_command "xfconf-query -c xfwm4 -p /general/theme -s '$gtk_theme'" "Application du thème de fenêtre"
+}
+
+# Vérification des dépendances
+check_dependencies
+
 if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer le fond d'écran ?"; then
-        download_wallpaper=true
-    fi
-    
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer WhiteSur-Dark ?"; then
-        install_whitesur=true
-    fi
-    
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer Fluent Cursor ?"; then
-        install_fluent=true
-    fi
+    download_wallpaper=$(gum choose --header="Installer le fond d'écran ?" --item.foreground="33" "Oui" "Non")
+    install_whitesur=$(gum choose --header="Installer WhiteSur-Dark ?" --item.foreground="33" "Oui" "Non")
+    install_fluent=$(gum choose --header="Installer Fluent Cursor ?" --item.foreground="33" "Oui" "Non")
+    apply_themes=$(gum choose --header="Appliquer automatiquement les thèmes ?" --item.foreground="33" "Oui" "Non")
 else
     read -p $"\e[33mVoulez-vous installer le fond d'écran ? (o/n) : \e[0m" choice
-    [[ $choice =~ ^[Oo]$ ]] && download_wallpaper=true
+    [[ $choice =~ ^[Oo]$ ]] && download_wallpaper="Oui"
 
     read -p $"\e[33mVoulez-vous installer WhiteSur-Dark ? (o/n) : \e[0m" choice
-    [[ $choice =~ ^[Oo]$ ]] && install_whitesur=true
+    [[ $choice =~ ^[Oo]$ ]] && install_whitesur="Oui"
 
     read -p $"\e[33mVoulez-vous installer Fluent Cursor ? (o/n) : \e[0m" choice
-    [[ $choice =~ ^[Oo]$ ]] && install_fluent=true
+    [[ $choice =~ ^[Oo]$ ]] && install_fluent="Oui"
+
+    read -p $"\e[33mVoulez-vous appliquer automatiquement les thèmes ? (o/n) : \e[0m" choice
+    [[ $choice =~ ^[Oo]$ ]] && apply_themes="Oui"
 fi
 
-if [ "$download_wallpaper" = true ]; then
-    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png" "Téléchargement du fond d'écran"
-    execute_command "sudo mv waves.png /usr/share/backgrounds/xfce/" "Installation du fond d'écran"
+if [ "$download_wallpaper" = "Oui" ]; then
+    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png -O /tmp/waves.png" "Téléchargement du fond d'écran"
+    execute_command "sudo mv /tmp/waves.png /usr/share/backgrounds/xfce/" "Installation du fond d'écran"
 fi
 
-if [ "$install_whitesur" = true ]; then
-    execute_command "wget https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" "Téléchargement de WhiteSur-Dark"
-    execute_command "unzip 2024.09.02.zip && tar -xf WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz && sudo mv WhiteSur-Dark/ /usr/share/themes/ && sudo rm -rf WhiteSur* && sudo rm 2024.09.02.zip" "Installation de WhiteSur-Dark"
+if [ "$install_whitesur" = "Oui" ]; then
+    install_theme "WhiteSur-Dark" "https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" "/tmp"
+    execute_command "sudo mv /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark /usr/share/themes/" "Installation de WhiteSur-Dark"
+    execute_command "rm -rf /tmp/WhiteSur-gtk-theme-2024.09.02" "Nettoyage des fichiers temporaires"
 fi
 
-if [ "$install_fluent" = true ]; then
-    execute_command "wget https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" "Téléchargement de Fluent Cursor"
-    execute_command "unzip 2024-02-25.zip && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/ && sudo mv Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/ && sudo rm -rf $HOME/Fluent* && sudo rm 2024-02-25.zip" "Installation de Fluent Cursor"
+if [ "$install_fluent" = "Oui" ]; then
+    install_theme "Fluent-cursors" "https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" "/tmp"
+    execute_command "sudo mv /tmp/Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/Fluent-cursors" "Installation de Fluent Cursor"
+    execute_command "sudo mv /tmp/Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/Fluent-cursors-dark" "Installation de Fluent Cursor Dark"
+    execute_command "rm -rf /tmp/Fluent-icon-theme-2024-02-25" "Nettoyage des fichiers temporaires"
+fi
+
+if [ "$apply_themes" = "Oui" ]; then
+    info_msg "Application des thèmes..."
+    apply_xfce_theme "WhiteSur-Dark" "Fluent-dark" "Fluent-cursors-dark"
+    success_msg "Thèmes appliqués avec succès"
 fi

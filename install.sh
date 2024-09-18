@@ -116,6 +116,13 @@ configure_noninteractive() {
     export DEBIAN_FRONTEND=noninteractive
 }
 
+# Fonction de nettoyage
+cleanup() {
+    info_msg "Nettoyage en cours..."
+    execute_command "sudo apt autoremove -y && sudo apt clean" "Nettoyage des paquets inutiles"
+    execute_command "rm -f $HOME/zsh.sh $HOME/xfce.sh" "Suppression des scripts temporaires"
+}
+
 sudo -v
 show_banner
 
@@ -129,11 +136,13 @@ generateResolvConf = false"
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier wslconfig"
 
 ## Installation des paquets
-packages="xfce4 xfce4-goodies gdm3 xwayland nautilus ark jq"
+packages=(xfce4 xfce4-goodies gdm3 xwayland nautilus ark jq)
 
 execute_command "sudo apt update -y" "Recherche de mises à jour"
 execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
 configure_noninteractive
+
+# Installation des paquets
 for package in $packages; do
     execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
 done
@@ -141,11 +150,9 @@ done
 # Installation de ZSH
 info_msg "❯ Configuration du shell"
 if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.fo
-reground="0""Installer zsh ?"; then
-        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" "Téléchargement du script zsh"
-        execute_command "chmod +x zsh.sh" "Modification des permissions"
-        "$HOME/zsh.sh" --gum  # Exécution directe du script avec gum
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer zsh ?"; then
+        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement et préparation du script zsh"
+        "$HOME/zsh.sh" --gum
         if [ $? -eq 0 ]; then
             success_msg "✓ Installation de zsh"
         else
@@ -155,14 +162,11 @@ reground="0""Installer zsh ?"; then
         info_msg "𐄂 Installation de zsh refusée"
     fi
 else
-    read -p $"\e[33mInstaller zsh ? (o/n) : \e[0m" choice
-
-    reponse_zsh=$(echo "$reponse_zsh" | tr '[:upper:]' '[:lower:]')
-
-    if [ "$reponse_zsh" = "oui" ] || [ "$reponse_zsh" = "o" ] || [ "$reponse_zsh" = "y" ] || [ "$reponse_zsh" = "yes" ]; then
-        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh" "Téléchargement du script zsh"
-        execute_command "chmod +x zsh.sh" "Modification des permissions"
-        "$HOME/zsh.sh"  # Exécution directe du script
+    read -p $'\e[33mInstaller zsh ? (o/n) : \e[0m' choice
+    choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
+    if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
+        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement et préparation du script zsh"
+        "$HOME/zsh.sh"
         if [ $? -eq 0 ]; then
             success_msg "✓ Installation de zsh"
         else
@@ -229,30 +233,7 @@ install_gwsl() {
         info_msg "Sources déjà téléchargées"
     fi
 
-    cd /mnt/c/WSL2-Distros
-    execute_command "unzip GWSL-145-STORE.zip" "Extraction de GWSL"
-    execute_command "mv GWSL-145-STORE GWSL" "Configuration de GWSL"
-    execute_command "rm -f GWSL-145-STORE.zip" "Nettoyage des fichiers temporaires"
-
-    cd
-}
-
-# TODO Vérifier si la fonction peut être supprimée
-configure_gwsl() {
-    local gwsl_config_file="/mnt/c/Users/$USERNAME/AppData/Roaming/GWSL/settings.json"
-    local temp_file="/tmp/gwsl_settings.json"
-
-    info_msg "❯ Configuration de GWSL"
-
-    if [ -f "$gwsl_config_file" ]; then
-        cat "$gwsl_config_file" > "$temp_file"
-        jq '.graphics = {"window_mode": "single", "hidpi": true}' "$temp_file" > "${temp_file}.tmp" && mv "${temp_file}.tmp" "$temp_file"
-        execute_command "cp \"$temp_file\" \"$gwsl_config_file\"" "Mise à jour des paramètres de GWSL"
-        rm -f "$temp_file"
-    else
-        error_msg "Le fichier $gwsl_config_file n'existe pas"
-        return 1
-    fi
+    execute_command "cd /mnt/c/WSL2-Distros && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL && rm -f GWSL-145-STORE.zip" "Extraction et configuration de GWSL"
 }
 
 execute_gwsl() {
@@ -343,7 +324,6 @@ alias search="nala search"
 alias list="nala list --upgradeable"
 alias show="nala show"' >> "$rc_file"
             ;;
-        # TODO Ajoutez d'autres cas pour les packages supplémentaires si nécessaire
     esac
 }
 
@@ -385,7 +365,7 @@ else
 
     choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
 
-    if [ "$choice" = "oui" ] || [ "$choice" = "o" ] || [ "$choice" = "y" ] || [ "$choice" = "yes" ]; then
+    if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
         optional_packages
     fi
 fi
@@ -395,17 +375,13 @@ info_msg "❯ Installation de GWSL"
 if $USE_GUM; then
     if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer GWSL ?"; then
         install_gwsl
-# TODO Vérifier si la fonction peut être supprimée
-#        configure_gwsl || error_msg "Échec de la configuration de GWSL"
     fi
 else
     read -p $"\e[33mVoulez-vous installer GWSL ? (o/n) : \e[0m" choice
     choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
     
-    if [ "$choice" = "oui" ] || [ "$choice" = "o" ] || [ "$choice" = "y" ] || [ "$choice" = "yes" ]; then
+    if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
         install_gwsl
-        # TODO Vérifier si la fonction peut être supprimée
-#        configure_gwsl || error_msg "Échec de la configuration de GWSL"
     fi
 fi
 
@@ -414,12 +390,12 @@ execute_command "timeout 5s sudo startxfce4" "Session XFCE4 fermée après 5 sec
 ## Configuration de XFCE4
 info_msg "❯ Configuration de XFCE4"
 
-execute_command "mkdir -p $HOME/.config/xfce4" "Création du dossier de configuration XFCE4"
-execute_command "cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc" "Copie de fichiers"
-execute_command "touch $HOME/.ICEauthority" "Création de fichiers"
-execute_command "chmod 600 $HOME/.ICEauthority" "Modification des permissions des fichiers"
-execute_command "sudo mkdir -p /run/user/$UID" "Création d'un dossier temporaire"
-execute_command "sudo chown -R $UID:$UID /run/user/$UID/" "Modification des permissions du dossier"
+execute_command "mkdir -p $HOME/.config/xfce4 && \
+                 cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc && \
+                 touch $HOME/.ICEauthority && \
+                 chmod 600 $HOME/.ICEauthority && \
+                 sudo mkdir -p /run/user/$UID && \
+                 sudo chown -R $UID:$UID /run/user/$UID/" "Configuration de XFCE4"
 
 # Personnalisation XFCE
 if $USE_GUM; then
@@ -442,7 +418,7 @@ else
 
     choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
 
-    if [ "$choice" = "oui" ] || [ "$choice" = "o" ] || [ "$choice" = "y" ] || [ "$choice" = "yes" ]; then
+    if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
         if [ -f "$HOME/xfce.sh" ]; then
             "$HOME/xfce.sh"  # Exécution directe du script
             if [ $? -eq 0 ]; then
@@ -462,7 +438,10 @@ execute_gwsl
 sleep 5
 execute_command "dbus-launch xfce4-session" "Lancement de la session XFCE4"
 sleep 5
-execute_command "rm -f zsh.sh xfce.sh" "Nettoyage des fichiers temporaires"
-execute_command "rm -- "$0"" "Suppression du script d'installation"
+
+# Nettoyage final
+cleanup
+
+execute_command "rm -- \"$0\"" "Suppression du script d'installation"
 exec zsh
 exit 0
