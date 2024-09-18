@@ -37,21 +37,41 @@ execute_command() {
     local info_msg="$2"
     local success_msg="✓ $info_msg"
     local error_msg="✗ $info_msg"
+    local needs_input="${3:-false}"
 
     if $USE_GUM; then
-        if gum spin  --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
-            gum style "$success_msg" --foreground 82
+        if $needs_input; then
+            info_msg "$info_msg"
+            if bash -c "$command"; then
+                gum style "$success_msg" --foreground 82
+            else
+                gum style "$error_msg" --foreground 196
+                return 1
+            fi
         else
-            gum style "$error_msg" --foreground 196
-            return 1
+            if gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
+                gum style "$success_msg" --foreground 82
+            else
+                gum style "$error_msg" --foreground 196
+                return 1
+            fi
         fi
     else
         info_msg "$info_msg"
-        if eval "$command" > /dev/null 2>&1; then
-            success_msg "$success_msg"
+        if $needs_input; then
+            if eval "$command"; then
+                success_msg "$success_msg"
+            else
+                error_msg "$error_msg"
+                return 1
+            fi
         else
-            error_msg "$error_msg"
-            return 1
+            if eval "$command" > /dev/null 2>&1; then
+                success_msg "$success_msg"
+            else
+                error_msg "$error_msg"
+                return 1
+            fi
         fi
     fi
 }
@@ -204,5 +224,5 @@ update_zshrc() {
 }
 
 install_zsh_plugins
-execute_command "chsh -s $(which zsh)" "Changement du shell par défaut à zsh"
+execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut" true
 execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh"
