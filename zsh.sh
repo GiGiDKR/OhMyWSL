@@ -141,6 +141,9 @@ execute_command "curl -fLo \"$HOME/.oh-my-zsh/custom/aliases.zsh\" https://raw.g
 install_zsh_plugins() {
     if $USE_GUM; then
         PLUGINS=$(gum choose --no-limit --header="Sélectionner avec ESPACE les plugins à installer :" "zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder" "Tout installer")
+        if [[ "$PLUGINS" == *"Tout installer"* ]]; then
+            PLUGINS="zsh-autosuggestions zsh-syntax-highlighting zsh-completions you-should-use zsh-abbr zsh-alias-finder"
+        fi
     else
         info_msg "Sélectionner les plugins à installer (SÉPARÉS PAR DES ESPACES) :"
         echo
