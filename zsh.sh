@@ -171,15 +171,36 @@ update_zshrc() {
     local zshrc="$HOME/.zshrc"
     cp "$zshrc" "${zshrc}.bak"
 
-    # Remplacer la ligne des plugins dans .zshrc avec les nouveaux plugins
-    sed -i "/^plugins=(/,/)/c\plugins=(\n\t${PLUGINS}\n)" "$zshrc"
+    # Liste des plugins à ajouter
+    local plugins_to_add=(
+        git
+        command-not-found
+        copyfile
+        node
+        npm
+        vscode
+        web-search
+        timer
+    )
 
-    # Ajouter la ligne fpath+= pour zsh-completions si nécessaire
+    # Ajout des nouveaux plugins à la liste existante
+    PLUGINS=$(echo "$PLUGINS ${plugins_to_add[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+
+    # Création de la nouvelle section plugins
+    local new_plugins_section="plugins=(\n"
+    for plugin in $PLUGINS; do
+        new_plugins_section+="\t$plugin\n"
+    done
+    new_plugins_section+=")"
+
+    # Remplacement de la section plugins existante
+    sed -i "/^plugins=(/,/)/c\\${new_plugins_section}" "$zshrc"
+
     if [[ "$PLUGINS" == *"zsh-completions"* ]] && ! grep -q "fpath+=" "$zshrc"; then
         sed -i '/^source $ZSH\/oh-my-zsh.sh$/i\fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src' "$zshrc"
     fi
 }
 
 install_zsh_plugins
-execute_command "chsh -s $(which zsh)" "Changement du shell par défaut à zsh"
+execute_command "sudo chsh -s $(which zsh)" "Changement du shell par défaut à zsh"
 execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh"
