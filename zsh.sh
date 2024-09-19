@@ -265,7 +265,7 @@ else
 fi
 
 # Configuration de base de ZSH
-execute_command "curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/zshrc" "Configuration de base de zshrc"
+execute_command "curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/zshrc" "Configuration de base de zshrc"
 
 # Installation de PowerLevel10k
 if $USE_GUM; then

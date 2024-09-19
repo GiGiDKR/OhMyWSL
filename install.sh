@@ -168,6 +168,10 @@ execute_command "sudo apt update -y" "Recherche de mises à jour"
 execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
 configure_noninteractive
 
+## Installation des paquets
+
+packages=(xfce4 xfce4-goodies xwayland nautilus ark jq)
+
 install_and_configure_gdm3() {
     execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y gdm3" "Installation de gdm3"
     execute_command "echo 'gdm3 shared/default-x-display-manager select gdm3' | sudo debconf-set-selections" "Configuration de gdm3 comme gestionnaire par défaut"
@@ -176,9 +180,6 @@ install_and_configure_gdm3() {
 }
 
 install_and_configure_gdm3
-
-## Installation des paquets
-packages=(xfce4 xfce4-goodies xwayland nautilus ark jq)
 
 for package in $packages; do
     execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
