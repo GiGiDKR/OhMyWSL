@@ -174,8 +174,8 @@ packages=(xfce4 xfce4-goodies xwayland nautilus ark jq)
 
 install_and_configure_gdm3() {
     execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y gdm3" "Installation de gdm3"
-    execute_command "echo 'gdm3 shared/default-x-display-manager select gdm3' | sudo debconf-set-selections" "Configuration de gdm3 comme gestionnaire par défaut"
-    execute_command "sudo dpkg-reconfigure gdm3" "Reconfiguration de gdm3"
+    execute_command "echo 'gdm3 shared/default-x-display-manager select gdm3' | sudo debconf-set-selections" "Définition de gdm3 comme gestionnaire par défaut"
+    execute_command "sudo dpkg-reconfigure gdm3" "Configuration de gdm3"
     execute_command "sudo systemctl enable gdm3" "Activation du service gdm3"
 }
 

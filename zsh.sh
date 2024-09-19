@@ -240,64 +240,66 @@ update_zshrc() {
 
 # Fonction principale
 main() {
+    check_dependencies
+    install_zsh
 
-check_dependencies
-install_zsh
-
-# Demander à l'utilisateur s'il souhaite sauvegarder la configuration existante
-if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous sauvegarder la configuration ZSH existante ?"; then
-        backup_existing_config
-    fi
-else
-    read -p $'\e[33mVoulez-vous sauvegarder la configuration ZSH existante ? (o/n) : \e[0m' choice
-    [[ $choice =~ ^[Oo]$ ]] && backup_existing_config
-fi
-
-# Installation de Oh My Zsh
-if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer Oh-My-Zsh ?"; then
-        install_oh_my_zsh
-    fi
-else
-    read -p $'\e[33mVoulez-vous installer Oh-My-Zsh ? (o/n) : \e[0m' choice
-    [[ $choice =~ ^[Oo]$ ]] && install_oh_my_zsh
-fi
-
-# Configuration de base de ZSH
-execute_command "curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/zshrc" "Configuration de base de zshrc"
-
-# Installation de PowerLevel10k
-if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer PowerLevel10k ?"; then
-        install_powerlevel10k
-        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer le prompt OhMyZSH ?"; then
-            install_ohmyzsh_prompt
-        else
-            info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
+    # Demander à l'utilisateur s'il souhaite sauvegarder la configuration existante
+    if $USE_GUM; then
+        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous sauvegarder la configuration ZSH existante ?"; then
+            backup_existing_config
         fi
+    else
+        read -p $'\e[33mVoulez-vous sauvegarder la configuration ZSH existante ? (o/n) : \e[0m' choice
+        [[ $choice =~ ^[Oo]$ ]] && backup_existing_config
     fi
-else
-    read -p $'\e[33mVoulez-vous installer PowerLevel10k ? (o/n) : \e[0m' choice
-    if [[ $choice =~ ^[Oo]$ ]]; then
-        install_powerlevel10k
-        read -p $'\e[33mInstaller le prompt OhMyZSH ? (o/n) : \e[0m' choice
+
+    # Installation de Oh My Zsh
+    if $USE_GUM; then
+        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer Oh-My-Zsh ?"; then
+            install_oh_my_zsh
+        fi
+    else
+        read -p $'\e[33mVoulez-vous installer Oh-My-Zsh ? (o/n) : \e[0m' choice
+        [[ $choice =~ ^[Oo]$ ]] && install_oh_my_zsh
+    fi
+
+    # Configuration de base de ZSH
+    execute_command "curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/zshrc" "Configuration de base de zshrc"
+
+    # Installation de PowerLevel10k
+    if $USE_GUM; then
+        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer PowerLevel10k ?"; then
+            install_powerlevel10k
+            if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer le prompt OhMyZSH ?"; then
+                install_ohmyzsh_prompt
+            else
+                info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
+            fi
+        fi
+    else
+        read -p $'\e[33mVoulez-vous installer PowerLevel10k ? (o/n) : \e[0m' choice
         if [[ $choice =~ ^[Oo]$ ]]; then
-            install_ohmyzsh_prompt
-        else
-            info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
+            install_powerlevel10k
+            read -p $'\e[33mInstaller le prompt OhMyZSH ? (o/n) : \e[0m' choice
+            if [[ $choice =~ ^[Oo]$ ]]; then
+                install_ohmyzsh_prompt
+            else
+                info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
+            fi
         fi
     fi
-fi
 
-# Installation de la configuration des alias
-execute_command "curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh" "Téléchargement de la configuration des alias"
+    # Installation de la configuration des alias
+    execute_command "curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh" "Téléchargement de la configuration des alias"
 
-# Installation des plugins
-install_zsh_plugins
+    # Installation des plugins
+    install_zsh_plugins
 
-# Définition de zsh comme shell par défaut
-execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut" true
+    # Définition de zsh comme shell par défaut
+    execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut" true
 
-# Rechargement de la configuration zsh
-execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh"
+    # Rechargement de la configuration zsh
+    execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh"
+}
+
+main
