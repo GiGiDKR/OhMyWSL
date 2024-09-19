@@ -86,7 +86,7 @@ done
 
 # Vérification des dépendances
 check_dependencies() {
-    local dependencies=("zsh" "wget" "curl" "git" "unzip")
+    local dependencies=("wget" "curl" "git" "unzip")
     local missing_deps=()
 
     for dep in "${dependencies[@]}"; do
@@ -102,7 +102,23 @@ check_dependencies() {
     fi
 }
 
-# Sauvegarde de la configuration existante
+# Fonction pour installer ZSH
+install_zsh() {
+    if ! command -v zsh &> /dev/null; then
+        info_msg "ZSH n'est pas installé. Installation en cours..."
+        execute_command "sudo apt update && sudo apt install -y zsh" "Installation de ZSH"
+        if [ $? -eq 0 ]; then
+            success_msg "ZSH a été installé avec succès"
+        else
+            error_msg "Échec de l'installation de ZSH"
+            exit 1
+        fi
+    else
+        info_msg "ZSH est déjà installé"
+    fi
+}
+
+# Fonction pour sauvegarder la configuration existante
 backup_existing_config() {
     if [ -f "$ZSHRC" ]; then
         local backup_file="${ZSHRC}.bak.$(date +%Y%m%d%H%M%S)"
@@ -111,7 +127,7 @@ backup_existing_config() {
     fi
 }
 
-# Installation de Oh My Zsh
+# Fonction pour installer Oh My Zsh
 install_oh_my_zsh() {
     if [ ! -d "$HOME/.oh-my-zsh" ]; then
         execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git '$HOME/.oh-my-zsh' --quiet" "Installation de Oh-My-Zsh"
@@ -120,7 +136,7 @@ install_oh_my_zsh() {
     fi
 }
 
-# Installation de PowerLevel10k
+# Fonction pour installer PowerLevel10k
 install_powerlevel10k() {
     if [ ! -d "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" ]; then
         execute_command "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git '$HOME/.oh-my-zsh/custom/themes/powerlevel10k' --quiet" "Installation de PowerLevel10k"
@@ -130,7 +146,15 @@ install_powerlevel10k() {
     fi
 }
 
-# Installation des plugins
+# Fonction pour installer le prompt OhMyZSH
+install_ohmyzsh_prompt() {
+    execute_command "curl -fLo '$HOME/.p10k.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/p10k.zsh" "Téléchargement du prompt OhMyZSH"
+    echo -e "\n# To customize prompt, run \`p10k configure\` or edit ~/.p10k.zsh." >> "$ZSHRC"
+    echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
+    success_msg "Le prompt OhMyZSH a été installé avec succès"
+}
+
+# Fonction pour installer les plugins
 install_zsh_plugins() {
     local plugins_to_install=()
     if $USE_GUM; then
@@ -171,6 +195,7 @@ install_zsh_plugins() {
     update_zshrc "${plugins_to_install[@]}"
 }
 
+# Fonction pour installer un plugin
 install_plugin() {
     local plugin_name=$1
     local plugin_url=""
@@ -191,6 +216,7 @@ install_plugin() {
     fi
 }
 
+# Fonction pour mettre à jour la configuration de ZSH
 update_zshrc() {
     local plugins=("$@")
     local default_plugins=(git command-not-found copyfile node npm vscode web-search timer)
@@ -212,8 +238,11 @@ update_zshrc() {
     fi
 }
 
-# Vérification des dépendances
+# Fonction principale
+main() {
+
 check_dependencies
+install_zsh
 
 # Demander à l'utilisateur s'il souhaite sauvegarder la configuration existante
 if $USE_GUM; then
@@ -242,10 +271,8 @@ execute_command "curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/Oh
 if $USE_GUM; then
     if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer PowerLevel10k ?"; then
         install_powerlevel10k
-        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer le prompt OhMyTermux ?"; then
-            execute_command "curl -fLo '$HOME/.p10k.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/p10k.zsh" "Téléchargement du prompt OhMyTermux"
-            echo -e "\n# To customize prompt, run \`p10k configure\` or edit ~/.p10k.zsh." >> "$ZSHRC"
-            echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
+        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer le prompt OhMyZSH ?"; then
+            install_ohmyzsh_prompt
         else
             info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
         fi
@@ -254,21 +281,23 @@ else
     read -p $'\e[33mVoulez-vous installer PowerLevel10k ? (o/n) : \e[0m' choice
     if [[ $choice =~ ^[Oo]$ ]]; then
         install_powerlevel10k
-        read -p $'\e[33mInstaller le prompt OhMyTermux ? (o/n) : \e[0m' choice
+        read -p $'\e[33mInstaller le prompt OhMyZSH ? (o/n) : \e[0m' choice
         if [[ $choice =~ ^[Oo]$ ]]; then
-            execute_command "curl -fLo '$HOME/.p10k.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/p10k.zsh" "Téléchargement du prompt OhMyTermux"
-            echo -e "\n# To customize prompt, run \`p10k configure\` or edit ~/.p10k.zsh." >> "$ZSHRC"
-            echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
+            install_ohmyzsh_prompt
         else
             info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
         fi
     fi
 fi
 
+# Installation de la configuration des alias
 execute_command "curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh" "Téléchargement de la configuration des alias"
 
 # Installation des plugins
 install_zsh_plugins
 
+# Définition de zsh comme shell par défaut
 execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut" true
+
+# Rechargement de la configuration zsh
 execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh"

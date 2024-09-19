@@ -101,7 +101,7 @@ error_msg() {
 # Fonction pour journaliser les erreurs
 log_error() {
     local error_msg="$1"
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERREUR: $error_msg" >> "$HOME/ohmywsl_install_errors.log"
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERREUR: $error_msg" >> "$HOME/ohmywsl.log"
 }
 
 # Fonction pour exécuter une commande et afficher le résultat
@@ -156,7 +156,7 @@ sudo -v
 show_banner
 
 info_msg "❯ Configuration du système"
-wslconfig_file="/mnt/c/Users/$USERNAME/.wslconfig"
+wslconfig_file="/mnt/c/Users/$USER/.wslconfig"
 content="[wsl2]
 guiApplications=false
 [network]
@@ -164,14 +164,13 @@ generateResolvConf = false"
 
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier wslconfig"
 
-## Installation des paquets
-packages=(xfce4 xfce4-goodies gdm3 xwayland nautilus ark jq)
-
 execute_command "sudo apt update -y" "Recherche de mises à jour"
 execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
 configure_noninteractive
 
-# Installation des paquets
+## Installation des paquets
+packages=(xfce4 xfce4-goodies gdm3 xwayland nautilus ark jq)
+
 for package in $packages; do
     execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
 done
@@ -180,7 +179,7 @@ done
 info_msg "❯ Configuration du shell"
 if $USE_GUM; then
     if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer zsh ?"; then
-        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement et préparation du script zsh"
+        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
         "$HOME/zsh.sh" --gum
         if [ $? -eq 0 ]; then
             success_msg "✓ Installation de zsh"
@@ -194,7 +193,7 @@ else
     read -p $'\e[33mInstaller zsh ? (o/n) : \e[0m' choice
     choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
     if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
-        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement et préparation du script zsh"
+        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
         "$HOME/zsh.sh"
         if [ $? -eq 0 ]; then
             success_msg "✓ Installation de zsh"
