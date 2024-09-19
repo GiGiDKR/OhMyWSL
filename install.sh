@@ -112,8 +112,8 @@ execute_command() {
     local error_msg="✗ $info_msg"
 
     if $USE_GUM; then
-        if ! gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
-            gum style "$error_msg" --foreground 196
+        if gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "DEBIAN_FRONTEND=noninteractive $command"; then
+            gum style "$success_msg" --foreground 82
             log_error "$error_msg"
             return 1
         fi
@@ -168,8 +168,17 @@ execute_command "sudo apt update -y" "Recherche de mises à jour"
 execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
 configure_noninteractive
 
+install_and_configure_gdm3() {
+    execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y gdm3" "Installation de gdm3"
+    execute_command "echo 'gdm3 shared/default-x-display-manager select gdm3' | sudo debconf-set-selections" "Configuration de gdm3 comme gestionnaire par défaut"
+    execute_command "sudo dpkg-reconfigure gdm3" "Reconfiguration de gdm3"
+    execute_command "sudo systemctl enable gdm3" "Activation du service gdm3"
+}
+
+install_and_configure_gdm3
+
 ## Installation des paquets
-packages=(xfce4 xfce4-goodies gdm3 xwayland nautilus ark jq)
+packages=(xfce4 xfce4-goodies xwayland nautilus ark jq)
 
 for package in $packages; do
     execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
