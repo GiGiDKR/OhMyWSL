@@ -125,6 +125,8 @@ apply_xfce_theme() {
     execute_command "xfconf-query -c xfwm4 -p /general/theme -s '$gtk_theme'" "Application du thème de fenêtre"
 }
 
+info_msg "❯ Configuration de XFCE"
+
 # Vérification des dépendances
 check_dependencies
 

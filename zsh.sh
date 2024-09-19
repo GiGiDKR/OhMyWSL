@@ -105,14 +105,7 @@ check_dependencies() {
 # Fonction pour installer ZSH
 install_zsh() {
     if ! command -v zsh &> /dev/null; then
-        info_msg "ZSH n'est pas installé. Installation en cours..."
         execute_command "sudo apt update && sudo apt install -y zsh" "Installation de ZSH"
-        if [ $? -eq 0 ]; then
-            success_msg "ZSH a été installé avec succès"
-        else
-            error_msg "Échec de l'installation de ZSH"
-            exit 1
-        fi
     else
         info_msg "ZSH est déjà installé"
     fi
@@ -148,10 +141,9 @@ install_powerlevel10k() {
 
 # Fonction pour installer le prompt OhMyZSH
 install_ohmyzsh_prompt() {
-    execute_command "curl -fLo '$HOME/.p10k.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/p10k.zsh" "Téléchargement du prompt OhMyZSH"
+    execute_command "curl -fLo '$HOME/.p10k.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/p10k.zsh" "Téléchargement du prompt OhMyZSH"
     echo -e "\n# To customize prompt, run \`p10k configure\` or edit ~/.p10k.zsh." >> "$ZSHRC"
     echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
-    success_msg "Le prompt OhMyZSH a été installé avec succès"
 }
 
 # Fonction pour installer les plugins
@@ -240,6 +232,7 @@ update_zshrc() {
 
 # Fonction principale
 main() {
+    info_msg "❯ Configuration de ZSH"
     check_dependencies
     install_zsh
 
@@ -290,7 +283,7 @@ main() {
     fi
 
     # Installation de la configuration des alias
-    execute_command "curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh" "Téléchargement de la configuration des alias"
+    execute_command "curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/aliases.zsh" "Téléchargement de la configuration des alias"
 
     # Installation des plugins
     install_zsh_plugins
@@ -298,8 +291,9 @@ main() {
     # Définition de zsh comme shell par défaut
     execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut" true
 
+    # TODO Debug
     # Rechargement de la configuration zsh
-    execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh"
+    #execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh"
 }
 
 main

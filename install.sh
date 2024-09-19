@@ -438,6 +438,7 @@ execute_command "mkdir -p $HOME/.config/xfce4 && \
 # Personnalisation XFCE
 if $USE_GUM; then
     if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer la personnalisation XFCE ?"; then
+        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
         if [ -f "$HOME/xfce.sh" ]; then
             "$HOME/xfce.sh" --gum
             if [ $? -eq 0 ]; then
@@ -457,6 +458,7 @@ else
     choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
 
     if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
+        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
         if [ -f "$HOME/xfce.sh" ]; then
             "$HOME/xfce.sh"  # Exécution directe du script
             if [ $? -eq 0 ]; then
