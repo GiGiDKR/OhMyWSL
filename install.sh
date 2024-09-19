@@ -24,6 +24,18 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
+# Vérification des permissions sudo au début du script
+if ! sudo -v; then
+    error_msg "Permissions sudo requises. Veuillez exécuter le script avec sudo."
+    exit 1
+fi
+
+# Vérification de l'environnement WSL
+if ! grep -q Microsoft /proc/version && ! grep -q microsoft /proc/version; then
+    error_msg "Ce script est conçu pour être exécuté dans un environnement WSL."
+    exit 1
+fi
+
 # Fonction pour installer gum
 install_gum() {
     bash_banner
@@ -86,6 +98,12 @@ error_msg() {
     fi
 }
 
+# Fonction pour journaliser les erreurs
+log_error() {
+    local error_msg="$1"
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERREUR: $error_msg" >> "$HOME/ohmywsl_install_errors.log"
+}
+
 # Fonction pour exécuter une commande et afficher le résultat
 execute_command() {
     local command="$1"
@@ -94,20 +112,20 @@ execute_command() {
     local error_msg="✗ $info_msg"
 
     if $USE_GUM; then
-        if gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "DEBIAN_FRONTEND=noninteractive $command"; then
-            gum style "$success_msg" --foreground 82
-        else
+        if ! gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
             gum style "$error_msg" --foreground 196
+            log_error "$error_msg"
             return 1
         fi
+        gum style "$success_msg" --foreground 82
     else
         info_msg "$info_msg"
-        if DEBIAN_FRONTEND=noninteractive eval "$command" > /dev/null 2>&1; then
-            success_msg "$success_msg"
-        else
+        if ! eval "$command"; then
             error_msg "$error_msg"
+            log_error "$error_msg"
             return 1
         fi
+        success_msg "$success_msg"
     fi
 }
 
@@ -123,6 +141,17 @@ cleanup() {
     execute_command "rm -f $HOME/zsh.sh $HOME/xfce.sh" "Suppression des scripts temporaires"
 }
 
+# Vérification des dépendances
+check_dependencies() {
+    local deps=(wget curl)
+    for dep in "${deps[@]}"; do
+        if ! command -v "$dep" &> /dev/null; then
+            execute_command "sudo apt install -y $dep" "Installation de $dep"
+        fi
+    done
+}
+
+check_dependencies
 sudo -v
 show_banner
 
@@ -391,11 +420,11 @@ execute_command "timeout 5s sudo startxfce4" "Session XFCE4 fermée après 5 sec
 info_msg "❯ Configuration de XFCE4"
 
 execute_command "mkdir -p $HOME/.config/xfce4 && \
-                 cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc && \
-                 touch $HOME/.ICEauthority && \
-                 chmod 600 $HOME/.ICEauthority && \
-                 sudo mkdir -p /run/user/$UID && \
-                 sudo chown -R $UID:$UID /run/user/$UID/" "Configuration de XFCE4"
+                cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc && \
+                touch $HOME/.ICEauthority && \
+                chmod 600 $HOME/.ICEauthority && \
+                sudo mkdir -p /run/user/$UID && \
+                sudo chown -R $UID:$UID /run/user/$UID/" "Configuration de XFCE4"
 
 # Personnalisation XFCE
 if $USE_GUM; then
@@ -444,4 +473,3 @@ cleanup
 
 execute_command "rm -- \"$0\"" "Suppression du script d'installation"
 exec zsh
-exit 0
