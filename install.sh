@@ -300,7 +300,7 @@ configure_gwsl() {
 optional_packages() {
     local packages=()
     if $USE_GUM; then
-        packages=($(gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer"))
+        packages=($(gum choose --no-limit --selected="Tout installer" --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer"))
         if [[ " ${packages[*]} " == *"Tout installer"* ]]; then
             packages=("nala" "eza" "lfm" "bat" "fzf")
         fi
@@ -438,7 +438,7 @@ else
     fi
 fi
 
-execute_command "timeout 5s sudo startxfce4" "Session XFCE4 fermée après 5 secondes"
+execute_command "timeout 5s sudo startxfce4" "Exécution initiale de XFCE4"
 
 ## Configuration de XFCE4
 info_msg "❯ Configuration de XFCE4"

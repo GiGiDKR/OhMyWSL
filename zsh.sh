@@ -223,7 +223,7 @@ update_zshrc() {
     done
     new_plugins_section+=")"
 
-    execute_command "sed -i '/^plugins=(/,/)/c\\${new_plugins_section}' '$ZSHRC'" "Mise à jour de la section plugins dans .zshrc"
+    execute_command "sed -i '/^plugins=(/,/)/c\\${new_plugins_section}' '$ZSHRC'" "Ajout des plugins dans .zshrc"
 
     if ! grep -q "source \$ZSH/oh-my-zsh.sh" "$ZSHRC"; then
         echo -e "\n\nsource \$ZSH/oh-my-zsh.sh\n" >> "$ZSHRC"
@@ -263,7 +263,7 @@ main() {
     fi
 
     # Configuration de base de ZSH
-    execute_command "curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/zshrc" "Configuration de base de zshrc"
+    execute_command "curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/zshrc" "Téléchargement de .zshrc"
 
     # Installation de PowerLevel10k
     if $USE_GUM; then

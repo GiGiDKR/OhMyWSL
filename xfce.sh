@@ -109,7 +109,7 @@ install_theme() {
     local zip_file="${name}.zip"
 
     execute_command "wget '$url' -O '$zip_file'" "Téléchargement de $name"
-    execute_command "unzip -o '$zip_file' -d '$install_dir'" "Installation de $name"
+    execute_command "unzip -o '$zip_file' -d '$install_dir'" "Extraction de $name"
     execute_command "rm '$zip_file'" "Nettoyage des fichiers temporaires"
 }
 
@@ -160,8 +160,10 @@ fi
 if [ "$install_whitesur" = "Oui" ]; then
     install_theme "WhiteSur-Dark" "https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" "/tmp"
     execute_command "sudo mkdir -p /usr/share/themes" "Création du répertoire des thèmes"
+    execute_command "tar -xf /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz -C /usr/share/themes/" "Extraction de WhiteSur-Dark"
     execute_command "sudo mv /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark /usr/share/themes/" "Installation de WhiteSur-Dark"
     execute_command "rm -rf /tmp/WhiteSur-gtk-theme-2024.09.02" "Nettoyage des fichiers temporaires"
+
 fi
 
 if [ "$install_fluent" = "Oui" ]; then
