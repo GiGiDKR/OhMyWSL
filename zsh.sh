@@ -116,7 +116,6 @@ backup_existing_config() {
     if [ -f "$ZSHRC" ]; then
         local backup_file="${ZSHRC}.bak.$(date +%Y%m%d%H%M%S)"
         execute_command "cp '$ZSHRC' '$backup_file'" "Sauvegarde de la configuration ZSH existante"
-        success_msg "Configuration ZSH sauvegardée dans $backup_file"
     fi
 }
 
@@ -244,21 +243,21 @@ main() {
 
     # Demander à l'utilisateur s'il souhaite sauvegarder la configuration existante
     if $USE_GUM; then
-        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous sauvegarder la configuration ZSH existante ?"; then
+        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Sauvegarder la configuration ZSH existante ?"; then
             backup_existing_config
         fi
     else
-        read -p $'\e[33mVoulez-vous sauvegarder la configuration ZSH existante ? (o/n) : \e[0m' choice
+        read -p $'\e[33mSauvegarder la configuration ZSH existante ? (o/n) : \e[0m' choice
         [[ $choice =~ ^[Oo]$ ]] && backup_existing_config
     fi
 
     # Installation de Oh My Zsh
     if $USE_GUM; then
-        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer Oh-My-Zsh ?"; then
+        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer Oh-My-Zsh ?"; then
             install_oh_my_zsh
         fi
     else
-        read -p $'\e[33mVoulez-vous installer Oh-My-Zsh ? (o/n) : \e[0m' choice
+        read -p $'\e[33mInstaller Oh-My-Zsh ? (o/n) : \e[0m' choice
         [[ $choice =~ ^[Oo]$ ]] && install_oh_my_zsh
     fi
 
@@ -267,7 +266,7 @@ main() {
 
     # Installation de PowerLevel10k
     if $USE_GUM; then
-        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer PowerLevel10k ?"; then
+        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer PowerLevel10k ?"; then
             install_powerlevel10k
             if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer le prompt OhMyZSH ?"; then
                 install_ohmyzsh_prompt
@@ -276,7 +275,7 @@ main() {
             fi
         fi
     else
-        read -p $'\e[33mVoulez-vous installer PowerLevel10k ? (o/n) : \e[0m' choice
+        read -p $'\e[33mInstaller PowerLevel10k ? (o/n) : \e[0m' choice
         if [[ $choice =~ ^[Oo]$ ]]; then
             install_powerlevel10k
             read -p $'\e[33mInstaller le prompt OhMyZSH ? (o/n) : \e[0m' choice

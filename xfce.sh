@@ -138,17 +138,18 @@ if $USE_GUM; then
 # TODO Revoir cette fonction
 #    gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" "Appliquer automatiquement les thèmes ?" && apply_themes="Oui"
 else
-    read -p $"\e[33mVoulez-vous installer le fond d'écran ? (o/n) : \e[0m" choice
+    read -p $"\e[33mInstaller le fond d'écran ? (o/n) : \e[0m" choice
     [[ $choice =~ ^[Oo]$ ]] && download_wallpaper="Oui"
 
-    read -p $"\e[33mVoulez-vous installer WhiteSur-Dark ? (o/n) : \e[0m" choice
+    read -p $"\e[33mInstaller WhiteSur-Dark ? (o/n) : \e[0m" choice
     [[ $choice =~ ^[Oo]$ ]] && install_whitesur="Oui"
 
-    read -p $"\e[33mVoulez-vous installer Fluent Cursor ? (o/n) : \e[0m" choice
-    [[ $choice =~ ^[Oo]$ ]] && install_fluent="Oui"
+    read -p $"\e[33mInstaller Fluent Cursor ? (o/n) : \e[0m" choice
 
-    read -p $"\e[33mVoulez-vous appliquer automatiquement les thèmes ? (o/n) : \e[0m" choice
-    [[ $choice =~ ^[Oo]$ ]] && apply_themes="Oui"
+    [[ $choice =~ ^[Oo]$ ]] && install_fluent="Oui"
+    # TODO Revoir cette fonction
+    #read -p $"\e[33mVoulez-vous appliquer automatiquement les thèmes ? (o/n) : \e[0m" choice
+    #[[ $choice =~ ^[Oo]$ ]] && apply_themes="Oui"
 fi
 
 if [ "$download_wallpaper" = "Oui" ]; then

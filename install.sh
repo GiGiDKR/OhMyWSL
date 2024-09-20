@@ -442,11 +442,11 @@ fi
 # Demander à l'utilisateur s'il souhaite installer GWSL
 info_msg "❯ Installation de GWSL"
 if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Voulez-vous installer GWSL ?"; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer GWSL ?"; then
         install_gwsl
     fi
 else
-    read -p $"\e[33mVoulez-vous installer GWSL ? (o/n) : \e[0m" choice
+    read -p $'\e[33mInstaller GWSL ? (o/n) : \e[0m' choice
     choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
     
     if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
