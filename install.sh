@@ -161,7 +161,7 @@ guiApplications=false
 [network]
 generateResolvConf = false"
 
-execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier wslconfig"
+execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier .wslconfig"
 
 execute_command "sudo apt update -y" "Recherche de mises à jour"
 execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
@@ -234,18 +234,22 @@ export PULSE_SERVER=tcp:$(cat /etc/resolv.conf | grep nameserver | awk '{print $
 add_lines_to_file() {
     local file="$1"
     local create_if_missing="$2"
+    local file_name=$(basename "$file")
 
     if [ -f "$file" ]; then
-        execute_command "echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $file"
+        execute_command "echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $file_name"
     else
         if [ "$create_if_missing" = "true" ]; then
-            execute_command "touch \"$file\"" "Création du fichier $file"
-            execute_command "echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $file"
+            execute_command "touch \"$file\"" "Création du fichier $file_name"
+            execute_command "echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $file_name"
         else
-            error_msg "Le fichier $file n'existe pas"
+            error_msg "Le fichier $file_name n'existe pas"
         fi
     fi
 }
+
+add_lines_to_file "$bashrc_path" "true"
+[ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path" "false"
 
 add_lines_to_file "$bashrc_path" "true"
 [ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path" "false"
@@ -408,7 +412,7 @@ fi
 common_alias
 
 # Demander à l'utilisateur s'il souhaite installer des packages supplémentaires
-info_msg "❯ Configuration complémentaire"
+info_msg "❯ Configuration additionnelle"
 if $USE_GUM; then
     if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer des packages supplémentaires ?"; then
         optional_packages
