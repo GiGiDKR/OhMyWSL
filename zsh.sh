@@ -294,12 +294,12 @@ main() {
     # Installation des plugins
     install_zsh_plugins
 
-    # Définition de zsh comme shell par défaut
-    execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut" true
-
-    # TODO Debug
+    # TODO Test à effectuer
     # Rechargement de la configuration zsh
     #execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh"
+
+    # Définition de zsh comme shell par défaut
+    #execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut" true
 }
 
 main

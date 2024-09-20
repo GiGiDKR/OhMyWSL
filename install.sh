@@ -525,4 +525,9 @@ else
     fi
 fi
 
-exec zsh
+# Définition de zsh comme shell par défaut s'il est installé
+if command -v zsh &> /dev/null
+then
+    execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut"
+    exec zsh
+fi
