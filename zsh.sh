@@ -288,7 +288,7 @@ main() {
     fi
 
     # Installation de la configuration des alias
-    execute_command "curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/aliases.zsh" "Téléchargement de la configuration des alias"
+    execute_command "curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/aliases.zsh" "Configuration des alias communs"
 
     # Installation des plugins
     install_zsh_plugins

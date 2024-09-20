@@ -309,7 +309,7 @@ configure_gwsl() {
 # Fonction pour installer des packages optionnels
 optional_packages() {
     if $USE_GUM; then
-        packages=$(gum choose --selected="Tout installer" --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer"))
+        packages=$(gum choose --selected="Tout installer" --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer")
         if [[ " ${packages[*]} " == *" Tout installer "* ]]; then
             packages=("nala" "eza" "lfm" "bat" "fzf")
         fi
