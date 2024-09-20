@@ -132,10 +132,11 @@ info_msg "❯ Configuration de XFCE"
 check_dependencies
 
 if $USE_GUM; then
-    gum confirm "Installer le fond d'écran ?" && download_wallpaper="Oui"
-    gum confirm "Installer WhiteSur-Dark ?" && install_whitesur="Oui"
-    gum confirm "Installer Fluent Cursor ?" && install_fluent="Oui"
-    gum confirm "Appliquer automatiquement les thèmes ?" && apply_themes="Oui"
+    gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" "Installer le fond d'écran ?" && download_wallpaper="Oui"
+    gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" "Installer WhiteSur-Dark ?" && install_whitesur="Oui"
+    gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" "Installer Fluent Cursor ?" && install_fluent="Oui"
+# TODO Revoir cette fonction
+#    gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" "Appliquer automatiquement les thèmes ?" && apply_themes="Oui"
 else
     read -p $"\e[33mVoulez-vous installer le fond d'écran ? (o/n) : \e[0m" choice
     [[ $choice =~ ^[Oo]$ ]] && download_wallpaper="Oui"

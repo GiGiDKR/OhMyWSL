@@ -262,25 +262,36 @@ add_lines_to_file "$bashrc_path" "true"
 
 ## Installation de GWSL
 install_gwsl() {
+    if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
+        success_msg "✓ GWSL est déjà installé"
+        return 0
+    fi
+
     execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire C:\WSL2-Distros"
+    
     if [ ! -f "/mnt/c/WSL2-Distros/GWSL-145-STORE.zip" ]; then
         execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip -P /mnt/c/WSL2-Distros" "Téléchargement de GWSL"
     else
         success_msg "✓ Sources de GWSL déjà téléchargées"
     fi
+    
     execute_command "cd /mnt/c/WSL2-Distros && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL" "Extraction et configuration de GWSL"
 
-    execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
-    sleep 5
-    configure_gwsl
-    execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Relancement de GWSL avec la nouvelle configuration"
+    if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
+        execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
+        configure_gwsl
+        execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL avec la nouvelle configuration"
+    else
+        error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
+    fi
 }
 
+# Fonction pour configurer GWSL
 configure_gwsl() {
     local config_file="/mnt/c/Users/$USER/AppData/Roaming/GWSL/settings.json"
     
     # Attendre que le fichier soit créé
-    timeout=30
+    timeout=10
     while [ ! -f "$config_file" ] && [ $timeout -gt 0 ]; do
         sleep 1
         ((timeout--))
