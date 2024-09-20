@@ -488,9 +488,9 @@ else
         info_msg "𐄂 Personnalisation XFCE refusée"
     fi
 fi
-
+execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL"
+sleep 3
 execute_command "dbus-launch xfce4-session" "Lancement de la session XFCE4"
-sleep 5
 
 # Nettoyage final
 cleanup
