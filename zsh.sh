@@ -150,7 +150,7 @@ install_ohmyzsh_prompt() {
 install_zsh_plugins() {
     local plugins_to_install=()
     if $USE_GUM; then
-        plugins_to_install=($(gum choose --no-limit --header="Sélectionner avec ESPACE les plugins à installer :" "zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder" "Tout installer"))
+        plugins_to_install=($(gum choose --selected="Tout installer" --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=9 --header="Sélectionner avec ESPACE les plugins à installer :" "zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder" "Tout installer"))
         if [[ " ${plugins_to_install[*]} " == *" Tout installer "* ]]; then
             plugins_to_install=("zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder")
         fi

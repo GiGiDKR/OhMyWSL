@@ -298,7 +298,10 @@ configure_gwsl() {
 # Fonction pour installer des packages optionnels
 optional_packages() {
     if $USE_GUM; then
-        packages=$(gum choose --selected="Tout installer" --no-limit --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf")
+        packages=$(gum choose --selected="Tout installer" --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer"))
+        if [[ " ${packages[*]} " == *" Tout installer "* ]]; then
+            packages=("nala" "eza" "lfm" "bat" "fzf")
+        fi
     else
         info_msg "Sélectionnez les packages à installer :"
         echo
@@ -410,7 +413,7 @@ fi
 common_alias
 
 # Demander à l'utilisateur s'il souhaite installer des packages supplémentaires
-info_msg "❯ Installation de packages supplémentaires"
+info_msg "❯ Configuration complémentaire"
 if $USE_GUM; then
     if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer des packages supplémentaires ?"; then
         optional_packages
