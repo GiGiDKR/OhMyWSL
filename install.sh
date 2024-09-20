@@ -190,11 +190,6 @@ if $USE_GUM; then
     if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer zsh ?"; then
         execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
         "$HOME/zsh.sh" --gum
-        if [ $? -eq 0 ]; then
-            success_msg "✓ Installation de zsh"
-        else
-            error_msg "✗ Installation de zsh"
-        fi
     else
         info_msg "𐄂 Installation de zsh refusée"
     fi
@@ -204,11 +199,6 @@ else
     if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
         execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
         "$HOME/zsh.sh"
-        if [ $? -eq 0 ]; then
-            success_msg "✓ Installation de zsh"
-        else
-            error_msg "✗ Installation de zsh"
-        fi
     else
         info_msg "𐄂 Installation de zsh refusée"
     fi
@@ -308,9 +298,10 @@ configure_gwsl() {
 
 # Fonction pour installer des packages optionnels
 optional_packages() {
+    local packages=()
     if $USE_GUM; then
-        packages=$(gum choose --selected="Tout installer" --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer")
-        if [[ " ${packages[*]} " == *" Tout installer "* ]]; then
+        packages=($(gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer"))
+        if [[ " ${packages[*]} " == *"Tout installer"* ]]; then
             packages=("nala" "eza" "lfm" "bat" "fzf")
         fi
     else
@@ -326,20 +317,13 @@ optional_packages() {
         read -p $"\e[33mEntrez les numéros des packages (SÉPARÉS PAR DES ESPACES) : \e[0m" package_choices
     fi
 
-    for choice in $packages; do
+    for choice in "${packages[@]}"; do
         case $choice in
-            nala|1) install_package "nala" ;;
-            eza|2) install_eza ;;
-            lfm|3) install_package "lfm" ;;
-            bat|4) install_package "bat" ;;
-            fzf|5) install_package "fzf" ;;
-            "Tout installer"|6)
-                install_package "nala"
-                install_eza
-                install_package "lfm"
-                install_package "bat"
-                install_package "fzf"
-                ;;
+            nala) install_package "nala" ;;
+            eza) install_eza ;;
+            lfm) install_package "lfm" ;;
+            bat) install_package "bat" ;;
+            fzf) install_package "fzf" ;;
         esac
     done
 }
@@ -464,7 +448,7 @@ execute_command "mkdir -p $HOME/.config/xfce4 && \
                 touch $HOME/.ICEauthority && \
                 chmod 600 $HOME/.ICEauthority && \
                 sudo mkdir -p /run/user/$UID && \
-                sudo chown -R $UID:$UID /run/user/$UID/" "Configuration de XFCE4"
+                sudo chown -R $UID:$UID /run/user/$UID/" "Modifications de droits"
 
 # Personnalisation XFCE
 if $USE_GUM; then
@@ -511,12 +495,12 @@ sleep 5
 # Nettoyage final
 cleanup
 if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Supprimer les sources de GWSL et le script d'installation ?"; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Supprimer les sources d'installation ?"; then
         execute_command "rm -f /mnt/c/WSL2-Distros/GWSL-145-STORE.zip" "Suppression des sources de GWSL"
         execute_command "rm -- \"$0\"" "Suppression du script d'installation"
     fi
 else
-    read -p $"\e[33mSupprimer les sources de GWSL et le script d'installation ? (o/n) : \e[0m" choice
+    read -p $"\e[33mSupprimer les sources d'installation ? (o/n) : \e[0m" choice
     choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
     
     if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then

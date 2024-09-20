@@ -138,15 +138,16 @@ install_powerlevel10k() {
     fi
 }
 
-# Fonction pour installer le prompt OhMyZSH
-install_ohmyzsh_prompt() {
-    execute_command "curl -fLo '$HOME/.p10k.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/p10k.zsh" "Téléchargement du prompt OhMyZSH"
+# Fonction pour installer le prompt OhMyWSL
+install_ohmywsl_prompt() {
+    execute_command "curl -fLo '$HOME/.p10k.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/p10k.zsh" "Téléchargement du prompt OhMyWSL"
     echo -e "\n# To customize prompt, run \`p10k configure\` or edit ~/.p10k.zsh." >> "$ZSHRC"
     echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
 }
 
 # Fonction pour installer les plugins
 install_zsh_plugins() {
+    info_msg "❯ Configuration des plugins"
     local plugins_to_install=()
     if $USE_GUM; then
         plugins_to_install=($(gum choose --selected="Tout installer" --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=9 --header="Sélectionner avec ESPACE les plugins à installer :" "zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder" "Tout installer"))
@@ -268,8 +269,8 @@ main() {
     if $USE_GUM; then
         if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer PowerLevel10k ?"; then
             install_powerlevel10k
-            if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer le prompt OhMyZSH ?"; then
-                install_ohmyzsh_prompt
+            if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer le prompt OhMyWSL ?"; then
+                install_ohmywsl_prompt
             else
                 info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
             fi
@@ -278,9 +279,9 @@ main() {
         read -p $'\e[33mInstaller PowerLevel10k ? (o/n) : \e[0m' choice
         if [[ $choice =~ ^[Oo]$ ]]; then
             install_powerlevel10k
-            read -p $'\e[33mInstaller le prompt OhMyZSH ? (o/n) : \e[0m' choice
+            read -p $'\e[33mInstaller le prompt OhMyWSL ? (o/n) : \e[0m' choice
             if [[ $choice =~ ^[Oo]$ ]]; then
-                install_ohmyzsh_prompt
+                install_ohmywsl_prompt
             else
                 info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
             fi
