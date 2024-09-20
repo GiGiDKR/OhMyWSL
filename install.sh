@@ -136,7 +136,6 @@ configure_noninteractive() {
 
 # Fonction de nettoyage
 cleanup() {
-    info_msg "Nettoyage en cours..."
     execute_command "sudo apt autoremove -y && sudo apt clean" "Nettoyage des paquets inutiles"
     execute_command "rm -f $HOME/zsh.sh $HOME/xfce.sh" "Suppression des scripts temporaires"
 }
@@ -268,10 +267,10 @@ install_gwsl() {
     if [ ! -f "/mnt/c/WSL2-Distros/GWSL-145-STORE.zip" ]; then
         execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip -P /mnt/c/WSL2-Distros" "Téléchargement de GWSL"
     else
-        info_msg "Sources déjà téléchargées"
+        success_msg "✓ Sources de GWSL déjà téléchargées"
     fi
 
-    execute_command "cd /mnt/c/WSL2-Distros && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL && rm -f GWSL-145-STORE.zip" "Extraction et configuration de GWSL"
+    execute_command "cd /mnt/c/WSL2-Distros && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL" "Extraction et configuration de GWSL"
 }
 
 execute_gwsl() {
@@ -481,6 +480,19 @@ sleep 5
 
 # Nettoyage final
 cleanup
+if $USE_GUM; then
+    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Supprimer les sources de GWSL et le script d'installation ?"; then
+        execute_command "rm -f /mnt/c/WSL2-Distros/GWSL-145-STORE.zip" "Suppression des sources de GWSL"
+        execute_command "rm -- \"$0\"" "Suppression du script d'installation"
+    fi
+else
+    read -p $"\e[33mSupprimer les sources de GWSL et le script d'installation ? (o/n) : \e[0m" choice
+    choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
+    
+    if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
+        execute_command "rm -f /mnt/c/WSL2-Distros/GWSL-145-STORE.zip" "Suppression des sources de GWSL"
+        execute_command "rm -- \"$0\"" "Suppression du script d'installation"
+    fi
+fi
 
-execute_command "rm -- \"$0\"" "Suppression du script d'installation"
 exec zsh
