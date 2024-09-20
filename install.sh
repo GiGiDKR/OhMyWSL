@@ -263,18 +263,36 @@ add_lines_to_file "$bashrc_path" "true"
 ## Installation de GWSL
 install_gwsl() {
     execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire C:\WSL2-Distros"
-
     if [ ! -f "/mnt/c/WSL2-Distros/GWSL-145-STORE.zip" ]; then
         execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip -P /mnt/c/WSL2-Distros" "Téléchargement de GWSL"
     else
         success_msg "✓ Sources de GWSL déjà téléchargées"
     fi
-
     execute_command "cd /mnt/c/WSL2-Distros && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL" "Extraction et configuration de GWSL"
+
+    execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
+    sleep 5
+    configure_gwsl
+    execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Relancement de GWSL avec la nouvelle configuration"
 }
 
-execute_gwsl() {
-    execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL"
+configure_gwsl() {
+    local config_file="/mnt/c/Users/$USER/AppData/Roaming/GWSL/settings.json"
+    
+    # Attendre que le fichier soit créé
+    timeout=30
+    while [ ! -f "$config_file" ] && [ $timeout -gt 0 ]; do
+        sleep 1
+        ((timeout--))
+    done
+
+    if [ ! -f "$config_file" ]; then
+        error_msg "Le fichier de configuration GWSL n'a pas été créé dans le délai imparti."
+        return 1
+    fi
+
+    # Modifier le fichier de configuration
+    execute_command "sed -i 's/\"window_mode\": \"multi\"/\"window_mode\": \"single\"/' \"$config_file\"" "Modification du fichier de configuration GWSL"
 }
 
 # Fonction pour installer des packages optionnels
@@ -473,8 +491,6 @@ else
     fi
 fi
 
-execute_gwsl
-sleep 5
 execute_command "dbus-launch xfce4-session" "Lancement de la session XFCE4"
 sleep 5
 

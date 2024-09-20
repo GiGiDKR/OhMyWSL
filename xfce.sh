@@ -113,17 +113,18 @@ install_theme() {
     execute_command "rm '$zip_file'" "Nettoyage des fichiers temporaires"
 }
 
+# TODO Revoir cette fonction
 # Fonction pour appliquer le thème XFCE
-apply_xfce_theme() {
-    local gtk_theme="$1"
-    local icon_theme="$2"
-    local cursor_theme="$3"
+#apply_xfce_theme() {
+#    local gtk_theme="$1"
+#    local icon_theme="$2"
+#    local cursor_theme="$3"
 
-    execute_command "xfconf-query -c xsettings -p /Net/ThemeName -s '$gtk_theme'" "Application du thème GTK"
-    execute_command "xfconf-query -c xsettings -p /Net/IconThemeName -s '$icon_theme'" "Application du thème d'icônes"
-    execute_command "xfconf-query -c xsettings -p /Gtk/CursorThemeName -s '$cursor_theme'" "Application du thème de curseur"
-    execute_command "xfconf-query -c xfwm4 -p /general/theme -s '$gtk_theme'" "Application du thème de fenêtre"
-}
+#    execute_command "xfconf-query -c xsettings -p /Net/ThemeName -s '$gtk_theme'" "Application du thème GTK"
+#    execute_command "xfconf-query -c xsettings -p /Net/IconThemeName -s '$icon_theme'" "Application du thème d'icônes"
+#    execute_command "xfconf-query -c xsettings -p /Gtk/CursorThemeName -s '$cursor_theme'" "Application du thème de curseur"
+#    execute_command "xfconf-query -c xfwm4 -p /general/theme -s '$gtk_theme'" "Application du thème de fenêtre"
+#}
 
 info_msg "❯ Configuration de XFCE"
 
@@ -131,10 +132,10 @@ info_msg "❯ Configuration de XFCE"
 check_dependencies
 
 if $USE_GUM; then
-    download_wallpaper=$(gum choose --header="Installer le fond d'écran ?" --item.foreground="33" "Oui" "Non")
-    install_whitesur=$(gum choose --header="Installer WhiteSur-Dark ?" --item.foreground="33" "Oui" "Non")
-    install_fluent=$(gum choose --header="Installer Fluent Cursor ?" --item.foreground="33" "Oui" "Non")
-    apply_themes=$(gum choose --header="Appliquer automatiquement les thèmes ?" --item.foreground="33" "Oui" "Non")
+    gum confirm "Installer le fond d'écran ?" && download_wallpaper="Oui"
+    gum confirm "Installer WhiteSur-Dark ?" && install_whitesur="Oui"
+    gum confirm "Installer Fluent Cursor ?" && install_fluent="Oui"
+    gum confirm "Appliquer automatiquement les thèmes ?" && apply_themes="Oui"
 else
     read -p $"\e[33mVoulez-vous installer le fond d'écran ? (o/n) : \e[0m" choice
     [[ $choice =~ ^[Oo]$ ]] && download_wallpaper="Oui"
@@ -167,8 +168,9 @@ if [ "$install_fluent" = "Oui" ]; then
     execute_command "rm -rf /tmp/Fluent-icon-theme-2024-02-25" "Nettoyage des fichiers temporaires"
 fi
 
-if [ "$apply_themes" = "Oui" ]; then
-    info_msg "Application des thèmes..."
-    apply_xfce_theme "WhiteSur-Dark" "Fluent-dark" "Fluent-cursors-dark"
-    success_msg "Thèmes appliqués avec succès"
-fi
+# TODO Revoir cette fonction
+#if [ "$apply_themes" = "Oui" ]; then
+#    info_msg "Application des thèmes..."
+#    apply_xfce_theme "WhiteSur-Dark" "Fluent-dark" "Fluent-cursors-dark"
+#    success_msg "Thèmes appliqués avec succès"
+#fi
