@@ -21,13 +21,19 @@ wsl
 Run the following command to install OhMyWSL :
 
 ```bash
-curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/install.sh -o install.sh && chmod +x install.sh && ./install.sh
+curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.1/install.sh -o install.sh && chmod +x install.sh && ./install.sh
 ```
 
-> [!TIP]
+> [!NOTE]
 > You can also use the [gum](https://github.com/charmbracelet/gum) interface for execution with the `-g` or `--gum` option :
 > ```bash
-> curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/install.sh -o install.sh && chmod +x install.sh && ./install.sh -g
+> curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.1/install.sh -o install.sh && chmod +x install.sh && ./install.sh --gum
+> ```
+
+> [!TIP]
+> You can install OhMyWSL with all options (for those who like to copy/paste and go have a coffee :coffee:) with the `-f` or `--full` option :
+> ```bash
+> curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.1/install.sh -o install.sh && chmod +x install.sh && ./install.sh --full
 > ```
 
 ## 💻 Version history
@@ -35,7 +41,7 @@ curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/install.sh -o i
 > [!WARNING]
 > Preview version (only for testing) :
 > ```bash
-> curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.1/install.sh -o install.sh && chmod +x install.sh && ./install.sh -g
+> curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.1/install.sh -o install.sh && chmod +x install.sh && ./install.sh --gum
 > ```
 
 ## 📖 To Do
