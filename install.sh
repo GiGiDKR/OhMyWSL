@@ -248,7 +248,7 @@ else
             "$HOME/zsh.sh"
         fi
     else
-        info_msg "𐄂 Installation de zsh refusée"
+        info_msg "𐄂 Installation de zsh refus��e"
     fi
 fi
 
@@ -302,13 +302,28 @@ add_lines_to_file "$bashrc_path" "true"
 add_lines_to_file "$bashrc_path" "true"
 [ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path" "false"
 
+## Fonction pour forcer la fermeture de GWSL
+force_close_gwsl() {
+    info_msg "Fermeture forcée de GWSL"
+    execute_command "taskkill.exe /F /IM GWSL.exe" "Tentative de fermeture forcée de GWSL"
+    
+    # Vérifier si GWSL est toujours en cours d'exécution
+    if tasklist.exe | grep -q "GWSL.exe"; then
+        error_msg "Impossible de fermer GWSL. Veuillez le fermer manuellement."
+    else
+        success_msg "GWSL a été fermé avec succès."
+    fi
+}
+
 ## Installation de GWSL
 install_gwsl() {
     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
         success_msg "✓ GWSL est déjà installé"
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
         configure_gwsl
+        force_close_gwsl
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL avec la nouvelle configuration"
+        force_close_gwsl
         return 0
     fi
 
@@ -325,9 +340,12 @@ install_gwsl() {
     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
         configure_gwsl
+        force_close_gwsl
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL avec la nouvelle configuration"
+        force_close_gwsl
     else
         error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
+        return 1
     fi
 }
 
