@@ -309,7 +309,7 @@ force_close_gwsl() {
     local processes=("GWSL.exe" "GWSL_service.exe" "GWSL_vcxsrv.exe" "vcxsrv.exe")
     
     for process in "${processes[@]}"; do
-        execute_command "taskkill.exe /F /IM $process 2>/dev/null" "Fermeture forcée de $process"
+        taskkill.exe /F /IM $process 2>/dev/null
     done
     
     if tasklist.exe | grep -qE "GWSL|vcxsrv"; then
@@ -323,12 +323,10 @@ force_close_gwsl() {
 install_gwsl() {
     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
         success_msg "✓ GWSL est déjà installé"
-        force_close_gwsl
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
         configure_gwsl
         force_close_gwsl
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL avec la nouvelle configuration"
-        force_close_gwsl
         return 0
     fi
 
@@ -343,12 +341,10 @@ install_gwsl() {
     execute_command "cd /mnt/c/WSL2-Distros && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL" "Extraction et configuration de GWSL"
 
     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
-        force_close_gwsl
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
         configure_gwsl
         force_close_gwsl
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL avec la nouvelle configuration"
-        force_close_gwsl
     else
         error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
         return 1
@@ -576,6 +572,7 @@ else
     fi
 fi
 
+force_close_gwsl
 execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL"
 execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
 execute_command "startxfce4" "Exécution de XFCE4"
