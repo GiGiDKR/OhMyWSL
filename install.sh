@@ -258,6 +258,9 @@ add_lines_to_file "$bashrc_path" "true"
 install_gwsl() {
     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
         success_msg "✓ GWSL est déjà installé"
+        execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
+        configure_gwsl
+        execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL avec la nouvelle configuration"
         return 0
     fi
 
@@ -494,9 +497,9 @@ else
 fi
 
 execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL"
-sleep 5
+sleep 2
 execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
-sleep 5
+sleep 2
 
 # Nettoyage final
 cleanup
