@@ -1,6 +1,7 @@
 #!/bin/bash
 
 USE_GUM=false
+FULL_INSTALL=false
 ZSHRC="$HOME/.zshrc"
 
 # Fonction pour afficher des messages d'information en bleu
@@ -79,6 +80,7 @@ execute_command() {
 while [[ $# -gt 0 ]]; do
     case $1 in
         --gum|-g) USE_GUM=true ;;
+        --full|-f) FULL_INSTALL=true ;;
         *) error_msg "Option non reconnue : $1" ;;
     esac
     shift
@@ -153,7 +155,7 @@ install_zsh_plugins() {
     info_msg "❯ Configuration des plugins"
     local plugins_to_install=()
     if $USE_GUM; then
-        plugins_to_install=($(gum choose --selected="Tout installer" --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=9 --header="Sélectionner avec ESPACE les plugins à installer :" "zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder" "Tout installer"))
+        plugins_to_install=($(gum_choose "Sélectionner avec ESPACE les plugins à installer :" --selected="Tout installer" "zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder" "Tout installer"))
         if [[ " ${plugins_to_install[*]} " == *" Tout installer "* ]]; then
             plugins_to_install=("zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder")
         fi
@@ -247,7 +249,7 @@ main() {
 
     # Demander à l'utilisateur s'il souhaite sauvegarder la configuration existante
     if $USE_GUM; then
-        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Sauvegarder la configuration ZSH ?"; then
+        if gum_confirm "Sauvegarder la configuration ZSH ?"; then
             backup_existing_config
         fi
     else
@@ -257,7 +259,7 @@ main() {
 
     # Installation de Oh My Zsh
     if $USE_GUM; then
-        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer Oh-My-Zsh ?"; then
+        if gum_confirm "Installer Oh-My-Zsh ?"; then
             install_oh_my_zsh
         fi
     else
@@ -270,9 +272,9 @@ main() {
 
     # Installation de PowerLevel10k
     if $USE_GUM; then
-        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer PowerLevel10k ?"; then
+        if gum_confirm "Installer PowerLevel10k ?"; then
             install_powerlevel10k
-            if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer le prompt OhMyWSL ?"; then
+            if gum_confirm "Installer le prompt OhMyWSL ?"; then
                 install_ohmywsl_prompt
             else
                 info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
@@ -303,6 +305,46 @@ main() {
 
     # Définition de zsh comme shell par défaut
     #execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut" true
+}
+
+# Ajoutez cette fonction pour gérer les confirmations
+gum_confirm() {
+    local prompt="$1"
+    if $FULL_INSTALL; then
+        return 0
+    else
+        gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "$prompt"
+    fi
+}
+
+# Ajoutez cette fonction pour gérer les choix multiples
+gum_choose() {
+    local prompt="$1"
+    shift
+    local selected=""
+    local options=()
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --selected=*)
+                selected="${1#*=}"
+                ;;
+            *)
+                options+=("$1")
+                ;;
+        esac
+        shift
+    done
+
+    if $FULL_INSTALL; then
+        if [ -n "$selected" ]; then
+            echo "$selected"
+        else
+            echo "${options[@]}"
+        fi
+    else
+        gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="$prompt" --selected="$selected" "${options[@]}"
+    fi
 }
 
 main

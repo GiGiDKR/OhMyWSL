@@ -22,3 +22,9 @@ curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/install.sh -o i
 > ```bash
 > curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/install.sh -o install.sh && chmod +x install.sh && ./install.sh --gum
 > ```
+>
+> [!TIP]
+> You can also use the `-f` or `--full` option to install OhMyWSL with a full installation of zsh and xfce :
+> ```bash
+> curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/install.sh -o install.sh && chmod +x install.sh && ./install.sh --gum --full
+> ```

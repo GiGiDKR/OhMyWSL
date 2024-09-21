@@ -1,6 +1,7 @@
 #!/bin/bash
 
 USE_GUM=false
+FULL_INSTALL=false
 
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
@@ -78,10 +79,50 @@ execute_command() {
 while [[ $# -gt 0 ]]; do
     case $1 in
         --gum|-g) USE_GUM=true ;;
+        --full|-f) FULL_INSTALL=true ;;
         *) error_msg "Option non reconnue : $1" ;;
     esac
     shift
 done
+
+# Ajoutez cette fonction pour gérer les confirmations
+gum_confirm() {
+    local prompt="$1"
+    if $FULL_INSTALL; then
+        return 0
+    else
+        gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "$prompt"
+    fi
+}
+
+# Remplacez tous les appels à gum confirm par gum_confirm
+# Par exemple :
+if gum_confirm "Installer le fond d'écran ?"; then
+    download_wallpaper="Oui"
+fi
+
+if gum_confirm "Installer WhiteSur-Dark ?"; then
+    install_whitesur="Oui"
+fi
+
+if gum_confirm "Installer Fluent Cursor ?"; then
+    install_fluent="Oui"
+fi
+
+# TODO Revoir cette fonction
+# Fonction pour appliquer le thème XFCE
+#apply_xfce_theme() {
+#    local gtk_theme="$1"
+#    local icon_theme="$2"
+#    local cursor_theme="$3"
+
+#    execute_command "xfconf-query -c xsettings -p /Net/ThemeName -s '$gtk_theme'" "Application du thème GTK"
+#    execute_command "xfconf-query -c xsettings -p /Net/IconThemeName -s '$icon_theme'" "Application du thème d'icônes"
+#    execute_command "xfconf-query -c xsettings -p /Gtk/CursorThemeName -s '$cursor_theme'" "Application du thème de curseur"
+#    execute_command "xfconf-query -c xfwm4 -p /general/theme -s '$gtk_theme'" "Application du thème de fenêtre"
+#}
+
+info_msg "❯ Configuration de XFCE"
 
 # Vérification des dépendances
 check_dependencies() {
@@ -130,27 +171,6 @@ info_msg "❯ Configuration de XFCE"
 
 # Vérification des dépendances
 check_dependencies
-
-if $USE_GUM; then
-    gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" "Installer le fond d'écran ?" && download_wallpaper="Oui"
-    gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" "Installer WhiteSur-Dark ?" && install_whitesur="Oui"
-    gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" "Installer Fluent Cursor ?" && install_fluent="Oui"
-# TODO Revoir cette fonction
-#    gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" "Appliquer automatiquement les thèmes ?" && apply_themes="Oui"
-else
-    read -p $"\e[33mInstaller le fond d'écran ? (o/n) : \e[0m" choice
-    [[ $choice =~ ^[Oo]$ ]] && download_wallpaper="Oui"
-
-    read -p $"\e[33mInstaller WhiteSur-Dark ? (o/n) : \e[0m" choice
-    [[ $choice =~ ^[Oo]$ ]] && install_whitesur="Oui"
-
-    read -p $"\e[33mInstaller Fluent Cursor ? (o/n) : \e[0m" choice
-
-    [[ $choice =~ ^[Oo]$ ]] && install_fluent="Oui"
-    # TODO Revoir cette fonction
-    #read -p $"\e[33mVoulez-vous appliquer automatiquement les thèmes ? (o/n) : \e[0m" choice
-    #[[ $choice =~ ^[Oo]$ ]] && apply_themes="Oui"
-fi
 
 if [ "$download_wallpaper" = "Oui" ]; then
     execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png -O /tmp/waves.png" "Téléchargement du fond d'écran"

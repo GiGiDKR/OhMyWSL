@@ -1,6 +1,7 @@
 #!/bin/bash
 
 USE_GUM=false
+FULL_INSTALL=false
 
 # Fonction pour afficher le banner en mode basique
 bash_banner() {
@@ -19,6 +20,7 @@ bash_banner() {
 while [[ $# -gt 0 ]]; do
     case $1 in
         --gum|-g) USE_GUM=true ;;
+        --full|-f) FULL_INSTALL=true ;;
         *) echo "Option non reconnue : $1" ;;
     esac
     shift
@@ -187,9 +189,13 @@ done
 # Installation de ZSH
 info_msg "❯ Configuration du shell"
 if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer zsh ?"; then
+    if gum_confirm "Installer zsh ?"; then
         execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
-        "$HOME/zsh.sh" --gum
+        if $FULL_INSTALL; then
+            "$HOME/zsh.sh" --gum --full
+        else
+            "$HOME/zsh.sh" --gum
+        fi
     else
         info_msg "𐄂 Installation de zsh refusée"
     fi
@@ -198,7 +204,11 @@ else
     choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
     if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
         execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
-        "$HOME/zsh.sh"
+        if $FULL_INSTALL; then
+            "$HOME/zsh.sh" --full
+        else
+            "$HOME/zsh.sh"
+        fi
     else
         info_msg "𐄂 Installation de zsh refusée"
     fi
@@ -307,7 +317,7 @@ configure_gwsl() {
 optional_packages() {
     local packages=()
     if $USE_GUM; then
-        packages=($(gum choose --no-limit --selected="Tout installer" --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="Sélectionner avec ESPACE les packages à installer :" "nala" "eza" "lfm" "bat" "fzf" "Tout installer"))
+        packages=($(gum_choose "Sélectionner avec ESPACE les packages à installer :" --selected="Tout installer" "nala" "eza" "lfm" "bat" "fzf" "Tout installer"))
         if [[ " ${packages[*]} " == *"Tout installer"* ]]; then
             packages=("nala" "eza" "lfm" "bat" "fzf")
         fi
@@ -417,7 +427,7 @@ common_alias
 # Demander à l'utilisateur s'il souhaite installer des packages supplémentaires
 info_msg "❯ Configuration additionnelle"
 if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer des packages supplémentaires ?"; then
+    if gum_confirm "Installer des packages supplémentaires ?"; then
         optional_packages
     fi
 else
@@ -433,7 +443,7 @@ fi
 # Demander à l'utilisateur s'il souhaite installer GWSL
 info_msg "❯ Installation de GWSL"
 if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer GWSL ?"; then
+    if gum_confirm "Installer GWSL ?"; then
         install_gwsl
     fi
 else
@@ -459,10 +469,14 @@ execute_command "mkdir -p $HOME/.config/xfce4 && \
 
 # Personnalisation XFCE
 if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Installer la personnalisation XFCE ?"; then
+    if gum_confirm "Installer la personnalisation XFCE ?"; then
         execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
         if [ -f "$HOME/xfce.sh" ]; then
-            "$HOME/xfce.sh" --gum
+            if $FULL_INSTALL; then
+                "$HOME/xfce.sh" --gum --full
+            else
+                "$HOME/xfce.sh" --gum
+            fi
             if [ $? -eq 0 ]; then
                 success_msg "✓ Personnalisation XFCE"
             else
@@ -482,7 +496,11 @@ else
     if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
         execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
         if [ -f "$HOME/xfce.sh" ]; then
-            "$HOME/xfce.sh"  # Exécution directe du script
+            if $FULL_INSTALL; then
+                "$HOME/xfce.sh" --full
+            else
+                "$HOME/xfce.sh"
+            fi
             if [ $? -eq 0 ]; then
                 success_msg "✓ Personnalisation XFCE"
             else
@@ -504,7 +522,7 @@ sleep 2
 # Nettoyage final
 cleanup
 if $USE_GUM; then
-    if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Supprimer les sources d'installation ?"; then
+    if gum_confirm "Supprimer les sources d'installation ?"; then
         execute_command "rm -f /mnt/c/WSL2-Distros/GWSL-145-STORE.zip" "Suppression des sources de GWSL"
         execute_command "rm -- \"$0\"" "Suppression du script d'installation"
     fi
@@ -524,3 +542,41 @@ then
     execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut"
     exec zsh
 fi
+
+gum_confirm() {
+    local prompt="$1"
+    if $FULL_INSTALL; then
+        return 0 
+    else
+        gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "$prompt"
+    fi
+}
+
+gum_choose() {
+    local prompt="$1"
+    shift
+    local selected=""
+    local options=()
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --selected=*)
+                selected="${1#*=}"
+                ;;
+            *)
+                options+=("$1")
+                ;;
+        esac
+        shift
+    done
+
+    if $FULL_INSTALL; then
+        if [ -n "$selected" ]; then
+            echo "$selected"
+        else
+            echo "${options[@]}"
+        fi
+    else
+        gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="$prompt" --selected="$selected" "${options[@]}"
+    fi
+}
