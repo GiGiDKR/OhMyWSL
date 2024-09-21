@@ -158,16 +158,16 @@ if [ "$download_wallpaper" = "Oui" ]; then
 fi
 
 if [ "$install_whitesur" = "Oui" ]; then
-    install_theme "WhiteSur-Dark" "https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" "/tmp"
+    install_theme "WhiteSur-Dark-Theme" "https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" "/tmp"
     execute_command "sudo mkdir -p /usr/share/themes" "Création du répertoire des thèmes"
-    execute_command "tar -xf /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz -C /usr/share/themes/" "Extraction de WhiteSur-Dark"
+    execute_command "tar -xf /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz" "Extraction de WhiteSur-Dark"
     execute_command "sudo mv /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark /usr/share/themes/" "Installation de WhiteSur-Dark"
     execute_command "rm -rf /tmp/WhiteSur-gtk-theme-2024.09.02" "Nettoyage des fichiers temporaires"
 
 fi
 
 if [ "$install_fluent" = "Oui" ]; then
-    install_theme "Fluent-cursors" "https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" "/tmp"
+    install_theme "Fluent-Cursors" "https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" "/tmp"
     execute_command "sudo mkdir -p /usr/share/icons" "Création du répertoire des icônes"
     execute_command "sudo mv /tmp/Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/Fluent-cursors" "Installation de Fluent Cursor"
     execute_command "sudo mv /tmp/Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/Fluent-cursors-dark" "Installation de Fluent Cursor Dark"

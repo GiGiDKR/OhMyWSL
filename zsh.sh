@@ -114,10 +114,13 @@ install_zsh() {
 # Fonction pour sauvegarder la configuration existante
 backup_existing_config() {
     if [ -f "$ZSHRC" ]; then
-        local backup_file="${ZSHRC}.bak.$(date +%Y%m%d%H%M%S)"
+        local backup_file="${ZSHRC}.bak"
         execute_command "cp '$ZSHRC' '$backup_file'" "Sauvegarde de la configuration ZSH existante"
+    else
+        info_msg "Aucune configuration ZSH à sauvegarder"
     fi
 }
+
 
 # Fonction pour installer Oh My Zsh
 install_oh_my_zsh() {
@@ -244,7 +247,7 @@ main() {
 
     # Demander à l'utilisateur s'il souhaite sauvegarder la configuration existante
     if $USE_GUM; then
-        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Sauvegarder la configuration ZSH existante ?"; then
+        if gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "Sauvegarder la configuration ZSH ?"; then
             backup_existing_config
         fi
     else
