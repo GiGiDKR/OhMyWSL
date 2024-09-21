@@ -302,16 +302,20 @@ add_lines_to_file "$bashrc_path" "true"
 add_lines_to_file "$bashrc_path" "true"
 [ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path" "false"
 
-## Fonction pour forcer la fermeture de GWSL
+## Fonction pour forcer la fermeture de GWSL et des processus associés
 force_close_gwsl() {
-    info_msg "Fermeture forcée de GWSL"
-    execute_command "taskkill.exe /F /IM GWSL.exe" "Tentative de fermeture forcée de GWSL"
+    info_msg "Fermeture forcée de GWSL et des processus associés"
+
+    local processes=("GWSL.exe" "GWSL_service.exe" "GWSL_vcxsrv.exe" "vcxsrv.exe")
     
-    # Vérifier si GWSL est toujours en cours d'exécution
-    if tasklist.exe | grep -q "GWSL.exe"; then
-        error_msg "Impossible de fermer GWSL. Veuillez le fermer manuellement."
+    for process in "${processes[@]}"; do
+        execute_command "taskkill.exe /F /IM $process 2>/dev/null" "Fermeture forcée de $process"
+    done
+    
+    if tasklist.exe | grep -qE "GWSL|vcxsrv"; then
+        error_msg "Impossible de fermer tous les processus GWSL. Veuillez les fermer manuellement."
     else
-        success_msg "GWSL a été fermé avec succès."
+        success_msg "✓ Tous les processus GWSL ont été fermés avec succès."
     fi
 }
 
@@ -319,6 +323,7 @@ force_close_gwsl() {
 install_gwsl() {
     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
         success_msg "✓ GWSL est déjà installé"
+        force_close_gwsl
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
         configure_gwsl
         force_close_gwsl
@@ -338,6 +343,7 @@ install_gwsl() {
     execute_command "cd /mnt/c/WSL2-Distros && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL" "Extraction et configuration de GWSL"
 
     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
+        force_close_gwsl
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
         configure_gwsl
         force_close_gwsl
@@ -571,9 +577,8 @@ else
 fi
 
 execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL"
-sleep 2
 execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
-sleep 2
+execute_command "startxfce4" "Exécution de XFCE4"
 
 # Nettoyage final
 cleanup

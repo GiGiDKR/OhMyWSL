@@ -179,11 +179,11 @@ fi
 
 if [ "$install_whitesur" = "Oui" ]; then
     install_theme "WhiteSur-Dark-Theme" "https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" "/tmp"
-    execute_command "sudo mkdir -p /usr/share/themes" "Création du répertoire des thèmes"
-    execute_command "tar -xf /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz" "Extraction de WhiteSur-Dark"
+    sudo mkdir -p /usr/share/themes >/dev/null 2>&1
+    cd /tmp/WhiteSur-gtk-theme-2024.09.02/release/ >/dev/null 2>&1
+    tar -xf /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz >/dev/null 2>&1
     execute_command "sudo mv /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark /usr/share/themes/" "Installation de WhiteSur-Dark"
     execute_command "rm -rf /tmp/WhiteSur-gtk-theme-2024.09.02" "Nettoyage des fichiers temporaires"
-
 fi
 
 if [ "$install_fluent" = "Oui" ]; then
