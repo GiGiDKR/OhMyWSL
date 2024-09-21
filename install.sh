@@ -131,6 +131,44 @@ execute_command() {
     fi
 }
 
+gum_confirm() {
+    local prompt="$1"
+    if $FULL_INSTALL; then
+        return 0 
+    else
+        gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "$prompt"
+    fi
+}
+
+gum_choose() {
+    local prompt="$1"
+    shift
+    local selected=""
+    local options=()
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --selected=*)
+                selected="${1#*=}"
+                ;;
+            *)
+                options+=("$1")
+                ;;
+        esac
+        shift
+    done
+
+    if $FULL_INSTALL; then
+        if [ -n "$selected" ]; then
+            echo "$selected"
+        else
+            echo "${options[@]}"
+        fi
+    else
+        gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="$prompt" --selected="$selected" "${options[@]}"
+    fi
+}
+
 configure_noninteractive() {
     sudo debconf-set-selections <<< "gdm3 shared/default-x-display-manager select gdm3"
     export DEBIAN_FRONTEND=noninteractive
@@ -542,41 +580,3 @@ then
     execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut"
     exec zsh
 fi
-
-gum_confirm() {
-    local prompt="$1"
-    if $FULL_INSTALL; then
-        return 0 
-    else
-        gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "$prompt"
-    fi
-}
-
-gum_choose() {
-    local prompt="$1"
-    shift
-    local selected=""
-    local options=()
-
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --selected=*)
-                selected="${1#*=}"
-                ;;
-            *)
-                options+=("$1")
-                ;;
-        esac
-        shift
-    done
-
-    if $FULL_INSTALL; then
-        if [ -n "$selected" ]; then
-            echo "$selected"
-        else
-            echo "${options[@]}"
-        fi
-    else
-        gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="$prompt" --selected="$selected" "${options[@]}"
-    fi
-}
