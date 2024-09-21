@@ -115,14 +115,9 @@ install_zsh() {
 
 # Fonction pour sauvegarder la configuration existante
 backup_existing_config() {
-    if [ -f "$ZSHRC" ]; then
-        local backup_file="${ZSHRC}.bak"
-        execute_command "cp '$ZSHRC' '$backup_file'" "Sauvegarde de la configuration ZSH existante"
-    else
-        info_msg "Aucune configuration ZSH à sauvegarder"
-    fi
+    local backup_file="${ZSHRC}.bak"
+    execute_command "cp '$ZSHRC' '$backup_file'" "Sauvegarde de la configuration ZSH"
 }
-
 
 # Fonction pour installer Oh My Zsh
 install_oh_my_zsh() {
