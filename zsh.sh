@@ -1,8 +1,7 @@
 #!/bin/bash
 
-set -e
-
 USE_GUM=false
+FULL_INSTALL=false
 ZSHRC="$HOME/.zshrc"
 
 # Fonction pour afficher des messages d'information en bleu
@@ -38,88 +37,125 @@ execute_command() {
     local info_msg="$2"
     local success_msg="✓ $info_msg"
     local error_msg="✗ $info_msg"
+    local needs_input="${3:-false}"
 
     if $USE_GUM; then
-        if gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
-            gum style "$success_msg" --foreground 82
+        if $needs_input; then
+            info_msg "$info_msg"
+            if bash -c "$command"; then
+                gum style "$success_msg" --foreground 82
+            else
+                gum style "$error_msg" --foreground 196
+                return 1
+            fi
         else
-            gum style "$error_msg" --foreground 196
-            return 1
+            if gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command"; then
+                gum style "$success_msg" --foreground 82
+            else
+                gum style "$error_msg" --foreground 196
+                return 1
+            fi
         fi
     else
         info_msg "$info_msg"
-        if eval "$command"; then
-            success_msg "$success_msg"
+        if $needs_input; then
+            if eval "$command"; then
+                success_msg "$success_msg"
+            else
+                error_msg "$error_msg"
+                return 1
+            fi
         else
-            error_msg "$error_msg"
-            return 1
+            if eval "$command" > /dev/null 2>&1; then
+                success_msg "$success_msg"
+            else
+                error_msg "$error_msg"
+                return 1
+            fi
         fi
     fi
 }
 
-# Traitement des arguments de ligne de commande
+# Traitement des arguments en ligne de commande
 while [[ $# -gt 0 ]]; do
     case $1 in
         --gum|-g) USE_GUM=true ;;
-        *) error_msg "Option non reconnue : $1" >&2; exit 1 ;;
+        --full|-f) FULL_INSTALL=true ;;
+        *) error_msg "Option non reconnue : $1" ;;
     esac
     shift
 done
 
-execute_command "sudo apt install -y zsh wget curl git unzip > /dev/null 2>&1" "Installation de zsh et des dépendances"
+# Vérification des dépendances
+check_dependencies() {
+    local dependencies=("wget" "curl" "git" "unzip")
+    local missing_deps=()
 
-# Demander à l'utilisateur les options d'installation
-if $USE_GUM; then
-    install_oh_my_zsh=$(gum confirm "Voulez-vous installer Oh-My-Zsh ?" && echo true || echo false) > /dev/null 2>&1
-    install_powerlevel10k=$(gum confirm "Voulez-vous installer PowerLevel10k ?" && echo true || echo false) > /dev/null 2>&1
-    [ "$install_powerlevel10k" = true ] && install_p10k=$(gum confirm "Installer le prompt OhMyTermux ?" && echo true || echo false) > /dev/null 2>&1
-else
-    read -p "Voulez-vous installer Oh-My-Zsh ? (o/n) : " choice > /dev/null 2>&1
+    for dep in "${dependencies[@]}"; do
+        if ! command -v "$dep" &> /dev/null; then
+            missing_deps+=("$dep")
+        fi
+    done
 
-    [[ $choice =~ ^[Oo]$ ]] && install_oh_my_zsh=true || install_oh_my_zsh=false > /dev/null 2>&1
-
-    read -p "Voulez-vous installer PowerLevel10k ? (o/n) : " choice > /dev/null 2>&1
-    [[ $choice =~ ^[Oo]$ ]] && install_powerlevel10k=true || install_powerlevel10k=false > /dev/null 2>&1
-
-    if [ "$install_powerlevel10k" = true ]; then
-        read -p "Installer le prompt OhMyTermux ? (o/n) : " choice > /dev/null 2>&1
-        [[ $choice =~ ^[Oo]$ ]] && install_p10k=true || install_p10k=false > /dev/null 2>&1
+    if [ ${#missing_deps[@]} -ne 0 ]; then
+        error_msg "Dépendances manquantes : ${missing_deps[*]}"
+        info_msg "Installation des dépendances manquantes..."
+        execute_command "sudo apt update && sudo apt install -y ${missing_deps[*]}" "Installation des dépendances"
     fi
-fi
+}
 
-[ -f "$ZSHRC" ] && cp "$ZSHRC" "${ZSHRC}.bak"
-
-if [ "$install_oh_my_zsh" = true ]; then
-    execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git \"$HOME/.oh-my-zsh\" --quiet" "Installation de Oh-My-Zsh"
-fi
-
-execute_command "curl -fLo \"$ZSHRC\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/zshrc >/dev/null 2>&1" "Configuration de zshrc"
-
-if [ "$install_powerlevel10k" = true ]; then
-    execute_command "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \"$HOME/.oh-my-zsh/custom/themes/powerlevel10k\" > /dev/null 2>&1" "Installation de PowerLevel10k"
-    execute_command "sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/' \"$ZSHRC\"" "Configuration de PowerLevel10k"
-
-    if [ "$install_p10k" = true ]; then
-        execute_command "curl -fLo \"$HOME/.p10k.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/p10k.zsh > /dev/null 2>&1" "Téléchargement du prompt OhMyTermux"
-        echo -e "\n# Pour personnaliser le prompt, exécutez \`p10k configure\` ou modifiez ~/.p10k.zsh." >> "$ZSHRC"
-        echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
+# Fonction pour installer ZSH
+install_zsh() {
+    if ! command -v zsh &> /dev/null; then
+        execute_command "sudo apt update && sudo apt install -y zsh" "Installation de ZSH"
     else
-        info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'." > /dev/null 2>&1
+        info_msg "ZSH est déjà installé"
     fi
-fi
+}
 
-execute_command "curl -fLo \"$HOME/.oh-my-zsh/custom/aliases.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.6/files/aliases.zsh > /dev/null 2>&1" "Téléchargement de la configuration des alias"
+# Fonction pour sauvegarder la configuration existante
+backup_existing_config() {
+    local backup_file="${ZSHRC}.bak"
+    execute_command "cp '$ZSHRC' '$backup_file'" "Sauvegarde de la configuration ZSH"
+}
 
-# Fonction pour installer les plugins ZSH
+# Fonction pour installer Oh My Zsh
+install_oh_my_zsh() {
+    if [ ! -d "$HOME/.oh-my-zsh" ]; then
+        execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git '$HOME/.oh-my-zsh' --quiet" "Installation de Oh-My-Zsh"
+    else
+        info_msg "Oh-My-Zsh est déjà installé"
+    fi
+}
+
+# Fonction pour installer PowerLevel10k
+install_powerlevel10k() {
+    if [ ! -d "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" ]; then
+        execute_command "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git '$HOME/.oh-my-zsh/custom/themes/powerlevel10k' --quiet" "Installation de PowerLevel10k"
+        execute_command "sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/' '$ZSHRC'" "Configuration de PowerLevel10k"
+    else
+        info_msg "PowerLevel10k est déjà installé"
+    fi
+}
+
+# Fonction pour installer le prompt OhMyWSL
+install_ohmywsl_prompt() {
+    execute_command "curl -fLo '$HOME/.p10k.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/p10k.zsh" "Téléchargement du prompt OhMyWSL"
+    echo -e "\n# To customize prompt, run \`p10k configure\` or edit ~/.p10k.zsh." >> "$ZSHRC"
+    echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
+}
+
+# Fonction pour installer les plugins
 install_zsh_plugins() {
-    local plugins_to_install
-
+    info_msg "❯ Configuration des plugins"
+    local plugins_to_install=()
     if $USE_GUM; then
-        plugins_to_install=$(gum choose --no-limit --header="Sélectionnez les plugins à installer (utilisez ESPACE) :" \
-            "zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" \
-            "you-should-use" "zsh-abbr" "zsh-alias-finder" "Installer tout")
+        plugins_to_install=($(gum_choose "Sélectionner avec ESPACE les plugins à installer :" --selected="Tout installer" "zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder" "Tout installer"))
+        if [[ " ${plugins_to_install[*]} " == *" Tout installer "* ]]; then
+            plugins_to_install=("zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder")
+        fi
     else
-        info_msg "Sélectionner les plugins à installer :"
+        info_msg "Sélectionner les plugins à installer (SÉPARÉS PAR DES ESPACES) :"
         echo
         info_msg "1) zsh-autosuggestions"
         info_msg "2) zsh-syntax-highlighting"
@@ -129,67 +165,181 @@ install_zsh_plugins() {
         info_msg "6) zsh-alias-finder"
         info_msg "7) Tout installer"
         echo
-        read -p "Entrez vos choix (séparés par des espaces): " choices
-
-        plugins_to_install=""
-        for choice in $choices; do
+        read -p $"\e[33mEntrez les numéros des plugins : \e[0m" plugin_choices
+        
+        for choice in $plugin_choices; do
             case $choice in
-                1) plugins_to_install+="zsh-autosuggestions " ;;
-                2) plugins_to_install+="zsh-syntax-highlighting " ;;
-                3) plugins_to_install+="zsh-completions " ;;
-                4) plugins_to_install+="you-should-use " ;;
-                5) plugins_to_install+="zsh-abbr " ;;
-                6) plugins_to_install+="zsh-alias-finder " ;;
-                7) plugins_to_install="zsh-autosuggestions zsh-syntax-highlighting zsh-completions you-should-use zsh-abbr zsh-alias-finder" ;;
+                1) plugins_to_install+=("zsh-autosuggestions") ;;
+                2) plugins_to_install+=("zsh-syntax-highlighting") ;;
+                3) plugins_to_install+=("zsh-completions") ;;
+                4) plugins_to_install+=("you-should-use") ;;
+                5) plugins_to_install+=("zsh-abbr") ;;
+                6) plugins_to_install+=("zsh-alias-finder") ;;
+                7) plugins_to_install=("zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder") ;;
             esac
         done
     fi
 
-    for plugin in $plugins_to_install; do
+    for plugin in "${plugins_to_install[@]}"; do
         install_plugin "$plugin"
     done
 
-    update_zshrc
+    update_zshrc "${plugins_to_install[@]}"
 }
 
+# Fonction pour installer un plugin
 install_plugin() {
     local plugin_name=$1
     local plugin_url=""
 
     case $plugin_name in
-        "zsh-autosuggestions") plugin_url="https://github.com/zsh-users/zsh-autosuggestions.git" > /dev/null 2>&1   ;;
-        "zsh-syntax-highlighting") plugin_url="https://github.com/zsh-users/zsh-syntax-highlighting.git" > /dev/null 2>&1 ;;
-        "zsh-completions") plugin_url="https://github.com/zsh-users/zsh-completions.git" > /dev/null 2>&1 ;;
+        "zsh-autosuggestions") plugin_url="https://github.com/zsh-users/zsh-autosuggestions.git" ;;
+        "zsh-syntax-highlighting") plugin_url="https://github.com/zsh-users/zsh-syntax-highlighting.git" ;;
+        "zsh-completions") plugin_url="https://github.com/zsh-users/zsh-completions.git" ;;
         "you-should-use") plugin_url="https://github.com/MichaelAquilina/zsh-you-should-use.git" ;;
-        "zsh-abbr") plugin_url="https://github.com/olets/zsh-abbr" > /dev/null 2>&1 ;;
-        "zsh-alias-finder") plugin_url="https://github.com/akash329d/zsh-alias-finder" > /dev/null 2>&1 ;;
+        "zsh-abbr") plugin_url="https://github.com/olets/zsh-abbr" ;;
+        "zsh-alias-finder") plugin_url="https://github.com/akash329d/zsh-alias-finder" ;;
     esac
 
-    execute_command "git clone \"$plugin_url\" \"$HOME/.oh-my-zsh/custom/plugins/$plugin_name\" > /dev/null 2>&1" "Installation de $plugin_name"
+    if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/$plugin_name" ]; then
+        execute_command "git clone '$plugin_url' '$HOME/.oh-my-zsh/custom/plugins/$plugin_name' --quiet" "Installation de $plugin_name"
+    else
+        info_msg "$plugin_name est déjà installé"
+    fi
 }
 
+# Fonction pour mettre à jour la configuration de ZSH
 update_zshrc() {
-    local zshrc="$HOME/.zshrc"
-    cp "$zshrc" "${zshrc}.bak"
-    
-    local existing_plugins=$(sed -n '/^plugins=(/,/)/p' "$zshrc" | grep -v '^plugins=(' | grep -v ')' | tr -d ' ') > /dev/null 2>&1
-    
-    for plugin in $plugins_to_install; do
-        if [[ ! "$existing_plugins" =~ "$plugin" ]]; then
-            existing_plugins+=" $plugin"
-        fi
+    local plugins=("$@")
+    local default_plugins=(git command-not-found copyfile node npm vscode web-search timer)
+    plugins+=("${default_plugins[@]}")
+
+    # Supprimer les doublons
+    readarray -t unique_plugins < <(printf '%s\n' "${plugins[@]}" | sort -u)
+
+    local new_plugins_section="plugins=(\n"
+    for plugin in "${unique_plugins[@]}"; do
+        new_plugins_section+="\t$plugin\n"
     done
-    
-    sed -i "/^plugins=(/,/)/c\plugins=($existing_plugins)" "$zshrc" > /dev/null 2>&1
-    
-    if [[ "$plugins_to_install" == *"zsh-completions"* ]]; then
-        if ! grep -q "fpath+=" "$zshrc"; then
-            sed -i '/^source $ZSH\/oh-my-zsh.sh$/i\fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src' "$zshrc" > /dev/null 2>&1
+    new_plugins_section+=")"
+
+    execute_command "sed -i '/^plugins=(/,/)/c\\${new_plugins_section}' '$ZSHRC'" "Ajout des plugins dans .zshrc"
+
+    if ! grep -q "source \$ZSH/oh-my-zsh.sh" "$ZSHRC"; then
+        echo -e "\n\nsource \$ZSH/oh-my-zsh.sh\n" >> "$ZSHRC"
+    fi
+
+    if [[ " ${unique_plugins[*]} " == *" zsh-completions "* ]]; then
+        if ! grep -q "fpath+=.*zsh-completions" "$ZSHRC"; then
+            sed -i "1ifpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src" "$ZSHRC"
         fi
     fi
 }
 
-install_zsh_plugins
+# Fonction principale
+main() {
+    info_msg "❯ Configuration de ZSH"
+    check_dependencies
+    install_zsh
 
-execute_command "chsh -s zsh" "Changement du shell par défaut" > /dev/null 2>&1
-execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh" > /dev/null 2>&1
+    # Demander à l'utilisateur s'il souhaite sauvegarder la configuration existante
+    if $USE_GUM; then
+        if gum_confirm "Sauvegarder la configuration ZSH ?"; then
+            backup_existing_config
+        fi
+    else
+        read -p $'\e[33mSauvegarder la configuration ZSH existante ? (o/n) : \e[0m' choice
+        [[ $choice =~ ^[Oo]$ ]] && backup_existing_config
+    fi
+
+    # Installation de Oh My Zsh
+    if $USE_GUM; then
+        if gum_confirm "Installer Oh-My-Zsh ?"; then
+            install_oh_my_zsh
+        fi
+    else
+        read -p $'\e[33mInstaller Oh-My-Zsh ? (o/n) : \e[0m' choice
+        [[ $choice =~ ^[Oo]$ ]] && install_oh_my_zsh
+    fi
+
+    # Configuration de base de ZSH
+    execute_command "curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/zshrc" "Téléchargement de .zshrc"
+
+    # Installation de PowerLevel10k
+    if $USE_GUM; then
+        if gum_confirm "Installer PowerLevel10k ?"; then
+            install_powerlevel10k
+            if gum_confirm "Installer le prompt OhMyWSL ?"; then
+                install_ohmywsl_prompt
+            else
+                info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
+            fi
+        fi
+    else
+        read -p $'\e[33mInstaller PowerLevel10k ? (o/n) : \e[0m' choice
+        if [[ $choice =~ ^[Oo]$ ]]; then
+            install_powerlevel10k
+            read -p $'\e[33mInstaller le prompt OhMyWSL ? (o/n) : \e[0m' choice
+            if [[ $choice =~ ^[Oo]$ ]]; then
+                install_ohmywsl_prompt
+            else
+                info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
+            fi
+        fi
+    fi
+
+    # Installation de la configuration des alias
+    execute_command "curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/aliases.zsh" "Configuration des alias communs"
+
+    # Installation des plugins
+    install_zsh_plugins
+
+    # TODO Test à effectuer
+    # Rechargement de la configuration zsh
+    #execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh"
+
+    # Définition de zsh comme shell par défaut
+    #execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut" true
+}
+
+# Ajoutez cette fonction pour gérer les confirmations
+gum_confirm() {
+    local prompt="$1"
+    if $FULL_INSTALL; then
+        return 0
+    else
+        gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "$prompt"
+    fi
+}
+
+# Ajoutez cette fonction pour gérer les choix multiples
+gum_choose() {
+    local prompt="$1"
+    shift
+    local selected=""
+    local options=()
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --selected=*)
+                selected="${1#*=}"
+                ;;
+            *)
+                options+=("$1")
+                ;;
+        esac
+        shift
+    done
+
+    if $FULL_INSTALL; then
+        if [ -n "$selected" ]; then
+            echo "$selected"
+        else
+            echo "${options[@]}"
+        fi
+    else
+        gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="$prompt" --selected="$selected" "${options[@]}"
+    fi
+}
+
+main
