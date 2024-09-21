@@ -465,7 +465,7 @@ execute_command "mkdir -p $HOME/.config/xfce4 && \
                 touch $HOME/.ICEauthority && \
                 chmod 600 $HOME/.ICEauthority && \
                 sudo mkdir -p /run/user/$UID && \
-                sudo chown -R $UID:$UID /run/user/$UID/" "Modifications de droits"
+                sudo chown -R $UID:$UID /run/user/$UID/" "Attribution des permissions"
 
 # Personnalisation XFCE
 if $USE_GUM; then
