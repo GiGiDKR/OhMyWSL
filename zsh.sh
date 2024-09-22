@@ -123,6 +123,7 @@ backup_existing_config() {
 install_oh_my_zsh() {
     if [ ! -d "$HOME/.oh-my-zsh" ]; then
         execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git '$HOME/.oh-my-zsh' --quiet" "Installation de Oh-My-Zsh"
+        cp "$HOME/.oh-my-zsh/templates/zshrc.zsh-template" "$ZSHRC" "
     else
         info_msg "Oh-My-Zsh est déjà installé"
     fi
@@ -242,16 +243,6 @@ main() {
     check_dependencies
     install_zsh
 
-    # Demander à l'utilisateur s'il souhaite sauvegarder la configuration existante
-    if $USE_GUM; then
-        if gum_confirm "Sauvegarder la configuration ZSH ?"; then
-            backup_existing_config
-        fi
-    else
-        read -p $'\e[33mSauvegarder la configuration ZSH existante ? (o/n) : \e[0m' choice
-        [[ $choice =~ ^[Oo]$ ]] && backup_existing_config
-    fi
-
     # Installation de Oh My Zsh
     if $USE_GUM; then
         if gum_confirm "Installer Oh-My-Zsh ?"; then
@@ -260,6 +251,16 @@ main() {
     else
         read -p $'\e[33mInstaller Oh-My-Zsh ? (o/n) : \e[0m' choice
         [[ $choice =~ ^[Oo]$ ]] && install_oh_my_zsh
+    fi
+    
+    # Demander à l'utilisateur s'il souhaite sauvegarder la configuration existante
+    if $USE_GUM; then
+        if gum_confirm "Sauvegarder la configuration ZSH ?"; then
+            backup_existing_config
+        fi
+    else
+        read -p $'\e[33mSauvegarder la configuration ZSH existante ? (o/n) : \e[0m' choice
+        [[ $choice =~ ^[Oo]$ ]] && backup_existing_config
     fi
 
     # Configuration de base de ZSH
