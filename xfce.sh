@@ -96,7 +96,6 @@ gum_confirm() {
 }
 
 # Remplacez tous les appels à gum confirm par gum_confirm
-# Par exemple :
 if gum_confirm "Installer le fond d'écran ?"; then
     download_wallpaper="Oui"
 fi
@@ -108,19 +107,6 @@ fi
 if gum_confirm "Installer Fluent Cursor ?"; then
     install_fluent="Oui"
 fi
-
-# TODO Revoir cette fonction
-# Fonction pour appliquer le thème XFCE
-#apply_xfce_theme() {
-#    local gtk_theme="$1"
-#    local icon_theme="$2"
-#    local cursor_theme="$3"
-
-#    execute_command "xfconf-query -c xsettings -p /Net/ThemeName -s '$gtk_theme'" "Application du thème GTK"
-#    execute_command "xfconf-query -c xsettings -p /Net/IconThemeName -s '$icon_theme'" "Application du thème d'icônes"
-#    execute_command "xfconf-query -c xsettings -p /Gtk/CursorThemeName -s '$cursor_theme'" "Application du thème de curseur"
-#    execute_command "xfconf-query -c xfwm4 -p /general/theme -s '$gtk_theme'" "Application du thème de fenêtre"
-#}
 
 info_msg "❯ Configuration de XFCE"
 
@@ -154,18 +140,17 @@ install_theme() {
     execute_command "rm '$zip_file'" "Nettoyage des fichiers temporaires"
 }
 
-# TODO Revoir cette fonction
-# Fonction pour appliquer le thème XFCE
-#apply_xfce_theme() {
-#    local gtk_theme="$1"
-#    local icon_theme="$2"
-#    local cursor_theme="$3"
+apply_xfce_theme() {
+    local gtk_theme="$1"
+    local icon_theme="$2"
+    local cursor_theme="$3"
 
-#    execute_command "xfconf-query -c xsettings -p /Net/ThemeName -s '$gtk_theme'" "Application du thème GTK"
-#    execute_command "xfconf-query -c xsettings -p /Net/IconThemeName -s '$icon_theme'" "Application du thème d'icônes"
-#    execute_command "xfconf-query -c xsettings -p /Gtk/CursorThemeName -s '$cursor_theme'" "Application du thème de curseur"
-#    execute_command "xfconf-query -c xfwm4 -p /general/theme -s '$gtk_theme'" "Application du thème de fenêtre"
-#}
+    execute_command "xfconf-query -c xsettings -p /Net/ThemeName -s '$gtk_theme'" "Application du thème GTK"
+    execute_command "xfconf-query -c xsettings -p /Net/IconThemeName -s '$icon_theme'" "Application du thème d'icônes"
+    execute_command "xfconf-query -c xsettings -p /Gtk/CursorThemeName -s '$cursor_theme'" "Application du thème de curseur"
+    execute_command "xfconf-query -c xfwm4 -p /general/theme -s '$gtk_theme'" "Application du thème de fenêtre"
+    execute_command "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s '/usr/share/backgrounds/xfce/waves.png'" "Application du fond d'écran"
+}
 
 info_msg "❯ Configuration de XFCE"
 
@@ -196,9 +181,8 @@ if [ "$install_fluent" = "Oui" ]; then
     execute_command "rm -rf /tmp/Fluent-icon-theme-2024-02-25" "Nettoyage des fichiers temporaires"
 fi
 
-# TODO Revoir cette fonction
-#if [ "$apply_themes" = "Oui" ]; then
-#    info_msg "Application des thèmes..."
-#    apply_xfce_theme "WhiteSur-Dark" "Fluent-dark" "Fluent-cursors-dark"
-#    success_msg "Thèmes appliqués avec succès"
-#fi
+if [ "$apply_themes" = "Oui" ]; then
+    info_msg "Application des thèmes..."
+    apply_xfce_theme "WhiteSur-Dark" "Fluent-dark" "Fluent-cursors-dark"
+    success_msg "Thèmes appliqués avec succès"
+fi

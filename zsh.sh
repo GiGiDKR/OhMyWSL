@@ -123,11 +123,12 @@ backup_existing_config() {
 install_oh_my_zsh() {
     if [ ! -d "$HOME/.oh-my-zsh" ]; then
         execute_command "git clone https://github.com/ohmyzsh/ohmyzsh.git '$HOME/.oh-my-zsh' --quiet" "Installation de Oh-My-Zsh"
-        cp "$HOME/.oh-my-zsh/templates/zshrc.zsh-template" "$ZSHRC" "
+        cp "$HOME/.oh-my-zsh/templates/zshrc.zsh-template" "$ZSHRC"
     else
         info_msg "Oh-My-Zsh est déjà installé"
     fi
 }
+
 
 # Fonction pour installer PowerLevel10k
 install_powerlevel10k() {
@@ -206,6 +207,21 @@ install_plugin() {
         execute_command "git clone '$plugin_url' '$HOME/.oh-my-zsh/custom/plugins/$plugin_name' --quiet" "Installation de $plugin_name"
     else
         info_msg "$plugin_name est déjà installé"
+    fi
+}
+
+update_oh_my_zsh() {
+    if [ -d "$HOME/.oh-my-zsh" ]; then
+        execute_command "$ZSH/tools/upgrade.sh" "Mise à jour de Oh My Zsh"
+        execute_command "git -C $ZSH/custom/themes/powerlevel10k pull" "Mise à jour de PowerLevel10k"
+        
+        for plugin in "$ZSH/custom/plugins/"*; do
+            if [ -d "$plugin/.git" ]; then
+                execute_command "git -C $plugin pull" "Mise à jour du plugin $(basename "$plugin")"
+            fi
+        done
+    else
+        info_msg "Oh My Zsh n'est pas installé, aucune mise à jour nécessaire."
     fi
 }
 
@@ -289,18 +305,9 @@ main() {
         fi
     fi
 
-    # Installation de la configuration des alias
     execute_command "curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/aliases.zsh" "Configuration des alias communs"
-
-    # Installation des plugins
     install_zsh_plugins
-
-    # TODO Test à effectuer
-    # Rechargement de la configuration zsh
-    #execute_command "source $HOME/.zshrc" "Rechargement de la configuration zsh"
-
-    # Définition de zsh comme shell par défaut
-    #execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut" true
+    update_oh_my_zsh
 }
 
 # Ajoutez cette fonction pour gérer les confirmations
