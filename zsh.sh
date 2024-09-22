@@ -338,7 +338,7 @@ gum_choose() {
             echo "${options[@]}"
         fi
     else
-        gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="$prompt" --selected="$selected" "${options[@]}"
+        gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=10 --header="$prompt" --selected="$selected" "${options[@]}"
     fi
 }
 

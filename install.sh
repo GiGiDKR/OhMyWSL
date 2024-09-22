@@ -309,7 +309,7 @@ force_close_gwsl() {
     local processes=("GWSL.exe" "GWSL_service.exe" "GWSL_vcxsrv.exe" "vcxsrv.exe")
     
     for process in "${processes[@]}"; do
-        taskkill.exe /F /IM $process 2>/dev/null
+        taskkill.exe /F /IM "$process" >/dev/null 2>&1
     done
     
     if tasklist.exe | grep -qE "GWSL|vcxsrv"; then
@@ -356,7 +356,7 @@ configure_gwsl() {
     local config_file="/mnt/c/Users/$USER/AppData/Roaming/GWSL/settings.json"
     
     # Attendre que le fichier soit créé
-    timeout=10
+    timeout=5
     while [ ! -f "$config_file" ] && [ $timeout -gt 0 ]; do
         sleep 1
         ((timeout--))
