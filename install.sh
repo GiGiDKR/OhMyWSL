@@ -165,7 +165,7 @@ gum_choose() {
             echo "${options[@]}"
         fi
     else
-        gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=8 --header="$prompt" --selected="$selected" "${options[@]}"
+        gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --header="$prompt" --selected="$selected" "${options[@]}"
     fi
 }
 
@@ -321,15 +321,16 @@ force_close_gwsl() {
 
 ## Installation de GWSL
 install_gwsl() {
-    if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
-        success_msg "✓ GWSL est déjà installé"
-        execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
+     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
+        execute_command "powershell.exe -Command 'Start-Process -FilePath \"C:\WSL2-Distros\GWSL\GWSL.exe\" -WindowStyle Hidden'" "Exécution de GWSL"
         configure_gwsl
         force_close_gwsl
-        execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL avec la nouvelle configuration"
-        return 0
+        execute_command "powershell.exe -Command 'Start-Process -FilePath \"C:\WSL2-Distros\GWSL\GWSL.exe\" -WindowStyle Hidden'" "Exécution de GWSL re-configuré"
+    else
+        error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
+        return 1
     fi
-
+}
     execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire C:\WSL2-Distros"
     
     if [ ! -f "/mnt/c/WSL2-Distros/GWSL-145-STORE.zip" ]; then
@@ -342,6 +343,7 @@ install_gwsl() {
 
     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
+        force_close_gwsl
         configure_gwsl
         force_close_gwsl
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL avec la nouvelle configuration"
@@ -573,8 +575,9 @@ else
 fi
 
 force_close_gwsl
-execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL"
+execute_command "powershell.exe -Command 'Start-Process -FilePath "C:\WSL2-Distros\GWSL\GWSL.exe" -WindowStyle Hidden'" "Exécution de GWSL"
 execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
+execute_command "sleep 5" "Attente de 5 secondes"
 execute_command "startxfce4" "Exécution de XFCE4"
 
 # Nettoyage final
