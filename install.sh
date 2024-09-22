@@ -332,7 +332,7 @@ configure_gwsl() {
 
     if [ ! -f "$config_file" ]; then
         error_msg "Le fichier de configuration GWSL n'a pas été créé dans le délai imparti."
-        return 1
+        return 0
     fi
 
     # Modifier le fichier de configuration
@@ -348,7 +348,7 @@ install_gwsl() {
         execute_command "powershell.exe -Command 'Start-Process -FilePath \"C:\WSL2-Distros\GWSL\GWSL.exe\" -WindowStyle Hidden'" "Exécution de GWSL re-configuré"
     else
         error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
-        return 1
+        return 0
     fi
 
     if [ ! -f "/mnt/c/WSL2-Distros/GWSL-145-STORE.zip" ]; then
@@ -366,7 +366,7 @@ install_gwsl() {
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL avec la nouvelle configuration"
     else
         error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
-        return 1
+        return 0
     fi
 }
 
