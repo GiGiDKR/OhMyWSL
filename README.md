@@ -43,7 +43,7 @@ curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.1/install.sh -o i
 > [!WARNING]
 > Preview version (only for internal development) :
 > ```bash
-> curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.1/install.sh -o install.sh && chmod +x install.sh && ./install.sh --gum --full
+> curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.2/install.sh -o install.sh && chmod +x install.sh && ./install.sh --gum --full
 > ```
 
 ## 📖 To Do
