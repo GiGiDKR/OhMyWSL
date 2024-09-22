@@ -345,7 +345,7 @@ install_gwsl() {
         success_msg "✓ GWSL est déjà installé"
         execute_command "powershell.exe -Command 'Start-Process -FilePath \"C:\WSL2-Distros\GWSL\GWSL.exe\" -WindowStyle Hidden'" "Exécution de GWSL"
         configure_gwsl && force_close_gwsl
-        execute_command "powershell.exe -Command 'Start-Process -FilePath \"C:\WSL2-Distros\GWSL\GWSL.exe\" -WindowStyle Hidden'" "Exécution de GWSL re-configuré"
+        return 0
     else
         error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
         return 0
@@ -363,7 +363,6 @@ install_gwsl() {
     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
         execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
         configure_gwsl && force_close_gwsl
-        execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL avec la nouvelle configuration"
     else
         error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
         return 0
@@ -571,11 +570,11 @@ else
     fi
 fi
 
-force_close_gwsl
-execute_command "powershell.exe -Command 'Start-Process -FilePath "C:\WSL2-Distros\GWSL\GWSL.exe" -WindowStyle Hidden'" "Exécution de GWSL"
+execute_command "powershell.exe -Command 'Start-Process -FilePath \"C:\WSL2-Distros\GWSL\GWSL.exe\" -WindowStyle Hidden'" "Exécution de GWSL re-configuré"
 execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
-execute_command "sleep 5" "Attente de 5 secondes"
-execute_command "startxfce4" "Exécution de XFCE4"
+# TODO : Vérifier si la commande suivante fonctionne
+#execute_command "sleep 5" "Attente de 5 secondes"
+#execute_command "startxfce4" "Exécution de XFCE4"
 
 # Nettoyage final
 cleanup
