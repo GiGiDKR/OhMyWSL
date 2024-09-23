@@ -3,6 +3,7 @@
 USE_GUM=false
 FULL_INSTALL=false
 ZSHRC="$HOME/.zshrc"
+FZF_INSTALLED=false
 
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
@@ -147,14 +148,27 @@ install_ohmywsl_prompt() {
     echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
 }
 
+# Fonction pour vérifier et installer fzf
+check_and_install_fzf() {
+    if ! command -v fzf &> /dev/null; then
+        info_msg "fzf n'est pas installé. Installation en cours..."
+        execute_command "sudo apt update && sudo apt install -y fzf" "Installation de fzf"
+        execute_command "source ~/.zshrc" "Rechargement de la configuration zsh"
+        FZF_INSTALLED=true
+    else
+        info_msg "fzf est déjà installé"
+        FZF_INSTALLED=true
+    fi
+}
+
 # Fonction pour installer les plugins
 install_zsh_plugins() {
     info_msg "❯ Configuration des plugins"
     local plugins_to_install=()
     if $USE_GUM; then
-        plugins_to_install=($(gum_choose "Sélectionner avec ESPACE les plugins à installer :" --selected="Tout installer" "zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder" "Tout installer"))
+        plugins_to_install=($(gum_choose "Sélectionner avec ESPACE les plugins à installer :" --selected="Tout installer" "zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder" "zoxide" "fast-syntax-highlighting" "fzf-tab" "Tout installer"))
         if [[ " ${plugins_to_install[*]} " == *" Tout installer "* ]]; then
-            plugins_to_install=("zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder")
+            plugins_to_install=("zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder" "zoxide" "fast-syntax-highlighting" "fzf-tab")
         fi
     else
         info_msg "Sélectionner les plugins à installer (SÉPARÉS PAR DES ESPACES) :"
@@ -165,7 +179,10 @@ install_zsh_plugins() {
         info_msg "4) you-should-use"
         info_msg "5) zsh-abbr"
         info_msg "6) zsh-alias-finder"
-        info_msg "7) Tout installer"
+        info_msg "7) zoxide"
+        info_msg "8) fast-syntax-highlighting"
+        info_msg "9) fzf-tab"
+        info_msg "10) Tout installer"
         echo
         read -p $"\e[33mEntrez les numéros des plugins : \e[0m" plugin_choices
         
@@ -177,7 +194,10 @@ install_zsh_plugins() {
                 4) plugins_to_install+=("you-should-use") ;;
                 5) plugins_to_install+=("zsh-abbr") ;;
                 6) plugins_to_install+=("zsh-alias-finder") ;;
-                7) plugins_to_install=("zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder") ;;
+                7) plugins_to_install+=("zoxide") ;;
+                8) plugins_to_install+=("fast-syntax-highlighting") ;;
+                9) plugins_to_install+=("fzf-tab") ;;
+                10) plugins_to_install=("zsh-autosuggestions" "zsh-syntax-highlighting" "zsh-completions" "you-should-use" "zsh-abbr" "zsh-alias-finder" "zoxide" "fast-syntax-highlighting" "fzf-tab") ;;
             esac
         done
     fi
@@ -201,6 +221,16 @@ install_plugin() {
         "you-should-use") plugin_url="https://github.com/MichaelAquilina/zsh-you-should-use.git" ;;
         "zsh-abbr") plugin_url="https://github.com/olets/zsh-abbr" ;;
         "zsh-alias-finder") plugin_url="https://github.com/akash329d/zsh-alias-finder" ;;
+        "zoxide")
+            execute_command "curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh >/dev/null 2>&1" "Installation de zoxide"
+            execute_command "sudo mv ~/.local/bin/zoxide /usr/local/bin/" "Déplacement de zoxide vers /usr/local/bin"
+            return
+            ;;
+        "fast-syntax-highlighting") plugin_url="https://github.com/zdharma-continuum/fast-syntax-highlighting.git" ;;
+        "fzf-tab")
+            plugin_url="https://github.com/Aloxaf/fzf-tab.git"
+            check_and_install_fzf
+            ;;
     esac
 
     if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/$plugin_name" ]; then
@@ -243,12 +273,22 @@ update_zshrc() {
     execute_command "sed -i '/^plugins=(/,/)/c\\${new_plugins_section}' '$ZSHRC'" "Ajout des plugins dans .zshrc"
 
     if ! grep -q "source \$ZSH/oh-my-zsh.sh" "$ZSHRC"; then
-        echo -e "\n\nsource \$ZSH/oh-my-zsh.sh\n" >> "$ZSHRC"
+        echo -e "\n\n# Initialize Oh-My-Zsh\nsource \$ZSH/oh-my-zsh.sh\n" >> "$ZSHRC"
     fi
-
     if [[ " ${unique_plugins[*]} " == *" zsh-completions "* ]]; then
         if ! grep -q "fpath+=.*zsh-completions" "$ZSHRC"; then
-            sed -i "1ifpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src" "$ZSHRC"
+            sed -i '/^plugins=(/,/)/a\
+\
+fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src\
+' "$ZSHRC" 2>/dev/null
+        fi
+    fi
+    if ! grep -q "eval \"\$(zoxide init zsh)\"" "$ZSHRC"; then
+        echo -e "\n# Initialize zoxide\neval \"\$(zoxide init zsh)\"" >> "$ZSHRC"
+    fi
+    if [[ " ${unique_plugins[*]} " == *" fzf-tab "* ]]; then
+        if ! grep -q "source ~/.fzf.zsh" "$ZSHRC"; then
+            echo -e "\n# Configuration fzf\n[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh" >> "$ZSHRC"
         fi
     fi
 }
@@ -308,6 +348,9 @@ main() {
     execute_command "curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/aliases.zsh" "Configuration des alias communs"
     install_zsh_plugins
     update_oh_my_zsh
+
+    # Écrire l'état de l'installation de fzf dans un fichier temporaire
+    echo "$FZF_INSTALLED" > /tmp/fzf_installed
 }
 
 # Ajoutez cette fonction pour gérer les confirmations

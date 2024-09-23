@@ -255,7 +255,7 @@ else
             "$HOME/zsh.sh"
         fi
     else
-        info_msg "𐄂 Installation de zsh refus��e"
+        info_msg "𐄂 Installation de zsh refuse"
     fi
 fi
 
@@ -379,10 +379,23 @@ install_gwsl() {
 # Fonction pour installer des packages optionnels
 optional_packages() {
     local packages=()
+    local fzf_installed=false
+
+    # Vérifier si fzf a été installé par zsh.sh
+    if [ -f /tmp/fzf_installed ]; then
+        fzf_installed=$(cat /tmp/fzf_installed)
+        rm /tmp/fzf_installed  # Supprimer le fichier temporaire après lecture
+    fi
+
     if $USE_GUM; then
-        packages=($(gum_choose "Sélectionner avec ESPACE les packages à installer :" --selected="Tout installer" "nala" "eza" "lfm" "bat" "fzf" "Tout installer"))
+        local options=("nala" "eza" "lfm" "bat")
+        [ "$fzf_installed" = "false" ] && options+=("fzf")
+        options+=("Tout installer")
+
+        packages=($(gum_choose "Sélectionner avec ESPACE les packages à installer :" --selected="Tout installer" "${options[@]}"))
         if [[ " ${packages[*]} " == *"Tout installer"* ]]; then
-            packages=("nala" "eza" "lfm" "bat" "fzf")
+            packages=("${options[@]}")
+            packages=("${packages[@]/Tout installer}")
         fi
     else
         info_msg "Sélectionnez les packages à installer :"
@@ -391,19 +404,33 @@ optional_packages() {
         info_msg "2) eza"
         info_msg "3) lfm"
         info_msg "4) bat"
-        info_msg "5) fzf"
-        info_msg "6) Tout installer"
+        [ "$fzf_installed" = "false" ] && info_msg "5) fzf"
+        info_msg "$((5 + $([ "$fzf_installed" = "false" ] && echo 1 || echo 0))) Tout installer"
         echo
         read -p $"\e[33mEntrez les numéros des packages (SÉPARÉS PAR DES ESPACES) : \e[0m" package_choices
+        
+        for choice in $package_choices; do
+            case $choice in
+                1) packages+=("nala") ;;
+                2) packages+=("eza") ;;
+                3) packages+=("lfm") ;;
+                4) packages+=("bat") ;;
+                5) [ "$fzf_installed" = "false" ] && packages+=("fzf") ;;
+                $((5 + $([ "$fzf_installed" = "false" ] && echo 1 || echo 0)))) 
+                    packages=("nala" "eza" "lfm" "bat")
+                    [ "$fzf_installed" = "false" ] && packages+=("fzf")
+                    ;;
+            esac
+        done
     fi
 
-    for choice in "${packages[@]}"; do
-        case $choice in
+    for package in "${packages[@]}"; do
+        case $package in
             nala) install_package "nala" ;;
             eza) install_eza ;;
             lfm) install_package "lfm" ;;
             bat) install_package "bat" ;;
-            fzf) install_package "fzf" ;;
+            fzf) [ "$fzf_installed" = "false" ] && install_package "fzf" ;;
         esac
     done
 }
