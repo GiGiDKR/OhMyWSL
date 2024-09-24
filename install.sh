@@ -345,26 +345,33 @@ configure_gwsl() {
 
 # Fonction d'installation de GWSL
 install_gwsl() {
-    if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
+    local gwsl_path="/mnt/c/WSL2-Distros/GWSL/GWSL.exe"
+    local zip_path="/mnt/c/WSL2-Distros/GWSL-145-STORE.zip"
+    local install_dir="/mnt/c/WSL2-Distros"
+
+    if [ -f "$gwsl_path" ]; then
         success_msg "✓ GWSL est déjà installé"
-        execute_command "powershell.exe -Command 'Start-Process -FilePath \"C:\WSL2-Distros\GWSL\GWSL.exe\" -WindowStyle Hidden'" "Exécution de GWSL"
+        execute_command "powershell.exe -Command 'Start-Process -FilePath \"$gwsl_path\" -WindowStyle Hidden'" "Exécution de GWSL"
+        configure_gwsl && force_close_gwsl
+        return 0
+    fi
+
+    if [ ! -f "$zip_path" ]; then
+        execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip -P $install_dir" "Téléchargement de GWSL"
+    else
+        success_msg "✓ Sources de GWSL déjà téléchargées"
+    fi
+
+    execute_command "mkdir -p $install_dir" "Création du répertoire C:\WSL2-Distros"
+    execute_command "cd $install_dir && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL" "Extraction et configuration de GWSL"
+
+    if [ -f "$gwsl_path" ]; then
+        execute_command "$gwsl_path" "Exécution initiale de GWSL"
         configure_gwsl && force_close_gwsl
         return 0
     else
-        if [ ! -f "/mnt/c/WSL2-Distros/GWSL-145-STORE.zip" ]; then
-            execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip -P /mnt/c/WSL2-Distros" "Téléchargement de GWSL"
-        else
-            success_msg "✓ Sources de GWSL déjà téléchargées"
-        fi
-        execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire C:\WSL2-Distros"
-        execute_command "cd /mnt/c/WSL2-Distros && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL" "Extraction et configuration de GWSL"
-        if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
-            execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
-            configure_gwsl && force_close_gwsl
-            return 0
-        else
-            error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
-        fi
+        error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
+        return 1
     fi
 }
 
