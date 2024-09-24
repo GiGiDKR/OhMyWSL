@@ -363,7 +363,6 @@ install_gwsl() {
             configure_gwsl && force_close_gwsl
         else
             error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
-            return 0
         fi
     fi
 }
