@@ -31,7 +31,7 @@ parse_arguments() {
 # Vérification des permissions sudo
 check_sudo_permissions() {
     if ! sudo -v; then
-        error_msg "Permissions sudo requises. Veuillez exécuter le script avec sudo."
+        echo -e "\e[38;5;196mPermissions sudo requises. Veuillez exécuter le script avec sudo.\e[0m"
         exit 1
     fi
 }
@@ -39,13 +39,13 @@ check_sudo_permissions() {
 # Vérification de l'environnement WSL et de sa version
 check_wsl_environment() {
     if ! grep -q Microsoft /proc/version && ! grep -q microsoft /proc/version; then
-        error_msg "Ce script est conçu pour être exécuté dans un environnement WSL."
+        echo -e "\e[38;5;196mCe script est conçu pour être exécuté dans un environnement WSL.\e[0m"
         exit 1
     fi
 
     wsl_version=$(wsl.exe -l -v | grep -i "ubuntu" | awk '{print $NF}' | tr -d '\r')
     if [ "$wsl_version" != "2" ]; then
-        error_msg "Ce script nécessite WSL 2. Votre version actuelle est : $wsl_version"
+        echo -e "\e[38;5;196mCe script nécessite WSL 2. Votre version actuelle est : $wsl_version\e[0m"
         exit 1
     fi
 }
