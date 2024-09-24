@@ -147,6 +147,7 @@ gum_confirm() {
     fi
 }
 
+# Fonction pour choisir des options avec gum
 gum_choose() {
     local prompt="$1"
     shift
@@ -176,6 +177,7 @@ gum_choose() {
     fi
 }
 
+# Fonction pour configurer le mode non interactif
 configure_noninteractive() {
     sudo debconf-set-selections <<< "gdm3 shared/default-x-display-manager select gdm3"
     export DEBIAN_FRONTEND=noninteractive
@@ -201,6 +203,7 @@ check_dependencies
 sudo -v
 show_banner
 
+# Fonction pour configurer le système
 info_msg "❯ Configuration du système"
 wslconfig_file="/mnt/c/Users/$USER/.wslconfig"
 content="[wsl2]
@@ -210,14 +213,12 @@ generateResolvConf = false"
 
 execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier .wslconfig"
 
+# Fonction pour mettre à jour le système
 execute_command "sudo apt update -y" "Recherche de mises à jour"
 execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
 configure_noninteractive
 
-## Installation des paquets
-
-packages=(xfce4 xfce4-goodies xwayland nautilus ark jq)
-
+## Fonction pour installer et configurer gdm3
 install_and_configure_gdm3() {
     execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y gdm3" "Installation de gdm3"
     execute_command "echo 'gdm3 shared/default-x-display-manager select gdm3' | sudo debconf-set-selections" "Définition de gdm3 comme gestionnaire par défaut"
@@ -226,6 +227,9 @@ install_and_configure_gdm3() {
 }
 
 install_and_configure_gdm3
+
+# Fonction pour installer des paquets
+packages=(xfce4 xfce4-goodies xwayland nautilus ark jq)
 
 for package in $packages; do
     execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
@@ -259,7 +263,7 @@ else
     fi
 fi
 
-## Configuration réseau
+## Fonction pour configurer le réseau
 info_msg "❯ Configuration du réseau"
 ip_address=$(ip route | grep default | awk '{print $3; exit;}')
 
@@ -277,7 +281,8 @@ fi
 
 execute_command "sudo sed -i 's/^nameserver.*/nameserver '"${ip_address}"'/' /etc/resolv.conf" "Mise à jour du fichier resolv.conf"
 
-## Configuration des fichiers de shell
+# Fonction pour ajouter des lignes aux fichiers de shell
+
 bashrc_path="$HOME/.bashrc"
 zshrc_path="$HOME/.zshrc"
 
@@ -285,7 +290,6 @@ lines_to_add="
 export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}'):0.0
 export PULSE_SERVER=tcp:$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}')
 "
-
 add_lines_to_file() {
     local file="$1"
     local create_if_missing="$2"
@@ -342,11 +346,10 @@ configure_gwsl() {
         return 0
     fi
 
-    # Modifier le fichier de configuration
     execute_command "sed -i 's/\"window_mode\": \"multi\"/\"window_mode\": \"single\"/' \"$config_file\"" "Modification du fichier de configuration GWSL"
 }
 
-## Installation de GWSL
+## Fonction d'installation de GWSL
 install_gwsl() {
     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
         success_msg "✓ GWSL est déjà installé"
@@ -384,7 +387,7 @@ optional_packages() {
     # Vérifier si fzf a été installé par zsh.sh
     if [ -f /tmp/fzf_installed ]; then
         fzf_installed=$(cat /tmp/fzf_installed)
-        rm /tmp/fzf_installed  # Supprimer le fichier temporaire après lecture
+        rm /tmp/fzf_installed
     fi
 
     if $USE_GUM; then
@@ -487,6 +490,7 @@ alias show="nala show"' >> "$rc_file"
     esac
 }
 
+# Fonction pour ajouter les alias commun
 common_alias() {
 # Define general aliases in a variable
 aliases='alias ..="cd .."
@@ -545,6 +549,7 @@ else
     fi
 fi
 
+# Exécution initiale de XFCE4
 execute_command "timeout 5s sudo startxfce4" "Exécution initiale de XFCE4"
 
 ## Configuration de XFCE4
