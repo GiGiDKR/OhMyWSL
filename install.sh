@@ -351,16 +351,12 @@ install_gwsl() {
         configure_gwsl && force_close_gwsl
         return 0
     else
-        error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
-        return 0
-    fi
+        if [ ! -f "/mnt/c/WSL2-Distros/GWSL-145-STORE.zip" ]; then
+            execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip -P /mnt/c/WSL2-Distros" "Téléchargement de GWSL"
+        else
+            success_msg "✓ Sources de GWSL déjà téléchargées"
+        fi
 
-    if [ ! -f "/mnt/c/WSL2-Distros/GWSL-145-STORE.zip" ]; then
-        execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip -P /mnt/c/WSL2-Distros" "Téléchargement de GWSL"
-    else
-        success_msg "✓ Sources de GWSL déjà téléchargées"
-    fi
-    
     execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire C:\WSL2-Distros"
     execute_command "cd /mnt/c/WSL2-Distros && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL" "Extraction et configuration de GWSL"
 
