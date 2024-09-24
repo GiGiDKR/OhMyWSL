@@ -356,16 +356,15 @@ install_gwsl() {
         else
             success_msg "✓ Sources de GWSL déjà téléchargées"
         fi
-
-    execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire C:\WSL2-Distros"
-    execute_command "cd /mnt/c/WSL2-Distros && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL" "Extraction et configuration de GWSL"
-
-    if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
-        execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
-        configure_gwsl && force_close_gwsl
-    else
-        error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
-        return 0
+        execute_command "mkdir -p /mnt/c/WSL2-Distros" "Création du répertoire C:\WSL2-Distros"
+        execute_command "cd /mnt/c/WSL2-Distros && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL" "Extraction et configuration de GWSL"
+        if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
+            execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
+            configure_gwsl && force_close_gwsl
+        else
+            error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
+            return 0
+        fi
     fi
 }
 
