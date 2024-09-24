@@ -11,11 +11,6 @@ Open a Windows Terminal and run the following command :
 wsl --install
 ```
 
-After the installation, run the following command to connect to the Ubuntu distribution :
-```bash
-wsl
-```
-
 ## 📦 Install OhMyWSL
 
 Run the following command to install OhMyWSL :
