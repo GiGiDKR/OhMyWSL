@@ -32,12 +32,6 @@ if ! sudo -v; then
     exit 1
 fi
 
-# Vérification de l'environnement WSL
-if ! grep -q Microsoft /proc/version && ! grep -q microsoft /proc/version; then
-    error_msg "Ce script est conçu pour être exécuté dans un environnement WSL."
-    exit 1
-fi
-
 # Fonction pour installer gum
 install_gum() {
     bash_banner
