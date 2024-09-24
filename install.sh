@@ -605,7 +605,7 @@ run_gwsl_and_xfce4() {
 cleanup_installation_sources() {
     if $USE_GUM; then
         if gum_confirm "Supprimer les sources d'installation ?"; then
-            execute_command "rm -f /mnt/c/WSL2-Distros/GWSL-145-STORE.zip" "Suppression des sources de GWSL"
+            execute_command "rm -f /mnt/c/WSL2-Distros/GWSL.zip" "Suppression des sources de GWSL"
             execute_command "rm -- \"$0\"" "Suppression du script d'installation"
         fi
     else
@@ -613,7 +613,7 @@ cleanup_installation_sources() {
         choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
         
         if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
-            execute_command "rm -f /mnt/c/WSL2-Distros/GWSL-145-STORE.zip" "Suppression des sources de GWSL"
+            execute_command "rm -f /mnt/c/WSL2-Distros/GWSL.zip" "Suppression des sources de GWSL"
             execute_command "rm -- \"$0\"" "Suppression du script d'installation"
         fi
     fi
