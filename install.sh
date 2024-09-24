@@ -220,9 +220,9 @@ install_and_configure_gdm3() {
 
 # Fonction pour installer des paquets
 install_packages() {
-    packages=(xfce4 xfce4-goodies xwayland nautilus ark jq)
+    local packages=(xfce4 xfce4-goodies xwayland nautilus ark jq)
 
-    for package in $packages; do
+    for package in "${packages[@]}"; do
         execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
     done
 }
@@ -346,7 +346,7 @@ configure_gwsl() {
 # Fonction d'installation de GWSL
 install_gwsl() {
     local gwsl_path="/mnt/c/WSL2-Distros/GWSL/GWSL.exe"
-    local zip_path="/mnt/c/WSL2-Distros/GWSL-145-STORE.zip"
+    local zip_path="/mnt/c/WSL2-Distros/GWSL.zip"
     local install_dir="/mnt/c/WSL2-Distros"
 
     if [ -f "$gwsl_path" ]; then
@@ -357,13 +357,13 @@ install_gwsl() {
     fi
 
     if [ ! -f "$zip_path" ]; then
-        execute_command "wget https://archive.org/download/gwsl-145-store/GWSL-145-STORE.zip -P $install_dir" "Téléchargement de GWSL"
+        execute_command "wget https://github.com/GiGiDKR/OhMyWSL/raw/dev/GWSL.zip -P $install_dir" "Téléchargement de GWSL"
     else
         success_msg "✓ Sources de GWSL déjà téléchargées"
     fi
 
     execute_command "mkdir -p $install_dir" "Création du répertoire C:\WSL2-Distros"
-    execute_command "cd $install_dir && unzip GWSL-145-STORE.zip && mv GWSL-145-STORE GWSL" "Extraction et configuration de GWSL"
+    execute_command "unzip $install_dir/GWSL.zip -d $install_dir" "Extraction de GWSL"
 
     if [ -f "$gwsl_path" ]; then
         execute_command "$gwsl_path" "Exécution initiale de GWSL"
