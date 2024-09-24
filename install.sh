@@ -36,20 +36,6 @@ check_sudo_permissions() {
     fi
 }
 
-# Vérification de l'environnement WSL et de sa version
-check_wsl_environment() {
-    if ! grep -q Microsoft /proc/version && ! grep -q microsoft /proc/version; then
-        echo -e "\e[38;5;196mCe script est conçu pour être exécuté dans un environnement WSL.\e[0m"
-        exit 1
-    fi
-
-    wsl_version=$(wsl.exe -l -v | grep -i "ubuntu" | awk '{print $NF}' | tr -d '\r')
-    if [ "$wsl_version" != "2" ]; then
-        echo -e "\e[38;5;196mCe script nécessite WSL 2. Votre version actuelle est : $wsl_version\e[0m"
-        exit 1
-    fi
-}
-
 # Fonction pour installer gum
 install_gum() {
     bash_banner
@@ -644,7 +630,6 @@ set_zsh_as_default_shell() {
 main() {
     parse_arguments "$@"
     check_sudo_permissions
-    check_wsl_environment
     install_gum_if_needed
     check_dependencies
     sudo -v
