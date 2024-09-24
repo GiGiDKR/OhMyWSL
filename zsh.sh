@@ -87,6 +87,46 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
+# Fonction pour gérer les confirmations
+gum_confirm() {
+    local prompt="$1"
+    if $FULL_INSTALL; then
+        return 0
+    else
+        gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "$prompt"
+    fi
+}
+
+# AFonction pour gérer les choix multiples
+gum_choose() {
+    local prompt="$1"
+    shift
+    local selected=""
+    local options=()
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --selected=*)
+                selected="${1#*=}"
+                ;;
+            *)
+                options+=("$1")
+                ;;
+        esac
+        shift
+    done
+
+    if $FULL_INSTALL; then
+        if [ -n "$selected" ]; then
+            echo "$selected"
+        else
+            echo "${options[@]}"
+        fi
+    else
+        gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=10 --header="$prompt" --selected="$selected" "${options[@]}"
+    fi
+}
+
 # Vérification des dépendances
 check_dependencies() {
     local dependencies=("wget" "curl" "git" "unzip")
@@ -293,104 +333,79 @@ fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src\
     fi
 }
 
+# Fonction pour exécuter une liste de fonctions
+execute_functions() {
+    local functions=("$@")
+    for func in "${functions[@]}"; do
+        if [[ $(type -t "$func") == function ]]; then
+            $func
+        else
+            error_msg "Fonction '$func' non trouvée"
+        fi
+    done
+}
+
 # Fonction principale
 main() {
     info_msg "❯ Configuration de ZSH"
-    check_dependencies
-    install_zsh
+    
+    local functions_to_execute=(
+        check_dependencies
+        install_zsh
+    )
 
-    # Installation de Oh My Zsh
     if $USE_GUM; then
         if gum_confirm "Installer Oh-My-Zsh ?"; then
-            install_oh_my_zsh
+            functions_to_execute+=(install_oh_my_zsh)
         fi
     else
         read -p $'\e[33mInstaller Oh-My-Zsh ? (o/n) : \e[0m' choice
-        [[ $choice =~ ^[Oo]$ ]] && install_oh_my_zsh
+        [[ $choice =~ ^[Oo]$ ]] && functions_to_execute+=(install_oh_my_zsh)
     fi
     
-    # Demander à l'utilisateur s'il souhaite sauvegarder la configuration existante
     if $USE_GUM; then
         if gum_confirm "Sauvegarder la configuration ZSH ?"; then
-            backup_existing_config
+            functions_to_execute+=(backup_existing_config)
         fi
     else
         read -p $'\e[33mSauvegarder la configuration ZSH existante ? (o/n) : \e[0m' choice
-        [[ $choice =~ ^[Oo]$ ]] && backup_existing_config
+        [[ $choice =~ ^[Oo]$ ]] && functions_to_execute+=(backup_existing_config)
     fi
 
-    # Configuration de base de ZSH
-    execute_command "curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/zshrc" "Téléchargement de .zshrc"
+    functions_to_execute+=(
+        "execute_command \"curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/zshrc\" \"Téléchargement de .zshrc\""
+    )
 
-    # Installation de PowerLevel10k
     if $USE_GUM; then
         if gum_confirm "Installer PowerLevel10k ?"; then
-            install_powerlevel10k
+            functions_to_execute+=(install_powerlevel10k)
             if gum_confirm "Installer le prompt OhMyWSL ?"; then
-                install_ohmywsl_prompt
+                functions_to_execute+=(install_ohmywsl_prompt)
             else
-                info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
+                functions_to_execute+=("info_msg \"Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'.\"")
             fi
         fi
     else
         read -p $'\e[33mInstaller PowerLevel10k ? (o/n) : \e[0m' choice
         if [[ $choice =~ ^[Oo]$ ]]; then
-            install_powerlevel10k
+            functions_to_execute+=(install_powerlevel10k)
             read -p $'\e[33mInstaller le prompt OhMyWSL ? (o/n) : \e[0m' choice
             if [[ $choice =~ ^[Oo]$ ]]; then
-                install_ohmywsl_prompt
+                functions_to_execute+=(install_ohmywsl_prompt)
             else
-                info_msg "Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'."
+                functions_to_execute+=("info_msg \"Vous pouvez configurer le prompt PowerLevel10k en exécutant 'p10k configure'.\"")
             fi
         fi
     fi
 
-    execute_command "curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/aliases.zsh" "Configuration des alias communs"
-    install_zsh_plugins
-    update_oh_my_zsh
+    functions_to_execute+=(
+        "execute_command \"curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/aliases.zsh\" \"Configuration des alias communs\""
+        install_zsh_plugins
+        update_oh_my_zsh
+        "echo \"$FZF_INSTALLED\" > /tmp/fzf_installed"
+    )
 
-    # Écrire l'état de l'installation de fzf dans un fichier temporaire
-    echo "$FZF_INSTALLED" > /tmp/fzf_installed
+    execute_functions "${functions_to_execute[@]}"
 }
 
-# Ajoutez cette fonction pour gérer les confirmations
-gum_confirm() {
-    local prompt="$1"
-    if $FULL_INSTALL; then
-        return 0
-    else
-        gum confirm --affirmative "Oui" --negative "Non" --prompt.foreground="33" --selected.background="33" --selected.foreground="0" "$prompt"
-    fi
-}
-
-# Ajoutez cette fonction pour gérer les choix multiples
-gum_choose() {
-    local prompt="$1"
-    shift
-    local selected=""
-    local options=()
-
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --selected=*)
-                selected="${1#*=}"
-                ;;
-            *)
-                options+=("$1")
-                ;;
-        esac
-        shift
-    done
-
-    if $FULL_INSTALL; then
-        if [ -n "$selected" ]; then
-            echo "$selected"
-        else
-            echo "${options[@]}"
-        fi
-    else
-        gum choose --no-limit --selected.foreground="33" --header.foreground="33" --cursor.foreground="33" --height=10 --header="$prompt" --selected="$selected" "${options[@]}"
-    fi
-}
-
-main
+main "$@"

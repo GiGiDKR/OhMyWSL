@@ -17,33 +17,38 @@ bash_banner() {
 }
 
 # Traitement des arguments en ligne de commande
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --gum|-g) USE_GUM=true ;;
-        --full|-f) FULL_INSTALL=true ;;
-        *) echo "Option non reconnue : $1" ;;
-    esac
-    shift
-done
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --gum|-g) USE_GUM=true ;;
+            --full|-f) FULL_INSTALL=true ;;
+            *) echo "Option non reconnue : $1" ;;
+        esac
+        shift
+    done
+}
 
-
-# Vérification des permissions sudo au début du script
-if ! sudo -v; then
-    error_msg "Permissions sudo requises. Veuillez exécuter le script avec sudo."
-    exit 1
-fi
+# Vérification des permissions sudo
+check_sudo_permissions() {
+    if ! sudo -v; then
+        error_msg "Permissions sudo requises. Veuillez exécuter le script avec sudo."
+        exit 1
+    fi
+}
 
 # Vérification de l'environnement WSL et de sa version
-if ! grep -q Microsoft /proc/version && ! grep -q microsoft /proc/version; then
-    error_msg "Ce script est conçu pour être exécuté dans un environnement WSL."
-    exit 1
-fi
+check_wsl_environment() {
+    if ! grep -q Microsoft /proc/version && ! grep -q microsoft /proc/version; then
+        error_msg "Ce script est conçu pour être exécuté dans un environnement WSL."
+        exit 1
+    fi
 
-wsl_version=$(wsl.exe -l -v | grep -i "ubuntu" | awk '{print $NF}' | tr -d '\r')
-if [ "$wsl_version" != "2" ]; then
-    error_msg "Ce script nécessite WSL 2. Votre version actuelle est : $wsl_version"
-    exit 1
-fi
+    wsl_version=$(wsl.exe -l -v | grep -i "ubuntu" | awk '{print $NF}' | tr -d '\r')
+    if [ "$wsl_version" != "2" ]; then
+        error_msg "Ce script nécessite WSL 2. Votre version actuelle est : $wsl_version"
+        exit 1
+    fi
+}
 
 # Fonction pour installer gum
 install_gum() {
@@ -57,11 +62,13 @@ install_gum() {
 }
 
 # Installation de gum si nécessaire
-if $USE_GUM; then
-    if ! command -v gum &> /dev/null; then
-        install_gum
+install_gum_if_needed() {
+    if $USE_GUM; then
+        if ! command -v gum &> /dev/null; then
+            install_gum
+        fi
     fi
-fi
+}
 
 # Fonction pour afficher le banner
 show_banner() {
@@ -147,7 +154,6 @@ gum_confirm() {
     fi
 }
 
-# Fonction pour choisir des options avec gum
 gum_choose() {
     local prompt="$1"
     shift
@@ -199,26 +205,26 @@ check_dependencies() {
     done
 }
 
-check_dependencies
-sudo -v
-show_banner
-
 # Fonction pour configurer le système
-info_msg "❯ Configuration du système"
-wslconfig_file="/mnt/c/Users/$USER/.wslconfig"
-content="[wsl2]
+configure_system() {
+    info_msg "❯ Configuration du système"
+    wslconfig_file="/mnt/c/Users/$USER/.wslconfig"
+    content="[wsl2]
 guiApplications=false
 [network]
 generateResolvConf = false"
 
-execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier .wslconfig"
+    execute_command "echo -e \"$content\" | tr -d '\r' > \"$wslconfig_file\"" "Création du fichier .wslconfig"
+}
 
 # Fonction pour mettre à jour le système
-execute_command "sudo apt update -y" "Recherche de mises à jour"
-execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
-configure_noninteractive
+update_system() {
+    execute_command "sudo apt update -y" "Recherche de mises à jour"
+    execute_command "sudo apt upgrade -y" "Mise à jour des paquets"
+    configure_noninteractive
+}
 
-## Fonction pour installer et configurer gdm3
+# Fonction pour installer et configurer gdm3
 install_and_configure_gdm3() {
     execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y gdm3" "Installation de gdm3"
     execute_command "echo 'gdm3 shared/default-x-display-manager select gdm3' | sudo debconf-set-selections" "Définition de gdm3 comme gestionnaire par défaut"
@@ -226,94 +232,96 @@ install_and_configure_gdm3() {
     execute_command "sudo systemctl enable gdm3" "Activation du service gdm3"
 }
 
-install_and_configure_gdm3
-
 # Fonction pour installer des paquets
-packages=(xfce4 xfce4-goodies xwayland nautilus ark jq)
+install_packages() {
+    packages=(xfce4 xfce4-goodies xwayland nautilus ark jq)
 
-for package in $packages; do
-    execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
-done
+    for package in $packages; do
+        execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
+    done
+}
 
-# Installation de ZSH
-info_msg "❯ Configuration du shell"
-if $USE_GUM; then
-    if gum_confirm "Installer zsh ?"; then
-        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
-        if $FULL_INSTALL; then
-            "$HOME/zsh.sh" --gum --full
+# Fonction pour installer ZSH
+install_zsh() {
+    info_msg "❯ Configuration du shell"
+    if $USE_GUM; then
+        if gum_confirm "Installer zsh ?"; then
+            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
+            if $FULL_INSTALL; then
+                "$HOME/zsh.sh" --gum --full
+            else
+                "$HOME/zsh.sh" --gum
+            fi
         else
-            "$HOME/zsh.sh" --gum
+            info_msg "𐄂 Installation de zsh refusée"
         fi
     else
-        info_msg "𐄂 Installation de zsh refusée"
-    fi
-else
-    read -p $'\e[33mInstaller zsh ? (o/n) : \e[0m' choice
-    choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
-    if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
-        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
-        if $FULL_INSTALL; then
-            "$HOME/zsh.sh" --full
+        read -p $'\e[33mInstaller zsh ? (o/n) : \e[0m' choice
+        choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
+        if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
+            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
+            if $FULL_INSTALL; then
+                "$HOME/zsh.sh" --full
+            else
+                "$HOME/zsh.sh"
+            fi
         else
-            "$HOME/zsh.sh"
-        fi
-    else
-        info_msg "𐄂 Installation de zsh refuse"
-    fi
-fi
-
-## Fonction pour configurer le réseau
-info_msg "❯ Configuration du réseau"
-ip_address=$(ip route | grep default | awk '{print $3; exit;}')
-
-if [ -z "$ip_address" ]; then
-    error_msg "Impossible de récupérer l'adresse IP"
-    exit 1
-fi
-
-resolv_conf="/etc/resolv.conf"
-
-if [ ! -f "$resolv_conf" ]; then
-    error_msg "Le fichier $resolv_conf n'existe pas"
-    exit 1
-fi
-
-execute_command "sudo sed -i 's/^nameserver.*/nameserver '"${ip_address}"'/' /etc/resolv.conf" "Mise à jour du fichier resolv.conf"
-
-# Fonction pour ajouter des lignes aux fichiers de shell
-
-bashrc_path="$HOME/.bashrc"
-zshrc_path="$HOME/.zshrc"
-
-lines_to_add="
-export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}'):0.0
-export PULSE_SERVER=tcp:$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}')
-"
-add_lines_to_file() {
-    local file="$1"
-    local create_if_missing="$2"
-    local file_name=$(basename "$file")
-
-    if [ -f "$file" ]; then
-        execute_command "echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $file_name"
-    else
-        if [ "$create_if_missing" = "true" ]; then
-            execute_command "touch \"$file\"" "Création du fichier $file_name"
-            execute_command "echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $file_name"
-        else
-            error_msg "Le fichier $file_name n'existe pas"
+            info_msg "𐄂 Installation de zsh refusée"
         fi
     fi
 }
 
-add_lines_to_file "$bashrc_path" "true"
-[ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path" "false"
+# Fonction pour configurer le réseau
+configure_network() {
+    info_msg "❯ Configuration du réseau"
+    ip_address=$(ip route | grep default | awk '{print $3; exit;}')
 
-add_lines_to_file "$bashrc_path" "true"
-[ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path" "false"
+    if [ -z "$ip_address" ]; then
+        error_msg "Impossible de récupérer l'adresse IP"
+        exit 1
+    fi
 
-## Fonction pour forcer la fermeture de GWSL et des processus associés
+    resolv_conf="/etc/resolv.conf"
+
+    if [ ! -f "$resolv_conf" ]; then
+        error_msg "Le fichier $resolv_conf n'existe pas"
+        exit 1
+    fi
+
+    execute_command "sudo sed -i 's/^nameserver.*/nameserver '"${ip_address}"'/' /etc/resolv.conf" "Mise à jour du fichier resolv.conf"
+}
+
+# Fonction pour ajouter des lignes aux fichiers de shell
+add_lines_to_shell_files() {
+    bashrc_path="$HOME/.bashrc"
+    zshrc_path="$HOME/.zshrc"
+
+    lines_to_add="
+export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}'):0.0
+export PULSE_SERVER=tcp:$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}')
+"
+    add_lines_to_file() {
+        local file="$1"
+        local create_if_missing="$2"
+        local file_name=$(basename "$file")
+
+        if [ -f "$file" ]; then
+            execute_command "echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $file_name"
+        else
+            if [ "$create_if_missing" = "true" ]; then
+                execute_command "touch \"$file\"" "Création du fichier $file_name"
+                execute_command "echo \"$lines_to_add\" >> \"$file\"" "Configuration du fichier $file_name"
+            else
+                error_msg "Le fichier $file_name n'existe pas"
+            fi
+        fi
+    }
+
+    add_lines_to_file "$bashrc_path" "true"
+    [ -f "$zshrc_path" ] && add_lines_to_file "$zshrc_path" "false"
+}
+
+# Fonction pour forcer la fermeture de GWSL et des processus associés
 force_close_gwsl() {
     info_msg "Fermeture forcée de GWSL et des processus associés"
 
@@ -349,7 +357,7 @@ configure_gwsl() {
     execute_command "sed -i 's/\"window_mode\": \"multi\"/\"window_mode\": \"single\"/' \"$config_file\"" "Modification du fichier de configuration GWSL"
 }
 
-## Fonction d'installation de GWSL
+# Fonction d'installation de GWSL
 install_gwsl() {
     if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
         success_msg "✓ GWSL est déjà installé"
@@ -490,10 +498,10 @@ alias show="nala show"' >> "$rc_file"
     esac
 }
 
-# Fonction pour ajouter les alias commun
+# Fonction pour ajouter les alias communs
 common_alias() {
-# Define general aliases in a variable
-aliases='alias ..="cd .."
+    # Define general aliases in a variable
+    aliases='alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
 alias .....="cd ../../../.."
@@ -509,132 +517,156 @@ alias g="git"
 alias gc="git clone"
 alias push="git pull && git add . && git commit -m '\''mobile push'\'' && git push"'
 
-echo "$aliases" >> "$bashrc_path"
+    echo "$aliases" >> "$bashrc_path"
 
-if [ -f "$zshrc_path" ]; then
-    echo "$aliases" >> "$zshrc_path"
-fi
+    if [ -f "$zshrc_path" ]; then
+        echo "$aliases" >> "$zshrc_path"
+    fi
 }
 
-common_alias
-
-# Demander à l'utilisateur s'il souhaite installer des packages supplémentaires
-info_msg "❯ Configuration additionnelle"
-if $USE_GUM; then
-    if gum_confirm "Installer des packages supplémentaires ?"; then
-        optional_packages
-    fi
-else
-    read -p $"\e[33mInstaller des packages supplémentaires ? (o/n) : \e[0m" choice
-
-    choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
-
-    if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
-        optional_packages
-    fi
-fi
-
-# Demander à l'utilisateur s'il souhaite installer GWSL
-info_msg "❯ Installation de GWSL"
-if $USE_GUM; then
-    if gum_confirm "Installer GWSL ?"; then
-        install_gwsl
-    fi
-else
-    read -p $'\e[33mInstaller GWSL ? (o/n) : \e[0m' choice
-    choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
-    
-    if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
-        install_gwsl
-    fi
-fi
-
-# Exécution initiale de XFCE4
-execute_command "timeout 5s sudo startxfce4" "Exécution initiale de XFCE4"
-
-## Configuration de XFCE4
-info_msg "❯ Configuration de XFCE4"
-
-execute_command "mkdir -p $HOME/.config/xfce4 && \
-                cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc && \
-                touch $HOME/.ICEauthority && \
-                chmod 600 $HOME/.ICEauthority && \
-                sudo mkdir -p /run/user/$UID && \
-                sudo chown -R $UID:$UID /run/user/$UID/" "Attribution des permissions"
-
-# Personnalisation XFCE
-if $USE_GUM; then
-    if gum_confirm "Installer la personnalisation XFCE ?"; then
-        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
-        if [ -f "$HOME/xfce.sh" ]; then
-            if $FULL_INSTALL; then
-                "$HOME/xfce.sh" --gum --full
-            else
-                "$HOME/xfce.sh" --gum
-            fi
-            if [ $? -eq 0 ]; then
-                success_msg "✓ Personnalisation XFCE"
-            else
-                error_msg "✗ Personnalisation XFCE"
-            fi
-        else
-            error_msg "Le fichier xfce.sh n'existe pas"
+# Fonction pour installer GWSL
+install_gwsl_if_needed() {
+    info_msg "❯ Installation de GWSL"
+    if $USE_GUM; then
+        if gum_confirm "Installer GWSL ?"; then
+            install_gwsl
         fi
     else
-        info_msg "𐄂 Personnalisation XFCE refusée"
+        read -p $'\e[33mInstaller GWSL ? (o/n) : \e[0m' choice
+        choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
+        
+        if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
+            install_gwsl
+        fi
     fi
-else
-    read -p $"\e[33mInstaller la personnalisation XFCE ? (o/n) : \e[0m" choice
+}
 
-    choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
+# Fonction pour exécuter XFCE4
+run_xfce4() {
+    execute_command "timeout 5s sudo startxfce4" "Exécution initiale de XFCE4"
+}
 
-    if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
-        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
-        if [ -f "$HOME/xfce.sh" ]; then
-            if $FULL_INSTALL; then
-                "$HOME/xfce.sh" --full
+# Fonction pour configurer XFCE4
+configure_xfce4() {
+    info_msg "❯ Configuration de XFCE4"
+
+    execute_command "mkdir -p $HOME/.config/xfce4 && \
+                    cp /etc/xdg/xfce4/xinitrc $HOME/.config/xfce4/xinitrc && \
+                    touch $HOME/.ICEauthority && \
+                    chmod 600 $HOME/.ICEauthority && \
+                    sudo mkdir -p /run/user/$UID && \
+                    sudo chown -R $UID:$UID /run/user/$UID/" "Attribution des permissions"
+}
+
+# Fonction pour personnaliser XFCE
+customize_xfce() {
+    if $USE_GUM; then
+        if gum_confirm "Installer la personnalisation XFCE ?"; then
+            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
+            if [ -f "$HOME/xfce.sh" ]; then
+                if $FULL_INSTALL; then
+                    "$HOME/xfce.sh" --gum --full
+                else
+                    "$HOME/xfce.sh" --gum
+                fi
+                if [ $? -eq 0 ]; then
+                    success_msg "✓ Personnalisation XFCE"
+                else
+                    error_msg "✗ Personnalisation XFCE"
+                fi
             else
-                "$HOME/xfce.sh"
-            fi
-            if [ $? -eq 0 ]; then
-                success_msg "✓ Personnalisation XFCE"
-            else
-                error_msg "✗ Personnalisation XFCE"
+                error_msg "Le fichier xfce.sh n'existe pas"
             fi
         else
-            error_msg "Le fichier xfce.sh n'existe pas"
+            info_msg "𐄂 Personnalisation XFCE refusée"
         fi
     else
-        info_msg "𐄂 Personnalisation XFCE refusée"
-    fi
-fi
+        read -p $"\e[33mInstaller la personnalisation XFCE ? (o/n) : \e[0m" choice
 
-execute_command "powershell.exe -Command 'Start-Process -FilePath \"C:\WSL2-Distros\GWSL\GWSL.exe\" -WindowStyle Hidden'" "Exécution de GWSL re-configuré"
-execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
-# TODO : Vérifier si la commande suivante fonctionne
-#execute_command "sleep 5" "Attente de 5 secondes"
-#execute_command "startxfce4" "Exécution de XFCE4"
+        choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
 
-# Nettoyage final
-cleanup
-if $USE_GUM; then
-    if gum_confirm "Supprimer les sources d'installation ?"; then
-        execute_command "rm -f /mnt/c/WSL2-Distros/GWSL-145-STORE.zip" "Suppression des sources de GWSL"
-        execute_command "rm -- \"$0\"" "Suppression du script d'installation"
+        if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
+            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
+            if [ -f "$HOME/xfce.sh" ]; then
+                if $FULL_INSTALL; then
+                    "$HOME/xfce.sh" --full
+                else
+                    "$HOME/xfce.sh"
+                fi
+                if [ $? -eq 0 ]; then
+                    success_msg "✓ Personnalisation XFCE"
+                else
+                    error_msg "✗ Personnalisation XFCE"
+                fi
+            else
+                error_msg "Le fichier xfce.sh n'existe pas"
+            fi
+        else
+            info_msg "𐄂 Personnalisation XFCE refusée"
+        fi
     fi
-else
-    read -p $"\e[33mSupprimer les sources d'installation ? (o/n) : \e[0m" choice
-    choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
-    
-    if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
-        execute_command "rm -f /mnt/c/WSL2-Distros/GWSL-145-STORE.zip" "Suppression des sources de GWSL"
-        execute_command "rm -- \"$0\"" "Suppression du script d'installation"
-    fi
-fi
+}
 
-# Définition de zsh comme shell par défaut s'il est installé
-if command -v zsh &> /dev/null
-then
-    execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut"
-    exec zsh
-fi
+# Fonction pour exécuter GWSL et XFCE4
+run_gwsl_and_xfce4() {
+    execute_command "powershell.exe -Command 'Start-Process -FilePath \"C:\WSL2-Distros\GWSL\GWSL.exe\" -WindowStyle Hidden'" "Exécution de GWSL re-configuré"
+    execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
+}
+
+# Fonction pour nettoyer les sources d'installation
+cleanup_installation_sources() {
+    if $USE_GUM; then
+        if gum_confirm "Supprimer les sources d'installation ?"; then
+            execute_command "rm -f /mnt/c/WSL2-Distros/GWSL-145-STORE.zip" "Suppression des sources de GWSL"
+            execute_command "rm -- \"$0\"" "Suppression du script d'installation"
+        fi
+    else
+        read -p $"\e[33mSupprimer les sources d'installation ? (o/n) : \e[0m" choice
+        choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
+        
+        if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
+            execute_command "rm -f /mnt/c/WSL2-Distros/GWSL-145-STORE.zip" "Suppression des sources de GWSL"
+            execute_command "rm -- \"$0\"" "Suppression du script d'installation"
+        fi
+    fi
+}
+
+# Fonction pour définir zsh comme shell par défaut
+set_zsh_as_default_shell() {
+    if command -v zsh &> /dev/null
+    then
+        execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut"
+        exec zsh
+    fi
+}
+
+# Fonction principale
+main() {
+    parse_arguments "$@"
+    check_sudo_permissions
+    check_wsl_environment
+    install_gum_if_needed
+    check_dependencies
+    sudo -v
+    show_banner
+    configure_system
+    update_system
+    install_and_configure_gdm3
+    install_packages
+    install_zsh
+    configure_network
+    add_lines_to_shell_files
+    common_alias
+    optional_packages
+    install_gwsl_if_needed
+    run_xfce4
+    configure_xfce4
+    customize_xfce
+    run_gwsl_and_xfce4
+    cleanup
+    cleanup_installation_sources
+    set_zsh_as_default_shell
+}
+
+# Exécution de la fonction principale
+main "$@"
