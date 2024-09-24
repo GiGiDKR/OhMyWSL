@@ -75,7 +75,7 @@ execute_command() {
     fi
 }
 
-# Traitement des arguments en ligne de commande
+# Traitement des arguments en ligne de commande et définition des variables
 while [[ $# -gt 0 ]]; do
     case $1 in
         --gum|-g) USE_GUM=true ;;
@@ -85,7 +85,7 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-# Ajoutez cette fonction pour gérer les confirmations
+# Fonction pour gérer les confirmations automatiques
 gum_confirm() {
     local prompt="$1"
     if $FULL_INSTALL; then
@@ -95,7 +95,6 @@ gum_confirm() {
     fi
 }
 
-# Remplacez tous les appels à gum confirm par gum_confirm
 if gum_confirm "Installer le fond d'écran ?"; then
     download_wallpaper="Oui"
 fi
@@ -140,6 +139,7 @@ install_theme() {
     execute_command "rm '$zip_file'" "Nettoyage des fichiers temporaires"
 }
 
+# Fonction pour appliquer les thèmes
 apply_xfce_theme() {
     local gtk_theme="$1"
     local icon_theme="$2"
@@ -152,37 +152,52 @@ apply_xfce_theme() {
     execute_command "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s '/usr/share/backgrounds/xfce/waves.png'" "Application du fond d'écran"
 }
 
-info_msg "❯ Configuration de XFCE"
+# Fonction pour exécuter une liste de fonctions
+execute_functions() {
+    local functions=("$@")
+    for func in "${functions[@]}"; do
+        if [[ $(type -t "$func") == function ]]; then
+            $func
+        else
+            error_msg "Fonction '$func' non trouvée"
+        fi
+    done
+}
 
-# Vérification des dépendances
-check_dependencies
+# Fonction principale
+main() {
+    info_msg "❯ Configuration de XFCE"
+    
+    local functions_to_execute=(
+        check_dependencies
+    )
 
-if [ "$download_wallpaper" = "Oui" ]; then
-    execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png -O /tmp/waves.png" "Téléchargement du fond d'écran"
-    execute_command "sudo mv /tmp/waves.png /usr/share/backgrounds/xfce/" "Installation du fond d'écran"
-fi
+    if [ "$download_wallpaper" = "Oui" ]; then
+        functions_to_execute+=("execute_command \"wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png -O /tmp/waves.png\" \"Téléchargement du fond d'écran\"")
+        functions_to_execute+=("execute_command \"sudo mv /tmp/waves.png /usr/share/backgrounds/xfce/\" \"Installation du fond d'écran\"")
+    fi
 
-if [ "$install_whitesur" = "Oui" ]; then
-    install_theme "WhiteSur-Dark-Theme" "https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" "/tmp"
-    sudo mkdir -p /usr/share/themes >/dev/null 2>&1
-    cd /tmp/WhiteSur-gtk-theme-2024.09.02/release/ >/dev/null 2>&1
-    tar -xf /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark.tar.xz >/dev/null 2>&1
-    execute_command "sudo mv /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark /usr/share/themes/" "Installation de WhiteSur-Dark"
-    execute_command "rm -rf /tmp/WhiteSur-gtk-theme-2024.09.02" "Nettoyage des fichiers temporaires"
-    cd >/dev/null 2>&1
-fi
+    if [ "$install_whitesur" = "Oui" ]; then
+        functions_to_execute+=("install_theme \"WhiteSur-Dark-Theme\" \"https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip\" \"/tmp\"")
+        functions_to_execute+=("execute_command \"sudo mkdir -p /usr/share/themes\" \"Création du répertoire des thèmes\"")
+        functions_to_execute+=("execute_command \"cd /tmp/WhiteSur-gtk-theme-2024.09.02/release/ && tar -xf WhiteSur-Dark.tar.xz\" \"Extraction de WhiteSur-Dark\"")
+        functions_to_execute+=("execute_command \"sudo mv /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark /usr/share/themes/\" \"Installation de WhiteSur-Dark\"")
+        functions_to_execute+=("execute_command \"rm -rf /tmp/WhiteSur-gtk-theme-2024.09.02\" \"Nettoyage des fichiers temporaires\"")
+    fi
 
+    if [ "$install_fluent" = "Oui" ]; then
+        functions_to_execute+=("install_theme \"Fluent-Cursors\" \"https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip\" \"/tmp\"")
+        functions_to_execute+=("execute_command \"sudo mkdir -p /usr/share/icons\" \"Création du répertoire des icônes\"")
+        functions_to_execute+=("execute_command \"sudo mv /tmp/Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/Fluent-cursors\" \"Installation de Fluent Cursor\"")
+        functions_to_execute+=("execute_command \"sudo mv /tmp/Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/Fluent-cursors-dark\" \"Installation de Fluent Cursor Dark\"")
+        functions_to_execute+=("execute_command \"rm -rf /tmp/Fluent-icon-theme-2024-02-25\" \"Nettoyage des fichiers temporaires\"")
+    fi
 
-if [ "$install_fluent" = "Oui" ]; then
-    install_theme "Fluent-Cursors" "https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" "/tmp"
-    execute_command "sudo mkdir -p /usr/share/icons" "Création du répertoire des icônes"
-    execute_command "sudo mv /tmp/Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/Fluent-cursors" "Installation de Fluent Cursor"
-    execute_command "sudo mv /tmp/Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/Fluent-cursors-dark" "Installation de Fluent Cursor Dark"
-    execute_command "rm -rf /tmp/Fluent-icon-theme-2024-02-25" "Nettoyage des fichiers temporaires"
-fi
+    if [ "$apply_themes" = "Oui" ]; then
+        functions_to_execute+=("apply_xfce_theme \"WhiteSur-Dark\" \"Fluent-dark\" \"Fluent-cursors-dark\"")
+    fi
 
-if [ "$apply_themes" = "Oui" ]; then
-    info_msg "Application des thèmes..."
-    apply_xfce_theme "WhiteSur-Dark" "Fluent-dark" "Fluent-cursors-dark"
-    success_msg "Thèmes appliqués avec succès"
-fi
+    execute_functions "${functions_to_execute[@]}"
+}
+
+main "$@"

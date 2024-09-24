@@ -4,8 +4,7 @@
 
 ## 🐧 Ubuntu Installation
 
-Open a Windows Terminal and run the following command :
-
+Open a Windows Terminal and run the following command to install WSL2 :
 
 ```bash
 wsl --install
@@ -17,7 +16,6 @@ wsl
 ```
 
 ## 📦 Install OhMyWSL
-
 Run the following command to install OhMyWSL :
 
 ```bash
@@ -39,11 +37,13 @@ curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.1/install.sh -o i
 ## 💻 Version history
 
 - 1.0.0 : Initial release
+- 1.0.1 : Add a script to install OhMyWSL on a new Ubuntu installation on WSL2
+- 1.0.2 : 
 
 > [!WARNING]
 > Preview version (only for internal development) :
 > ```bash
-> curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.2/install.sh -o install.sh && chmod +x install.sh && ./install.sh --gum --full
+> curl -sL https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/install.sh -o install.sh && chmod +x install.sh && ./install.sh --gum --full
 > ```
 
 ## 📖 To Do
