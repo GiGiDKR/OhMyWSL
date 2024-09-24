@@ -653,6 +653,7 @@ main() {
     cleanup
     cleanup_installation_sources
     set_zsh_as_default_shell
+    info_msg "✓ Saisissez 'dbus-launch xfce4-session' pour lancer Ubuntu XFCE"
 }
 
 # Exécution de la fonction principale
