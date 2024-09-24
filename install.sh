@@ -361,6 +361,7 @@ install_gwsl() {
         if [ -f "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" ]; then
             execute_command "/mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution initiale de GWSL"
             configure_gwsl && force_close_gwsl
+            return 0
         else
             error_msg "✗ GWSL.exe n'a pas été trouvé après l'installation."
         fi
