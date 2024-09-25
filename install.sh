@@ -257,15 +257,6 @@ install_zsh() {
     fi
 }
 
-# Fonction pour définir zsh comme shell par défaut
-set_zsh_as_default_shell() {
-    if command -v zsh &> /dev/null
-    then
-        execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut"
-        exec zsh
-    fi
-}
-
 # Fonction pour configurer le réseau
 configure_network() {
     info_msg "❯ Configuration du réseau"
@@ -611,6 +602,13 @@ run_gwsl_and_xfce4() {
     execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
 }
 
+# Fonction pour définir zsh comme shell par défaut
+set_zsh_as_default_shell() {
+    if command -v zsh &> /dev/null
+    then
+        execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut"
+    fi
+}
 # Fonction pour nettoyer les sources d'installation
 cleanup_installation_sources() {
     if $USE_GUM; then
@@ -642,7 +640,6 @@ main() {
     install_and_configure_gdm3
     install_packages
     install_zsh
-    set_zsh_as_default_shell
     configure_network
     add_lines_to_shell_files
     common_alias
@@ -652,9 +649,11 @@ main() {
     configure_xfce4
     customize_xfce
     run_gwsl_and_xfce4
+    set_zsh_as_default_shell
     cleanup
     cleanup_installation_sources
     info_msg "✓ Saisissez 'dbus-launch xfce4-session' pour lancer Ubuntu XFCE"
+    exec zsh
 }
 
 # Exécution de la fonction principale
