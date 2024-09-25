@@ -257,6 +257,15 @@ install_zsh() {
     fi
 }
 
+# Fonction pour définir zsh comme shell par défaut
+set_zsh_as_default_shell() {
+    if command -v zsh &> /dev/null
+    then
+        execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut"
+        exec zsh
+    fi
+}
+
 # Fonction pour configurer le réseau
 configure_network() {
     info_msg "❯ Configuration du réseau"
@@ -351,7 +360,7 @@ install_gwsl() {
 
     if [ -f "$gwsl_path" ]; then
         success_msg "✓ GWSL est déjà installé"
-        execute_command "powershell.exe -Command 'Start-Process -FilePath \"$gwsl_path\" -WindowStyle Hidden'" "Exécution de GWSL"
+        execute_command "cmd.exe /C start /b '' 'C:\WSL2-Distros\GWSL\GWSL.exe'" "Exécution de GWSL"
         configure_gwsl && force_close_gwsl
         return 0
     fi
@@ -597,7 +606,8 @@ customize_xfce() {
 
 # Fonction pour exécuter GWSL et XFCE4
 run_gwsl_and_xfce4() {
-    execute_command "powershell.exe -Command 'Start-Process -FilePath \"C:\WSL2-Distros\GWSL\GWSL.exe\" -WindowStyle Hidden'" "Exécution de GWSL re-configuré"
+    execute_command "cmd.exe /C start /b '' 'C:\WSL2-Distros\GWSL\GWSL.exe'" "Exécution de GWSL re-configuré"
+    sleep 2
     execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
 }
 
@@ -619,15 +629,6 @@ cleanup_installation_sources() {
     fi
 }
 
-# Fonction pour définir zsh comme shell par défaut
-set_zsh_as_default_shell() {
-    if command -v zsh &> /dev/null
-    then
-        execute_command "chsh -s $(which zsh) $USER" "Définition de zsh comme shell par défaut"
-        exec zsh
-    fi
-}
-
 # Fonction principale
 main() {
     parse_arguments "$@"
@@ -641,6 +642,7 @@ main() {
     install_and_configure_gdm3
     install_packages
     install_zsh
+    set_zsh_as_default_shell
     configure_network
     add_lines_to_shell_files
     common_alias
@@ -652,7 +654,6 @@ main() {
     run_gwsl_and_xfce4
     cleanup
     cleanup_installation_sources
-    set_zsh_as_default_shell
     info_msg "✓ Saisissez 'dbus-launch xfce4-session' pour lancer Ubuntu XFCE"
 }
 
