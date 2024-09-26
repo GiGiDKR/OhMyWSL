@@ -209,6 +209,7 @@ main() {
     #! DEBUG
     #functions_to_execute+=("apply_xfce_theme \"WhiteSur-Dark\" \"Fluent-dark\" \"Fluent-cursors-dark\"")
     
+    dbus-launch --exit-with-session startxfce4
     xfconf-query -c xsettings -p /Net/ThemeName -s "WhiteSur-Dark"
     xfconf-query -c xsettings -p /Net/IconThemeName -s "Fluent-dark"
     xfconf-query -c xsettings -p /Gtk/CursorThemeName -s "Fluent-cursors-dark"

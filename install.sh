@@ -234,7 +234,7 @@ install_and_configure_gdm3() {
 
 # Fonction pour installer des paquets
 install_packages() {
-    local packages=(xfce4 xfce4-goodies xwayland nautilus ark jq)
+    local packages=(dbus-x11 xfce4 xfce4-goodies xwayland nautilus ark jq)
 
     for package in "${packages[@]}"; do
         execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y $package" "Installation de $package"
@@ -675,12 +675,13 @@ main() {
     run_xfce4
     configure_xfce4
     customize_xfce
-    run_gwsl_and_xfce4
+    #! DEBUG
+    #run_gwsl_and_xfce4
     set_zsh_as_default_shell
     cleanup
     cleanup_installation_sources
     echo -e "\e[38;5;33m↳ Saisissez 'startxfce4' pour lancer Ubuntu XFCE\e[0m"
-    exec zsh > /dev/null 
+    exec zsh > /dev/null 2>&1
 }
 
 # Exécution de la fonction principale
