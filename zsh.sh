@@ -406,7 +406,8 @@ main() {
     functions_to_execute+=(
         "execute_command 'curl -fLo \"$HOME/.oh-my-zsh/custom/aliases.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/files/aliases.zsh' 'Configuration des alias communs'"
         install_zsh_plugins
-        update_oh_my_zsh
+        #! DEBUG
+        #update_oh_my_zsh
         "execute_command 'echo \"$FZF_INSTALLED\" > /tmp/fzf_installed' 'Enregistrement de l'état de fzf'"
     )
 

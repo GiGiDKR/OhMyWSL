@@ -365,7 +365,7 @@ install_gwsl() {
 
     if [ -f "$gwsl_path" ]; then
         success_msg "✓ GWSL est déjà installé"
-        execute_command "cmd.exe -b /mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL"
+        execute_command "cmd.exe -b /mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL, cliquez sur le terminal pour continuer..."
         configure_gwsl && force_close_gwsl
         return 0
     fi
@@ -611,9 +611,11 @@ customize_xfce() {
 
 # Fonction pour exécuter GWSL et XFCE4
 run_gwsl_and_xfce4() {
-    execute_command "cmd.exe -b /mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL re-configuré"
+    execute_command "cmd.exe -b /mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL, cliquez sur le terminal pour continuer..."
     sleep 2
-    execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
+    startxfce4
+    #! DEBUG
+    #execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
 }
 
 # Fonction pour définir zsh comme shell par défaut
@@ -678,7 +680,7 @@ main() {
     cleanup
     cleanup_installation_sources
     echo -e "\e[38;5;33m↳ Saisissez 'startxfce4' pour lancer Ubuntu XFCE\e[0m"
-    exec zsh
+    exec zsh > /dev/null 
 }
 
 # Exécution de la fonction principale

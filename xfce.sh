@@ -149,18 +149,19 @@ install_theme() {
     execute_command "rm '$zip_file'" "Nettoyage des fichiers temporaires"
 }
 
+#! DEBUG
 # Fonction pour appliquer les thèmes
-apply_xfce_theme() {
-    local gtk_theme="$1"
-    local icon_theme="$2"
-    local cursor_theme="$3"
+#apply_xfce_theme() {
+#    local gtk_theme="$1"
+#    local icon_theme="$2"
+#    local cursor_theme="$3"
 
-    execute_command "xfconf-query -c xsettings -p /Net/ThemeName -s '$gtk_theme'" "Application du thème GTK"
-    execute_command "xfconf-query -c xsettings -p /Net/IconThemeName -s '$icon_theme'" "Application du thème d'icônes"
-    execute_command "xfconf-query -c xsettings -p /Gtk/CursorThemeName -s '$cursor_theme'" "Application du thème de curseur"
-    execute_command "xfconf-query -c xfwm4 -p /general/theme -s '$gtk_theme'" "Application du thème de fenêtre"
-    execute_command "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s '/usr/share/backgrounds/xfce/waves.png'" "Application du fond d'écran"
-}
+#    execute_command "xfconf-query -c xsettings -p /Net/ThemeName -s '$gtk_theme'" "Application du thème GTK"
+#    execute_command "xfconf-query -c xsettings -p /Net/IconThemeName -s '$icon_theme'" "Application du thème d'icônes"
+#    execute_command "xfconf-query -c xsettings -p /Gtk/CursorThemeName -s '$cursor_theme'" "Application du thème de curseur"
+#    execute_command "xfconf-query -c xfwm4 -p /general/theme -s '$gtk_theme'" "Application du thème de fenêtre"
+#    execute_command "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s '/usr/share/backgrounds/xfce/waves.png'" "Application du fond d'écran"
+#}
 
 # Fonction pour exécuter une liste de fonctions ou de commandes
 execute_functions() {
@@ -205,7 +206,14 @@ main() {
         functions_to_execute+=("execute_command \"rm -rf /tmp/Fluent-icon-theme-2024-02-25\" \"Nettoyage des fichiers temporaires\"")
     fi
 
-    functions_to_execute+=("apply_xfce_theme \"WhiteSur-Dark\" \"Fluent-dark\" \"Fluent-cursors-dark\"")
+    #! DEBUG
+    #functions_to_execute+=("apply_xfce_theme \"WhiteSur-Dark\" \"Fluent-dark\" \"Fluent-cursors-dark\"")
+    
+    xfconf-query -c xsettings -p /Net/ThemeName -s "WhiteSur-Dark"
+    xfconf-query -c xsettings -p /Net/IconThemeName -s "Fluent-dark"
+    xfconf-query -c xsettings -p /Gtk/CursorThemeName -s "Fluent-cursors-dark"
+    xfconf-query -c xfwm4 -p /general/theme -s "WhiteSur-Dark"
+    xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s "/usr/share/backgrounds/xfce/waves.png"
 
     execute_functions "${functions_to_execute[@]}"
 }
