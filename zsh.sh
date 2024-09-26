@@ -140,7 +140,6 @@ check_dependencies() {
 
     if [ ${#missing_deps[@]} -ne 0 ]; then
         error_msg "Dépendances manquantes : ${missing_deps[*]}"
-        info_msg "Installation des dépendances manquantes..."
         execute_command "sudo apt update && sudo apt install -y ${missing_deps[*]}" "Installation des dépendances"
     fi
 }
