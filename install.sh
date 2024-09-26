@@ -110,7 +110,7 @@ install_log() {
     #? Format de date Français
     local timestamp=$(date +"%d/%m/%Y %H:%M:%S")
     local log_message="$timestamp - $message"
-    
+
     case "$type" in
         "info")
             echo -e "\e[34m[INFO]\e[0m $log_message"
@@ -125,8 +125,7 @@ install_log() {
             echo -e "[LOG] $log_message"
             ;;
     esac
-    
-    # Écriture dans le fichier de log
+
     echo "[$type] $log_message" >> "$LOG_FILE"
 }
 

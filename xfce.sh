@@ -170,7 +170,7 @@ main() {
     )
 
     if [ "$download_wallpaper" = "Oui" ]; then
-        functions_to_execute+=("execute_command \"wget https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/main/files/waves.png -O /tmp/waves.png\" \"Téléchargement du fond d'écran\"")
+        functions_to_execute+=("execute_command \"wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/files/waves.png -O /tmp/waves.png\" \"Téléchargement du fond d'écran\"")
         functions_to_execute+=("execute_command \"sudo mv /tmp/waves.png /usr/share/backgrounds/xfce/\" \"Installation du fond d'écran\"")
     fi
 

@@ -153,12 +153,15 @@ install_zsh() {
     fi
 }
 
-# TODO : Sauvegarder la configuration ZSH existante avant de la remplacer
 # Fonction pour sauvegarder la configuration existante
-# backup_existing_config() {
-#    local backup_file="${ZSHRC}.bak"
-#    execute_command "cp '$ZSHRC' '$backup_file'" "Sauvegarde de la configuration ZSH"
-#}
+backup_existing_config() {
+    local backup_file="${ZSHRC}.bak"
+    if [ -f "$ZSHRC" ]; then
+        execute_command "cp '$ZSHRC' '$backup_file'" "Sauvegarde de la configuration ZSH"
+    else
+        info_msg "Installation initiale de ZSH, aucune sauvegarde nécessaire"
+    fi
+}
 
 # Fonction pour installer Oh My Zsh
 install_oh_my_zsh() {
@@ -183,7 +186,7 @@ install_powerlevel10k() {
 
 # Fonction pour installer le prompt OhMyWSL
 install_ohmywsl_prompt() {
-    execute_command "curl -fLo '$HOME/.p10k.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/p10k.zsh" "Téléchargement du prompt OhMyWSL"
+    execute_command "curl -fLo '$HOME/.p10k.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/files/p10k.zsh" "Téléchargement du prompt OhMyWSL"
     echo -e "\n# To customize prompt, run \`p10k configure\` or edit ~/.p10k.zsh." >> "$ZSHRC"
     echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> "$ZSHRC"
 }
@@ -363,18 +366,17 @@ main() {
         [[ $choice =~ ^[Oo]$ ]] && functions_to_execute+=(install_oh_my_zsh)
     fi
 
-# TODO : Sauvegarder la configuration ZSH existante avant de la remplacer
-#    if $USE_GUM; then
-#        if gum_confirm "Sauvegarder la configuration ZSH ?"; then
-#            functions_to_execute+=(backup_existing_config)
-#        fi
-#    else
-#        read -p $'\e[33mSauvegarder la configuration ZSH existante ? (o/n) : \e[0m' choice
-#        [[ $choice =~ ^[Oo]$ ]] && functions_to_execute+=(backup_existing_config)
-#    fi
+    if $USE_GUM; then
+        if gum_confirm "Sauvegarder la configuration ZSH ?"; then
+            functions_to_execute+=(backup_existing_config)
+        fi
+    else
+        read -p $'\e[33mSauvegarder la configuration ZSH existante ? (o/n) : \e[0m' choice
+        [[ $choice =~ ^[Oo]$ ]] && functions_to_execute+=(backup_existing_config)
+    fi
 
     functions_to_execute+=(
-        "execute_command \"curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/zshrc\" \"Téléchargement de .zshrc\""
+        "execute_command \"curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/files/zshrc\" \"Téléchargement de .zshrc\""
     )
 
     if $USE_GUM; then
@@ -400,7 +402,7 @@ main() {
     fi
 
     functions_to_execute+=(
-        "execute_command \"curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyTermux/1.0.9/files/aliases.zsh\" \"Configuration des alias communs\""
+        "execute_command \"curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/files/aliases.zsh\" \"Configuration des alias communs\""
         install_zsh_plugins
         update_oh_my_zsh
         "echo \"$FZF_INSTALLED\" > /tmp/fzf_installed"
