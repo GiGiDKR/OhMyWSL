@@ -117,7 +117,7 @@ install_log() {
     local log_message="$timestamp - $message"
 
     if [ ! -f "$LOG_FILE" ]; then
-    execute_command "touch "$LOG_FILE" "Création du fichier de log"
+    execute_command "touch '$LOG_FILE'" "Création du fichier de log"
     fi
 
     case "$type" in
