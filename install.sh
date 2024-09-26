@@ -262,7 +262,7 @@ install_zsh() {
     info_msg "❯ Configuration du shell"
     if $USE_GUM; then
         if gum_confirm "Installer zsh ?"; then
-            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
+            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
             if $FULL_INSTALL; then
                 "$HOME/zsh.sh" --gum --full
             else
@@ -275,7 +275,7 @@ install_zsh() {
         read -p $'\e[33mInstaller zsh ? (o/n) : \e[0m' choice
         choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
         if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
-            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
+            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
             if $FULL_INSTALL; then
                 "$HOME/zsh.sh" --full
             else
@@ -580,7 +580,7 @@ configure_xfce4() {
 customize_xfce() {
     if $USE_GUM; then
         if gum_confirm "Installer la personnalisation XFCE ?"; then
-            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
+            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
             if [ -f "$HOME/xfce.sh" ]; then
                 if $FULL_INSTALL; then
                     "$HOME/xfce.sh" --gum --full
@@ -604,7 +604,7 @@ customize_xfce() {
         choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
 
         if [[ "$choice" =~ ^(oui|o|y|yes)$ ]]; then
-            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/1.0.0/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
+            execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/xfce.sh && chmod +x xfce.sh" "Téléchargement du script xfce"
             if [ -f "$HOME/xfce.sh" ]; then
                 if $FULL_INSTALL; then
                     "$HOME/xfce.sh" --full
@@ -667,9 +667,11 @@ main() {
 
     if $UPDATE_OH_MY_ZSH; then
         show_banner
+        info_msg "❯ Mise à jour de Oh-My-Zsh"
         update_system
+        execute_command "wget https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/zsh.sh && chmod +x zsh.sh" "Téléchargement du script zsh"
         "$HOME/zsh.sh" --update
-        info_msg "✓ Mise à jour de Oh-My-Zsh"
+        success_msg "✓ Mise à jour de Oh-My-Zsh"
         exit 0
     fi
 
