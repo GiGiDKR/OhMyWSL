@@ -163,7 +163,7 @@ execute_functions() {
 
 # Fonction principale
 main() {
-    info_msg "❯ Configuration de XFCE"
+    info_msg "❯ Personnalisation de XFCE"
     
     local functions_to_execute=(
         check_dependencies
