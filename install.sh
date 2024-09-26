@@ -113,11 +113,11 @@ error_msg() {
 install_log() {
     local type="$1"
     local message="$2"
-    local timestamp=$(date +"%d/%m/%Y %H:%M:%S")
+    local timestamp=$(date +"%d.%m.%Y %H:%M:%S")
     local log_message="$timestamp - $message"
 
     if [ ! -f "$LOG_FILE" ]; then
-        touch "$LOG_FILE"
+    execute_command "touch "$LOG_FILE" "Création du fichier de log"
     fi
 
     case "$type" in
