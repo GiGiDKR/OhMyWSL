@@ -82,6 +82,7 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --gum|-g) USE_GUM=true ;;
         --full|-f) FULL_INSTALL=true ;;
+        --update|-u) update_oh_my_zsh; exit 0 ;;
         *) error_msg "Option non reconnue : $1" ;;
     esac
     shift

@@ -3,6 +3,7 @@
 USE_GUM=false
 FULL_INSTALL=false
 LOG_FILE="$HOME/ohmywsl.log"
+UPDATE_OH_MY_ZSH=false
 
 # Fonction pour afficher le banner en mode basique
 bash_banner() {
@@ -23,6 +24,7 @@ parse_arguments() {
         case $1 in
             --gum|-g) USE_GUM=true ;;
             --full|-f) FULL_INSTALL=true ;;
+            --update|-u) UPDATE_OH_MY_ZSH=true ;;
             *) echo "Option non reconnue : $1" ;;
         esac
         shift
@@ -656,6 +658,15 @@ main() {
     install_gum_if_needed
     check_dependencies
     sudo -v
+
+    if $UPDATE_OH_MY_ZSH; then
+        show_banner
+        update_system
+        "$HOME/zsh.sh" --update
+        info_msg "✓ Mise à jour de Oh-My-Zsh"
+        exit 0
+    fi
+
     show_banner
     configure_system
     update_system
@@ -674,7 +685,7 @@ main() {
     set_zsh_as_default_shell
     cleanup
     cleanup_installation_sources
-    info_msg "✓ Saisissez 'dbus-launch xfce4-session' pour lancer Ubuntu XFCE"
+    echo -e "\e[38;5;33m↳ Saisissez 'startxfce4' pour lancer Ubuntu XFCE\e[0m"
     exec zsh
 }
 
