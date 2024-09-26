@@ -78,40 +78,47 @@ show_banner() {
 
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
+    local message="$1"
     if $USE_GUM; then
-        gum style "${1//$'\n'/ }" --foreground 33
+        gum style "${message//$'\n'/ }" --foreground 33
     else
-        echo -e "\e[38;5;33m$1\e[0m"
+        echo -e "\e[38;5;33m$message\e[0m"
     fi
+    install_log "info" "$message"
 }
 
 # Fonction pour afficher des messages de succès en vert
 success_msg() {
+    local message="$1"
     if $USE_GUM; then
-        gum style "${1//$'\n'/ }" --foreground 82
+        gum style "${message//$'\n'/ }" --foreground 82
     else
-        echo -e "\e[38;5;82m$1\e[0m"
+        echo -e "\e[38;5;82m$message\e[0m"
     fi
+    install_log "success" "$message"
 }
 
 # Fonction pour afficher des messages d'erreur en rouge
 error_msg() {
+    local message="$1"
     if $USE_GUM; then
-        gum style "${1//$'\n'/ }" --foreground 196
+        gum style "${message//$'\n'/ }" --foreground 196
     else
-        echo -e "\e[38;5;196m$1\e[0m"
+        echo -e "\e[38;5;196m$message\e[0m"
     fi
+    install_log "error" "$message"
 }
 
 # Fonction pour journaliser les messages
 install_log() {
     local type="$1"
     local message="$2"
-    #? English date format
-    #local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
-    #? Format de date Français
     local timestamp=$(date +"%d/%m/%Y %H:%M:%S")
     local log_message="$timestamp - $message"
+
+    if [ ! -f "$LOG_FILE" ]; then
+        touch "$LOG_FILE"
+    fi
 
     case "$type" in
         "info")
@@ -148,7 +155,6 @@ execute_command() {
         info_msg "$info_msg"
         if ! eval "$command"; then
             error_msg "$error_msg"
-            install_log "error" "$error_msg"
             return 1
         fi
         success_msg "$success_msg"

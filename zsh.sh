@@ -158,7 +158,7 @@ install_zsh() {
 backup_existing_config() {
     local backup_file="${ZSHRC}.bak"
     if [ -f "$ZSHRC" ]; then
-        execute_command "cp '$ZSHRC' '$backup_file'" "Sauvegarde de la configuration ZSH"
+        execute_command "cp $ZSHRC $backup_file" "Sauvegarde de la configuration ZSH"
     else
         info_msg "Installation initiale de ZSH, aucune sauvegarde nécessaire"
     fi
