@@ -149,14 +149,16 @@ apply_xfce_theme() {
     execute_command "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s '/usr/share/backgrounds/xfce/waves.png'" "Application du fond d'écran"
 }
 
-# Fonction pour exécuter une liste de fonctions
+# Fonction pour exécuter une liste de fonctions ou de commandes
 execute_functions() {
     local functions=("$@")
     for func in "${functions[@]}"; do
-        if [[ $(type -t "$func") == function ]]; then
+        if [[ "$func" == execute_command* ]]; then
+            eval "$func"
+        elif [[ $(type -t "$func") == function ]]; then
             $func
         else
-            error_msg "Fonction '$func' non trouvée"
+            error_msg "Fonction ou commande '$func' non reconnue"
         fi
     done
 }

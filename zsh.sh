@@ -336,14 +336,16 @@ fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src\
     fi
 }
 
-# Fonction pour exécuter une liste de fonctions
+# Fonction pour exécuter une liste de fonctions ou de commandes
 execute_functions() {
     local functions=("$@")
     for func in "${functions[@]}"; do
-        if [[ $(type -t "$func") == function ]]; then
+        if [[ "$func" == execute_command* ]]; then
+            eval "$func"
+        elif [[ $(type -t "$func") == function ]]; then
             $func
         else
-            error_msg "Fonction '$func' non trouvée"
+            error_msg "Fonction ou commande '$func' non reconnue"
         fi
     done
 }
