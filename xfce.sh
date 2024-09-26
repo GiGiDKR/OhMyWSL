@@ -107,8 +107,6 @@ if gum_confirm "Installer Fluent Cursor ?"; then
     install_fluent="Oui"
 fi
 
-info_msg "❯ Configuration de XFCE"
-
 # Vérification des dépendances
 check_dependencies() {
     local dependencies=("wget" "unzip" "tar")

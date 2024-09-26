@@ -2,6 +2,7 @@
 
 USE_GUM=false
 FULL_INSTALL=false
+LOG_FILE="$HOME/ohmywsl.log"
 
 # Fonction pour afficher le banner en mode basique
 bash_banner() {
@@ -100,10 +101,33 @@ error_msg() {
     fi
 }
 
-# Fonction pour journaliser les erreurs
-log_error() {
-    local error_msg="$1"
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERREUR: $error_msg" >> "$HOME/ohmywsl.log"
+# Fonction pour journaliser les messages
+install_log() {
+    local type="$1"
+    local message="$2"
+    #? English date format
+    #local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+    #? Format de date Français
+    local timestamp=$(date +"%d/%m/%Y %H:%M:%S")
+    local log_message="$timestamp - $message"
+    
+    case "$type" in
+        "info")
+            echo -e "\e[34m[INFO]\e[0m $log_message"
+            ;;
+        "success")
+            echo -e "\e[32m[SUCCÈS]\e[0m $log_message"
+            ;;
+        "error")
+            echo -e "\e[31m[ERREUR]\e[0m $log_message"
+            ;;
+        *)
+            echo -e "[LOG] $log_message"
+            ;;
+    esac
+    
+    # Écriture dans le fichier de log
+    echo "[$type] $log_message" >> "$LOG_FILE"
 }
 
 # Fonction pour exécuter une commande et afficher le résultat
@@ -116,7 +140,6 @@ execute_command() {
     if $USE_GUM; then
         if gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "DEBIAN_FRONTEND=noninteractive $command"; then
             gum style "$success_msg" --foreground 82
-            log_error "$error_msg"
             return 1
         fi
         gum style "$success_msg" --foreground 82
@@ -124,7 +147,7 @@ execute_command() {
         info_msg "$info_msg"
         if ! eval "$command"; then
             error_msg "$error_msg"
-            log_error "$error_msg"
+            install_log "error" "$error_msg"
             return 1
         fi
         success_msg "$success_msg"
@@ -472,7 +495,7 @@ alias lta="eza --icons --tree -lgha"
 alias dir="eza -lF --icons"' >> "$rc_file"
             ;;
         bat)
-            echo -e '\nalias cat="bat"' >> "$rc_file"
+            echo -e '\nalias cat="batcat"' >> "$rc_file"
             ;;
         nala)
             echo -e '\nalias install="nala install -y"
