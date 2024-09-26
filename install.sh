@@ -76,6 +76,19 @@ show_banner() {
     fi
 }
 
+# Fonction pour journaliser les messages
+install_log() {
+    local message="$1"
+    local timestamp=$(date +"%d.%m.%Y %H:%M:%S")
+    local log_message="$timestamp - $message"
+
+    if [ ! -f "$LOG_FILE" ]; then
+        touch "$LOG_FILE"
+    fi
+
+    echo "$log_message" >> "$LOG_FILE"
+}
+
 # Fonction pour afficher des messages d'information en bleu
 info_msg() {
     local message="$1"
@@ -84,7 +97,7 @@ info_msg() {
     else
         echo -e "\e[38;5;33m$message\e[0m"
     fi
-    install_log "info" "$message"
+    install_log "$message"
 }
 
 # Fonction pour afficher des messages de succès en vert
@@ -95,7 +108,7 @@ success_msg() {
     else
         echo -e "\e[38;5;82m$message\e[0m"
     fi
-    install_log "success" "$message"
+    install_log "$message"
 }
 
 # Fonction pour afficher des messages d'erreur en rouge
@@ -106,36 +119,7 @@ error_msg() {
     else
         echo -e "\e[38;5;196m$message\e[0m"
     fi
-    install_log "error" "$message"
-}
-
-# Fonction pour journaliser les messages
-install_log() {
-    local type="$1"
-    local message="$2"
-    local timestamp=$(date +"%d.%m.%Y %H:%M:%S")
-    local log_message="$timestamp - $message"
-
-    if [ ! -f "$LOG_FILE" ]; then
-        touch "$LOG_FILE"
-    fi
-
-    case "$type" in
-        "info")
-            echo -e "\e[34m[INFO]\e[0m $log_message"
-            ;;
-        "success")
-            echo -e "\e[32m[SUCCÈS]\e[0m $log_message"
-            ;;
-        "error")
-            echo -e "\e[31m[ERREUR]\e[0m $log_message"
-            ;;
-        *)
-            echo -e "[LOG] $log_message"
-            ;;
-    esac
-
-    echo "[$type] $log_message" >> "$LOG_FILE"
+    install_log "$message"
 }
 
 # Fonction pour exécuter une commande et afficher le résultat
