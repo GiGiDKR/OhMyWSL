@@ -195,9 +195,7 @@ install_ohmywsl_prompt() {
 # Fonction pour vérifier et installer fzf
 check_and_install_fzf() {
     if ! command -v fzf &> /dev/null; then
-        info_msg "fzf n'est pas installé. Installation en cours..."
         execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y fzf" "Installation de fzf"
-        execute_command "source ~/.zshrc" "Rechargement de la configuration zsh"
         FZF_INSTALLED=true
     else
         info_msg "fzf est déjà installé"
@@ -378,7 +376,7 @@ main() {
     fi
 
     functions_to_execute+=(
-        "execute_command \"curl -fLo '$ZSHRC' https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/files/zshrc\" \"Téléchargement de .zshrc\""
+        "execute_command 'curl -fLo \"$HOME/.zshrc\" https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/files/zshrc' 'Téléchargement de .zshrc'"
     )
 
     if $USE_GUM; then
@@ -404,10 +402,10 @@ main() {
     fi
 
     functions_to_execute+=(
-        "execute_command \"curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/files/aliases.zsh\" \"Configuration des alias communs\""
+        "execute_command 'curl -fLo \"$HOME/.oh-my-zsh/custom/aliases.zsh\" https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/files/aliases.zsh' 'Configuration des alias communs'"
         install_zsh_plugins
         update_oh_my_zsh
-        "execute_command \"echo \"$FZF_INSTALLED\" > /tmp/fzf_installed\" \"Enregistrement de l'état d'installation de fzf\""
+        "execute_command 'echo \"$FZF_INSTALLED\" > /tmp/fzf_installed' 'Enregistrement de l'état d'installation de fzf'"
     )
 
     execute_functions "${functions_to_execute[@]}"

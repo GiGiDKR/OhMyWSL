@@ -365,7 +365,7 @@ install_gwsl() {
 
     if [ -f "$gwsl_path" ]; then
         success_msg "✓ GWSL est déjà installé"
-        execute_command "cmd.exe /C start /b '' 'C:\WSL2-Distros\GWSL\GWSL.exe'" "Exécution de GWSL"
+        execute_command "cmd.exe -b /mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL"
         configure_gwsl && force_close_gwsl
         return 0
     fi
@@ -611,7 +611,7 @@ customize_xfce() {
 
 # Fonction pour exécuter GWSL et XFCE4
 run_gwsl_and_xfce4() {
-    execute_command "cmd.exe /C start /b '' 'C:\WSL2-Distros\GWSL\GWSL.exe'" "Exécution de GWSL re-configuré"
+    execute_command "cmd.exe -b /mnt/c/WSL2-Distros/GWSL/GWSL.exe" "Exécution de GWSL re-configuré"
     sleep 2
     execute_command "dbus-launch xfce4-session" "Exécution de la session XFCE4"
 }
