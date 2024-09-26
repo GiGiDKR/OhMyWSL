@@ -140,15 +140,15 @@ check_dependencies() {
     done
 
     if [ ${#missing_deps[@]} -ne 0 ]; then
-        error_msg "Dépendances manquantes : ${missing_deps[*]}"
-        execute_command "sudo apt update && sudo apt install -y ${missing_deps[*]}" "Installation des dépendances"
+        error_msg "✗ Dépendances manquantes : ${missing_deps[*]}"
+        execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y ${missing_deps[*]}" "Installation des dépendances"
     fi
 }
 
 # Fonction pour installer ZSH
 install_zsh() {
     if ! command -v zsh &> /dev/null; then
-        execute_command "sudo apt update && sudo apt install -y zsh" "Installation de ZSH"
+        execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y zsh" "Installation de ZSH"
     else
         info_msg "ZSH est déjà installé"
     fi
@@ -196,7 +196,7 @@ install_ohmywsl_prompt() {
 check_and_install_fzf() {
     if ! command -v fzf &> /dev/null; then
         info_msg "fzf n'est pas installé. Installation en cours..."
-        execute_command "sudo apt update && sudo apt install -y fzf" "Installation de fzf"
+        execute_command "sudo DEBIAN_FRONTEND=noninteractive apt install -y fzf" "Installation de fzf"
         execute_command "source ~/.zshrc" "Rechargement de la configuration zsh"
         FZF_INSTALLED=true
     else
@@ -286,6 +286,7 @@ install_plugin() {
 
 update_oh_my_zsh() {
     if [ -d "$HOME/.oh-my-zsh" ]; then
+        export ZSH="$HOME/.oh-my-zsh"
         execute_command "$ZSH/tools/upgrade.sh" "Mise à jour de Oh My Zsh"
         execute_command "git -C $ZSH/custom/themes/powerlevel10k pull" "Mise à jour de PowerLevel10k"
         
@@ -406,7 +407,7 @@ main() {
         "execute_command \"curl -fLo '$HOME/.oh-my-zsh/custom/aliases.zsh' https://raw.githubusercontent.com/GiGiDKR/OhMyWSL/dev/files/aliases.zsh\" \"Configuration des alias communs\""
         install_zsh_plugins
         update_oh_my_zsh
-        "echo \"$FZF_INSTALLED\" > /tmp/fzf_installed"
+        "execute_command \"echo \"$FZF_INSTALLED\" > /tmp/fzf_installed\" \"Enregistrement de l'état d'installation de fzf\""
     )
 
     execute_functions "${functions_to_execute[@]}"
