@@ -95,16 +95,29 @@ gum_confirm() {
     fi
 }
 
-if gum_confirm "Installer le fond d'écran ?"; then
-    download_wallpaper="Oui"
-fi
+# Demandes de confirmation
+if $USE_GUM; then
+    if gum_confirm "Installer le fond d'écran ?"; then
+        download_wallpaper="Oui"
+    fi
 
-if gum_confirm "Installer WhiteSur-Dark ?"; then
-    install_whitesur="Oui"
-fi
+    if gum_confirm "Installer WhiteSur-Dark ?"; then
+        install_whitesur="Oui"
+    fi
 
-if gum_confirm "Installer Fluent Cursor ?"; then
-    install_fluent="Oui"
+    if gum_confirm "Installer Fluent Cursor ?"; then
+        install_fluent="Oui"
+    fi
+else
+    # Ajouter des alternatives pour les confirmations sans gum
+    read -p "Installer le fond d'écran ? (O/n) " response
+    [[ $response =~ ^[Oo]$ ]] && download_wallpaper="Oui"
+
+    read -p "Installer WhiteSur-Dark ? (O/n) " response
+    [[ $response =~ ^[Oo]$ ]] && install_whitesur="Oui"
+
+    read -p "Installer Fluent Cursor ? (O/n) " response
+    [[ $response =~ ^[Oo]$ ]] && install_fluent="Oui"
 fi
 
 # Vérification des dépendances
@@ -177,7 +190,7 @@ main() {
     fi
 
     if [ "$install_whitesur" = "Oui" ]; then
-        functions_to_execute+=("install_theme \"WhiteSur-Dark-Theme\" \"https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip\" \"/tmp\"")
+        install_theme "WhiteSur-Dark-Theme" "https://github.com/vinceliuice/WhiteSur-gtk-theme/archive/refs/tags/2024.09.02.zip" "/tmp"
         functions_to_execute+=("execute_command \"sudo mkdir -p /usr/share/themes\" \"Création du répertoire des thèmes\"")
         functions_to_execute+=("execute_command \"cd /tmp/WhiteSur-gtk-theme-2024.09.02/release/ && tar -xf WhiteSur-Dark.tar.xz\" \"Extraction de WhiteSur-Dark\"")
         functions_to_execute+=("execute_command \"sudo mv /tmp/WhiteSur-gtk-theme-2024.09.02/release/WhiteSur-Dark /usr/share/themes/\" \"Installation de WhiteSur-Dark\"")
@@ -185,16 +198,14 @@ main() {
     fi
 
     if [ "$install_fluent" = "Oui" ]; then
-        functions_to_execute+=("install_theme \"Fluent-Cursors\" \"https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip\" \"/tmp\"")
+        install_theme "Fluent-Cursors" "https://github.com/vinceliuice/Fluent-icon-theme/archive/refs/tags/2024-02-25.zip" "/tmp"
         functions_to_execute+=("execute_command \"sudo mkdir -p /usr/share/icons\" \"Création du répertoire des icônes\"")
         functions_to_execute+=("execute_command \"sudo mv /tmp/Fluent-icon-theme-2024-02-25/cursors/dist /usr/share/icons/Fluent-cursors\" \"Installation de Fluent Cursor\"")
         functions_to_execute+=("execute_command \"sudo mv /tmp/Fluent-icon-theme-2024-02-25/cursors/dist-dark /usr/share/icons/Fluent-cursors-dark\" \"Installation de Fluent Cursor Dark\"")
         functions_to_execute+=("execute_command \"rm -rf /tmp/Fluent-icon-theme-2024-02-25\" \"Nettoyage des fichiers temporaires\"")
     fi
 
-    if [ "$apply_themes" = "Oui" ]; then
-        functions_to_execute+=("apply_xfce_theme \"WhiteSur-Dark\" \"Fluent-dark\" \"Fluent-cursors-dark\"")
-    fi
+    functions_to_execute+=("apply_xfce_theme \"WhiteSur-Dark\" \"Fluent-dark\" \"Fluent-cursors-dark\"")
 
     execute_functions "${functions_to_execute[@]}"
 }
