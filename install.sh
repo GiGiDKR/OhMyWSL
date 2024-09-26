@@ -379,7 +379,7 @@ install_gwsl() {
     fi
 
     if [ ! -f "$zip_path" ]; then
-        execute_command "wget https://github.com/GiGiDKR/OhMyWSL/raw/dev/GWSL.zip -P $install_dir" "Téléchargement de GWSL"
+        execute_command "wget https://github.com/GiGiDKR/OhMyWSL/raw/dev/files/GWSL.zip -P $install_dir" "Téléchargement de GWSL"
     else
         success_msg "✓ Sources de GWSL déjà téléchargées"
     fi
