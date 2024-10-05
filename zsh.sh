@@ -307,21 +307,22 @@ update_zshrc() {
     # Supprimer les doublons
     readarray -t unique_plugins < <(printf '%s\n' "${plugins[@]}" | sort -u)
 
-    local new_plugins_section="plugins=("
+    local new_plugins_section="plugins=(\n"
     for plugin in "${unique_plugins[@]}"; do
-        new_plugins_section+="$plugin "
+        new_plugins_section+="\t$plugin\n"
     done
     new_plugins_section+=")"
 
-    execute_command "sed -i 's/^plugins=(.*)/'"${new_plugins_section}"'/' '$ZSHRC'" "Ajout des plugins dans .zshrc"
+    execute_command "sed -i '/^plugins=(/,/)/c\\${new_plugins_section}' '$ZSHRC'" "Ajout des plugins dans .zshrc"
 
     if ! grep -q "source \$ZSH/oh-my-zsh.sh" "$ZSHRC"; then
         echo -e "\n\n# Initialize Oh-My-Zsh\nsource \$ZSH/oh-my-zsh.sh\n" >> "$ZSHRC"
     fi
     if [[ " ${unique_plugins[*]} " == *" zsh-completions "* ]]; then
         if ! grep -q "fpath+=.*zsh-completions" "$ZSHRC"; then
-            sed -i '/^plugins=(/a\
-fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
+            sed -i '/^plugins=(/,/)/a\
+\
+fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src\
 ' "$ZSHRC" 2>/dev/null
         fi
     fi
