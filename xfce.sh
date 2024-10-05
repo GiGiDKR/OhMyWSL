@@ -59,15 +59,23 @@ execute_command() {
         info_msg "$info_msg"
         if $needs_input; then
             if eval "$command"; then
+                tput cuu1
+                tput el
                 success_msg "$success_msg"
             else
+                tput cuu1
+                tput el
                 error_msg "$error_msg"
                 return 1
             fi
         else
             if eval "$command" > /dev/null 2>&1; then
+                tput cuu1
+                tput el
                 success_msg "$success_msg"
             else
+                tput cuu1
+                tput el
                 error_msg "$error_msg"
                 return 1
             fi

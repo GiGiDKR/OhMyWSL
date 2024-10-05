@@ -122,6 +122,12 @@ error_msg() {
     install_log "$message"
 }
 
+# Fonction pour journaliser les erreurs
+log_error() {
+    local error_msg="$1"
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERREUR: $error_msg" >> "$HOME/ohmytermux.log"
+}
+
 # Fonction pour exécuter une commande et afficher le résultat
 execute_command() {
     local command="$1"
@@ -130,18 +136,26 @@ execute_command() {
     local error_msg="✗ $info_msg"
 
     if $USE_GUM; then
-        if gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "DEBIAN_FRONTEND=noninteractive $command"; then
+        if gum spin --spinner.foreground="33" --title.foreground="33" --spinner dot --title "$info_msg" -- bash -c "$command $redirect"; then
             gum style "$success_msg" --foreground 82
+        else
+            gum style "$error_msg" --foreground 196
+            log_error "$command"
             return 1
         fi
-        gum style "$success_msg" --foreground 82
     else
         info_msg "$info_msg"
-        if ! eval "$command"; then
+        if eval "$command $redirect"; then
+            tput cuu1
+            tput el
+            success_msg "$success_msg"
+        else
+            tput cuu1
+            tput el
             error_msg "$error_msg"
+            log_error "$command"
             return 1
         fi
-        success_msg "$success_msg"
     fi
 }
 
